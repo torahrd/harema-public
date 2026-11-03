@@ -9,7 +9,8 @@
         "SESSION_ENCRYPTION_KEYS",
         "FIREBASE_AUTH_ORIGIN_OVERRIDE",
         "FIREBASE_X509_URL_OVERRIDE",
-        "VERCEL"
+        "VERCEL",
+        "HAREMA_LP_ONLY"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
