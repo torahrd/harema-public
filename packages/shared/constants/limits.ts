@@ -14,3 +14,10 @@ export const SOURCE_TITLE_MAX_LENGTH = 200
  * (実測 27〜200 文字台)に対して十分な余裕を取った値。
  */
 export const GOOGLE_PLACE_ID_MAX_LENGTH = 512
+
+/**
+ * 共有(他のアプリの「共有」)から検索欄に入れる文字の上限(コードポイント)。長い本文をそのまま検索に投げない。
+ * 共有の中身の受け渡しの検証(`validations/share-handoff.ts`)と、共有の文の解析(mobile の `parse-shared.ts`)が
+ * 同じ値を使う。
+ */
+export const SHARE_QUERY_MAX_LENGTH = 60

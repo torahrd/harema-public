@@ -2,7 +2,7 @@
 
 import { useEffect, type RefObject } from 'react'
 import { isDevBuild } from '@/env/client'
-import { sheetFollowInset } from './sheet-cover'
+import { MAP_EDGE_INSET, sheetFollowInset } from './sheet-cover'
 
 /**
  * 保存シートが開いている間、地図の器の下端をシートの上端まで縮める。
@@ -92,7 +92,7 @@ export function useSheetCover(
       resizeObserver.disconnect()
       mutationObserver.disconnect()
       if (frame !== null) window.cancelAnimationFrame(frame)
-      mapBox.style.bottom = '0px'
+      mapBox.style.bottom = `${MAP_EDGE_INSET}px`
     }
   }, [active, mapBoxRef, sheetWrapperRef])
 }

@@ -41,6 +41,7 @@ import {
   useAutocompleteSuggestions,
   type ClassifiedSuggestion,
 } from './use-autocomplete-suggestions'
+import { MAP_EDGE_INSET } from './sheet-cover'
 import { useSheetCover } from './use-sheet-cover'
 import { watchErrorRevokesLocation } from './watch-error'
 
@@ -468,7 +469,9 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
       ) : (
         <div
           ref={mapBoxRef}
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          // 下端は .edge-tint(Safari のバーの色を外観に追従させる帯・globals.css)が塗るので、
+          // 地図をその上で終える(MAP_EDGE_INSET)。保存シートの間は useSheetCover が書き換える。
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: MAP_EDGE_INSET }}
         >
           <Map
             id={MAP_INSTANCE_ID}

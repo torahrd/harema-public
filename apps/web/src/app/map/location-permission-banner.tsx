@@ -87,9 +87,18 @@ export function LocationPermissionBanner({
           color: 'var(--fg-1)',
         }}
       >
-        {LOCATION_DENIED_MESSAGE.map((phrase) => (
-          <span key={phrase} style={{ display: 'inline-block' }}>
-            {phrase}
+        {/*
+          文の切れ目「。」の後で必ず行を変える(所有者 2026-11-03 17:44 JST・デザインシステムの和文の
+          「行は句読点の後で終える」)。1 文目は 1 行。2 文目は句ごとの塊で、入る幅では 1 行に並び、
+          入らない幅では句の切れ目「、」の後で折れる。字は META のまま変えない。
+        */}
+        {[[LOCATION_DENIED_MESSAGE[0]], LOCATION_DENIED_MESSAGE.slice(1)].map((sentence) => (
+          <span key={sentence.join('')} style={{ display: 'block' }}>
+            {sentence.map((phrase) => (
+              <span key={phrase} style={{ display: 'inline-block' }}>
+                {phrase}
+              </span>
+            ))}
           </span>
         ))}
         <button

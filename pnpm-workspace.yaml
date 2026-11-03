@@ -27,4 +27,5 @@ packageExtensions:
       zod: "^4.0.0"
 
 patchedDependencies:
+  expo-share-extension@6.0.0-beta: patches/expo-share-extension@6.0.0-beta.patch
   react-native-maps@1.29.11: patches/react-native-maps@1.29.11.patch

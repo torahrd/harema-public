@@ -402,7 +402,7 @@ html, body {
   line-break: strict;
 }
 
-/* Edge tint — the two invisible bands that feed Safari's toolbar colour.
+/* Edge tint — the two bands that feed Safari's toolbar colour.
 
    iOS 26 dropped theme-color from the toolbar inputs; the colour now comes from
    whatever fixed / sticky element sits on the viewport edge, falling back to the
@@ -411,16 +411,18 @@ html, body {
    colour they were sampled with. These bands own the edge instead, and their
    background is the same --bg token as the body, so the OS switch moves them.
 
-   visibility: hidden stays in the sampling set; display: none and backdrop-filter
-   drop out of it. Neither may be introduced here, or the bands stop working while
-   still looking correct in the DOM. */
+   The bands must be painted: with visibility: hidden (2026-08) they did not move
+   the bars, and below 12px tall they do not either (iOS 26.5 Simulator,
+   2026-11-03: 3 / 6 / 9px stay stale, 12px follows the OS switch on /map and
+   /saved). display: none and backdrop-filter drop them out of the sampling set.
+   They are --bg on --bg, so they only show where content passes under an edge;
+   /map lifts the map 12px off the bottom so the Google attribution stays clear. */
 .edge-tint {
   position: fixed;
   left: 0;
   width: 100%;
   height: 12px;
   background: var(--bg);
-  visibility: hidden;
   pointer-events: none;
   z-index: 100;
 }

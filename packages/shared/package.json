@@ -5,6 +5,8 @@
   "exports": {
     "./validations": "./validations/index.ts",
     "./validations/env": "./validations/env.ts",
+    "./validations/share-handoff": "./validations/share-handoff.ts",
+    "./validations/firebase-stored-user": "./validations/firebase-stored-user.ts",
     "./constants": "./constants/index.ts",
     "./i18n": "./i18n/index.ts",
     "./current-location": "./current-location/index.ts"
