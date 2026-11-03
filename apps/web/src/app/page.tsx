@@ -53,7 +53,7 @@ export default function Home() {
 <span className="wordmark">hareMa</span>
 <nav className="lp-nav" aria-label="ページ">
 <a href="#about">このアプリについて</a>
-<Link href="/login">ログイン</Link>
+<a href="/login">ログイン</a>
 </nav>
 </header>
 
@@ -63,7 +63,7 @@ export default function Home() {
 <h1 className="h1 hd" id="w-h1">散らばる店を、<wbr />ひとつの地図に。</h1>
 <p className="lead hd"><span className="lb"><span className="nw">「行きたい」</span><wbr /><span className="nw">「また行きたい」</span></span><span className="lb">あなたが<wbr />訪れるべき<wbr />お店だけを<wbr />表示する</span><span className="lb">あなた専用の<wbr />地図が<wbr />作れる<wbr />アプリです。</span></p>
 <div className="act">
-<Link className="cta" href="/login">はじめる</Link>
+<a className="cta" href="/login">はじめる</a>
 <p className="act-note"><span className="nw">Apple または Google のアカウントで、</span><wbr /><span className="nw">ブラウザのまま始められます。</span></p>
 <p className="act-note">無料で使えます。</p>
 <p className="act-note dev-note hd"><span className="dev-mark" aria-hidden="true">※</span>開発中のため、<wbr />画面や機能は変わることがあります。</p>
@@ -162,7 +162,7 @@ export default function Home() {
 <div className="fact"><dt>アプリ</dt><dd><span className="hd"><span className="nw">ブラウザ版と iPhone のアプリを、</span><wbr />並行して作っています。<wbr /><span className="nw">ブラウザ版から順次公開予定です。</span></span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
 </dl>
 <div className="act">
-<Link className="cta" href="/login">はじめる</Link>
+<a className="cta" href="/login">はじめる</a>
 <p className="act-note"><span className="nw">Apple または Google のアカウントで、</span><wbr /><span className="nw">ブラウザのまま始められます。</span></p>
 <p className="act-note">無料で使えます。</p>
 </div>

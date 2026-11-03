@@ -9,3 +9,6 @@ export const SITE_ORIGIN = 'https://harema.app'
 
 /** 検索に載せる公開ページ。ログインの外で読めて、検索よけ(noindex)を付けていない道だけ。 */
 export const PUBLIC_INDEXABLE_PATHS = ['/', '/terms', '/privacy'] as const
+
+/** 解析のタグを動かす道(公開ページ)。この外では Google の公式の止め方で送信を止める。 */
+export const PUBLIC_ANALYTICS_PATHS = ['/', '/terms', '/privacy', '/coming-soon'] as const
