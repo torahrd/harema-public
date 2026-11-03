@@ -10,6 +10,7 @@
         "FIREBASE_AUTH_ORIGIN_OVERRIDE",
         "FIREBASE_X509_URL_OVERRIDE",
         "VERCEL",
+        "VERCEL_ENV",
         "HAREMA_LP_ONLY"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]

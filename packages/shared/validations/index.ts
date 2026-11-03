@@ -14,6 +14,7 @@ export {
 } from './saved-place'
 export {
   webClientEnvSchema,
+  webAnalyticsEnvSchema,
   clientEnvSchema,
   mobileClientEnvSchema,
   mobileBuildEnvSchema,

@@ -50,6 +50,18 @@ const googleIosClientId = z.preprocess(
     .optional(),
 )
 
+/**
+ * Google アナリティクス 4 の測定 ID(`G-` で始まる英大文字と数字)。秘密ではない(ページの HTML に平文で載る)。
+ * 任意。無ければ解析の部品を出さない(所有者の決定 2026-11-03 12:13 JST「公開してアナリティクスを取らないのはあり得ない」)。
+ */
+const gaMeasurementId = z.preprocess(emptyToUndefined, z.string().regex(/^G-[A-Z0-9]{4,20}$/).optional())
+
+/**
+ * Web の公開ページの解析の env。他の web の client env と分けるのは、公開ページ(LP・規約・ポリシー・
+ * Coming soon)が Supabase や Firebase の env を読まずに済むようにするため(LP を先に出す間も同じ build で動く)。
+ */
+export const webAnalyticsEnvSchema = z.object({ gaMeasurementId })
+
 // ── Web(ブラウザへ公開されるランタイム env) ──────────────────────────
 export const webClientEnvSchema = z.object({
   supabaseUrl,

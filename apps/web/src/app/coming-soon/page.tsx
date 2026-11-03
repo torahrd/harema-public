@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata, Viewport } from 'next'
 import { isLpOnly } from '@/lib/lp-only'
+import { SiteAnalytics } from '../_public/site-analytics'
 import '../lp.css'
 
 // LP を先に出す間の Coming soon のページ(所有者の決定 2026-11-03 09:28 JST「LP を先に出す」)。
@@ -43,6 +44,7 @@ export default function ComingSoonPage() {
 <nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">お問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
 </footer>
+<SiteAnalytics />
 </div>
   )
 }

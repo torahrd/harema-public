@@ -10,6 +10,7 @@ import mapR1Light from './_public/lp/map-r1-1b-light.webp'
 import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
 import appIconLight from './_public/lp/app-icon-light.webp'
 import appIconDark from './_public/lp/app-icon-dark.webp'
+import { SiteAnalytics } from './_public/site-analytics'
 import './lp.css'
 
 export const metadata: Metadata = { title: 'hareMa', description: HOME_DESCRIPTION }
@@ -174,6 +175,7 @@ export default function Home() {
 <nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">お問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
 </footer>
+<SiteAnalytics />
 </div>
   )
 }
