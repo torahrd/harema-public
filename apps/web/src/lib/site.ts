@@ -12,3 +12,9 @@ export const PUBLIC_INDEXABLE_PATHS = ['/', '/terms', '/privacy'] as const
 
 /** 解析のタグを動かす道(公開ページ)。この外では Google の公式の止め方で送信を止める。 */
 export const PUBLIC_ANALYTICS_PATHS = ['/', '/terms', '/privacy', '/coming-soon'] as const
+
+/**
+ * リンクを貼ったときのカード(OGP・X のカード)の画像。所有者の決定 2026-11-03 12:58 JST(案 B「LP の最初の画面の縮図」)。
+ * `public/og.png`(1200x630)。LP を先に出す間の転送でも、public 直下の .png は送られない。
+ */
+export const OG_IMAGE = { url: '/og.png', width: 1200, height: 630, alt: 'hareMa' } as const

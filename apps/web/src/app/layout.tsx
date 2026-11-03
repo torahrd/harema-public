@@ -9,6 +9,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { THEME_COLOR } from "./theme-color";
+import { OG_IMAGE, SITE_ORIGIN } from "@/lib/site";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -55,8 +56,12 @@ const sourceCodePro = Source_Code_Pro({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: "hareMa",
   description: "レストランをブックマークする日本語アプリ",
+  // リンクを貼ったときのカード。ページごとの title・description は各ページの metadata が上書きする。
+  openGraph: { type: "website", siteName: "hareMa", locale: "ja_JP", images: [OG_IMAGE] },
+  twitter: { card: "summary_large_image", images: [OG_IMAGE] },
 };
 
 // ブラウザのツールバーの色。iOS 26 系はこれを読まないので、そちらは .edge-tint が受け持つ

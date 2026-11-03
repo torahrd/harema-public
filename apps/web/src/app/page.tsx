@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getImageProps } from 'next/image'
 import type { Metadata, Viewport } from 'next'
 import { HOME_DESCRIPTION } from './_public/content'
+import { OG_IMAGE } from '@/lib/site'
 import mapLight from './_public/lp/map-light.webp'
 import mapDark from './_public/lp/map-dark.webp'
 import mapR1Light from './_public/lp/map-r1-1b-light.webp'
@@ -13,7 +14,14 @@ import appIconDark from './_public/lp/app-icon-dark.webp'
 import { SiteAnalytics } from './_public/site-analytics'
 import './lp.css'
 
-export const metadata: Metadata = { title: 'hareMa', description: HOME_DESCRIPTION }
+export const metadata: Metadata = {
+  title: 'hareMa',
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: '/' },
+  // openGraph・twitter は layout の値と浅く合わさらず丸ごと置き換わるので、画像も含めて書く。
+  openGraph: { type: 'website', siteName: 'hareMa', locale: 'ja_JP', url: '/', title: 'hareMa', description: HOME_DESCRIPTION, images: [OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: 'hareMa', description: HOME_DESCRIPTION, images: [OG_IMAGE] },
+}
 
 // ブラウザのツールバーの色を LP の地(Quiet Field の paper / ink)に合わせる。
 export const viewport: Viewport = {
