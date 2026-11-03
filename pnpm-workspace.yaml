@@ -1,0 +1,30 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# pnpm 11 で verifyDepsBeforeRun のデフォルトが install になり、
+# サブパッケージから pnpm <script> を実行すると内部で自動 install が走る。
+# その際、ワークスペース全体ではなくサブパッケージスコープでの install となり、
+# pnpm-workspace.yaml の allowBuilds が effective でないケースがある(複数の既知 Issue)。
+# 無限ループや誤検知も既知問題のため、明示的 install 運用に統一する。
+verifyDepsBeforeRun: false
+
+# build scripts 許可リスト(strictDepBuilds=true のデフォルトを維持しつつ、必要なものだけ明示的に許可)
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  '@firebase/util': false
+  protobufjs: false
+
+# @hookform/resolvers は型・実行時とも 'zod/v4/core' を import するが、zod を依存として
+# 宣言していない(5.4.0 の peerDependencies は react-hook-form のみ)。宣言が無いと解決が
+# pnpm の hoisted fallback(node_modules/.pnpm/node_modules/zod)へ落ち、expo が持ち込む
+# zod 3.25.76 を掴んで web の zod 4.4.3 と型が食い違う(_zod.version.minor: 4 vs 0)。
+# peer として宣言し、依存元(apps/web)の zod へ解決を固定する。
+packageExtensions:
+  "@hookform/resolvers":
+    peerDependencies:
+      zod: "^4.0.0"
+
+patchedDependencies:
+  react-native-maps@1.29.11: patches/react-native-maps@1.29.11.patch

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "SUPABASE_SECRET_KEY",
+        "GOOGLE_PLACES_API_KEY",
+        "SESSION_ENCRYPTION_KEYS",
+        "FIREBASE_AUTH_ORIGIN_OVERRIDE",
+        "FIREBASE_X509_URL_OVERRIDE",
+        "VERCEL"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "mobile#typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/web/src/app/_public/legal.ts",
+        "$TURBO_ROOT$/apps/web/src/lib/auth/account-core.ts"
+      ]
+    }
+  }
+}

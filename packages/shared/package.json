@@ -1,0 +1,22 @@
+{
+  "name": "@harema/shared",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./validations": "./validations/index.ts",
+    "./validations/env": "./validations/env.ts",
+    "./constants": "./constants/index.ts",
+    "./i18n": "./i18n/index.ts",
+    "./current-location": "./current-location/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@harema/supabase": "workspace:*",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

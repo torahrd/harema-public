@@ -1,0 +1,1028 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------
+   Tailwind v4 theme bridge.
+   Maps Tailwind utility namespaces onto the design system's raw
+   semantic variables (single source of truth). `inline` makes
+   utilities emit the referenced var() directly, so light/dark
+   inversion happens via the @media reversal below — never a
+   Tailwind dark variant. Reference the raw vars (--bg/--brand/…),
+   not the --color-* aliases, to avoid a self-referential loop.
+   ------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-surface: var(--surface);
+  --color-muted: var(--fg-2);
+  --color-border: var(--border);
+  --color-primary: var(--brand);
+  --color-accent: var(--accent);
+  --color-accent-warm: var(--accent-warm);
+  --color-error: var(--sun-akane);
+
+  --font-sans: var(--ff-sans);
+  --font-serif: var(--ff-serif);
+  --font-mono: var(--ff-mono);
+  --font-heading: var(--ff-heading-jp);
+
+  --text-display: var(--fs-display);
+  --text-h1: var(--fs-h1);
+  --text-h2: var(--fs-h2);
+  --text-h3: var(--fs-h3);
+  --text-body: var(--fs-body);
+  --text-small: var(--fs-small);
+  --text-whisper: var(--fs-whisper);
+  --text-caption: var(--fs-caption);
+  --text-mono: var(--fs-mono);
+
+  --spacing-1: var(--sp-1);
+  --spacing-2: var(--sp-2);
+  --spacing-3: var(--sp-3);
+  --spacing-4: var(--sp-4);
+  --spacing-5: var(--sp-5);
+  --spacing-6: var(--sp-6);
+  --spacing-7: var(--sp-7);
+  --spacing-8: var(--sp-8);
+  --spacing-9: var(--sp-9);
+  --spacing-10: var(--sp-10);
+  --spacing-breath: var(--sp-breath);
+  --spacing-yohaku: var(--sp-yohaku);
+}
+
+/* -------------------------------------------------------------
+   1. Raw palette — H≈230 anchored. Names match palette_v2.png.
+   ------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+
+  /* Sea (海) */
+  --sea-deep: #1B2C3E;          /* 深藍 deep indigo */
+  --sea-indigo: #1D4063;        /* 藍 standard */
+  --sea-light: #5A7A95;         /* 浅藍 shoals */
+  --sea-pale-raw: #B7E5D1;      /* 白藍 — palette image value (reads green) */
+  --sea-pale: #BCCDDD;          /* corrected H=230 pale indigo */
+
+  /* Sky (空) */
+  --sky-offwhite: #F2EFE7;      /* 生成り — primary light surface */
+  --sky-cloudy: #D5D7D2;        /* 曇天 */
+  --sky-sumi: #8A8983;          /* 薄墨 */
+
+  /* Sunset (夕陽) — accents only, never background */
+  --sun-akane: #A5483A;         /* 茜 */
+  --sun-kin: #C8984D;           /* 金 — PRIMARY ACCENT */
+  --sun-shu: #B86238;           /* 朱 */
+  --sun-dull: #9C8567;          /* 鈍色 — corrected to warm-taupe */
+
+  /* Night (闇) */
+  --night-yoiyami: #1A1E27;     /* 宵闇 — primary dark surface */
+  --night-sumi: #0D0F14;        /* 墨 */
+  --night-moon: #C4C5C8;        /* 月光 */
+
+  /* Accent — metallic */
+  --metal-copper: #8A5F3D;      /* 銅 */
+  --metal-gold: #7F6A3C;        /* 鈍金 */
+  --metal-lead: #464F55;        /* 鉛 */
+
+  /* Text rawvalues (as given) */
+  --text-primary-light-raw: #1A1E27;
+  --text-primary-dark-raw: #E3E5DF;
+  --text-secondary-light-raw: #464F55;
+  --text-secondary-dark-raw: #6A6A5D; /* low contrast on yoiyami; raw kept for cross-check */
+}
+
+/* -------------------------------------------------------------
+   2. Semantic tokens — light mode (default)
+   ------------------------------------------------------------- */
+:root {
+  /* Surfaces */
+  --bg: #ffffff;
+  --bg-raised: #ffffff;
+  --bg-sunken: color-mix(in srgb, #d8dad4 40%, #ffffff);
+  --surface: #ffffff;
+
+  /* Foreground / text */
+  --fg: #171918;
+  --fg-1: #171918;
+  --fg-2: #2a2d2b;
+  --fg-3: #2a2d2b;
+  --fg-muted: color-mix(in srgb, #2a2d2b 70%, #ffffff);
+  --fg-whisper: #2a2d2b;        /* lede / whisper band — one step lighter than fg-2 */
+  --fg-on-accent: #FFFFFF;
+  --fg-on-dark: #fafafa;
+
+  /* Brand role colors */
+  --brand: var(--sea-indigo);
+  --brand-deep: var(--sea-deep);
+  --brand-soft: var(--sea-pale);
+  --accent: var(--sun-kin);             /* primary accent — sunset gold */
+  --accent-warm: var(--sun-akane);
+  --accent-deep: var(--sun-shu);
+
+  /* Borders */
+  --border-subtle: #d8dad4;
+  --border: #d8dad4;
+  --border-strong: #171918;
+  --border-accent: var(--sun-kin);
+  --hairline: currentColor;             /* hairlines inherit text color */
+
+  /* Focus */
+  --focus-ring: var(--sun-kin);
+
+  /* Map / pins (WP-07). Values from design: Pin.dc.html (sys="a") + map-flow.dc.html
+     search scrim. Colours flip in the dark @media below — never a `dark:` variant.
+     sys="b" hexes (#5A7A95 / #14304A / #47617A) are the unused alternative; not here. */
+  --pin-want-stroke: #1D4063;                 /* 行きたい = 藍の輪郭 */
+  --pin-want-fill: rgba(247, 246, 240, 0.85);
+  --pin-again-fill: #C8984D;                  /* また行きたい = 金の充填 */
+  --pin-again-stroke: #A67D39;
+  --pin-again-core: #96702D;
+  --pin-shadow: 0 1px 1.5px rgba(13, 15, 20, 0.30);
+  --map-scrim: rgba(26, 30, 39, 0.16);        /* サジェスト展開時の地図スクリム */
+  /* 現在地ドット(spec §7)。Google マップに合わせる所有者の決定(2026-11-02)で、製品の現在地の
+     色としてここに置く(デザインシステムの色の対象外)。明るい外観・暗い外観で同じ値なので、
+     暗い外観の @media と .theme-dark には書かない(:root を継ぐ)。 */
+  --current-dot: #1A73E8;                     /* 青い点 */
+  --current-dot-ring: #FFFFFF;                /* 点の白い縁 */
+  --current-accuracy: rgba(26, 115, 232, 0.18); /* 薄い青の精度の輪 */
+
+  /* Save sheet S1 (WP-08). Values from design C-1 / C-2. The scrim is deliberately
+     NOT --map-scrim: the search overlay sits at .16/.30, the sheet at .30/.5.
+     Like --map-scrim / --pin-shadow / --shadow-*, these live in :root and the dark
+     @media only — the .theme-* preview classes never restate them. */
+  --sheet-scrim: rgba(26, 30, 39, 0.30);
+  --sheet-shadow: 0 -10px 36px rgba(26, 30, 39, 0.20);
+  --segment-selected-shadow: 0 1px 2px rgba(26, 30, 39, 0.16);
+
+  /* Semantic role aliases (Tailwind v4 / v0.3 §2.4 naming).
+     These mirror the existing brand/bg/fg tokens — keep both surfaces in sync. */
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--fg-2);
+  --color-border: var(--border);
+  --color-primary: var(--brand);          /* light: sea-indigo #1D4063 (PDF B-Light BRAND) */
+  --color-accent: var(--accent);          /* sunset gold #C8984D — both modes */
+  --color-accent-subtle: var(--sun-dull); /* 鈍色 */
+  --color-success: var(--sea-indigo);
+  --color-warning: var(--sun-akane);
+  --color-error: var(--sun-akane);
+  /* Destructive-action TEXT color. --color-error stays 茜 #A5483A in both modes;
+     on the dark ground the akane text lifts to #D08A7A for legibility (WP-06 M1/M2
+     design). Text-only (never a fill); follows @media, never a `dark:` variant. */
+  --akane-text: var(--sun-akane);
+
+  /* Mode-following text roles (design-v4 auth/onboarding). Same 3-block layout
+     as --akane-text; values are the design's light/dark resolutions.
+     .theme-light inherits :root, so it needs no restatement. */
+  --fg-label: var(--fg-2);            /* M1 USERNAME / login EMAIL·TO / ABOUT */
+  --fg-caption-dim: var(--fg-muted);  /* M2 clause labels / resend countdown */
+  --fg-counter-active: var(--fg-2);   /* M1 counter while typing (1–14) */
+  --fg-footer: var(--fg-3);           /* login footer — v0.1 · PRIVACY */
+  --fg-placeholder: var(--fg-muted);      /* M1 placeholder */
+
+  /* Shadow — single soft elevation */
+  --shadow-1: 0 1px 2px rgba(26,30,39,0.04), 0 8px 24px rgba(26,30,39,0.06);
+  --shadow-2: 0 1px 2px rgba(26,30,39,0.06), 0 16px 48px rgba(26,30,39,0.10);
+
+  /* Radii — Quiet Signal の 4 つの形(tokens.json の radius)。アプリ本体はこの 4 つだけを使う。
+     image = 写真と画像の枠・読み込み中の帯 / control = ボタン・入力欄・検索欄 /
+     card = まとまりの面(ダイアログ・シート・トースト・帯・候補) / chip = 札と件数(44px 未満は丸い端)。 */
+  --radius-image: 2px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-chip: 22px;
+  --radius-sm: var(--radius-image);
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-breath: 80px;            /* between sp-7 and sp-9 — section breath */
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sp-yohaku: 120px;           /* hero ↔ body breathing */
+  --sp-10: 128px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 240ms;
+}
+
+/* -------------------------------------------------------------
+   3. Dark mode — follows OS, no toggle
+   ------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* C-Dark (settled 2026-05-11, PDF-confirmed):
+       Background = 深藍 sea-deep — the brand colour itself wraps the world.
+       Surfaces sit one step lighter in the sea-deep family. */
+    /* 地と面は LP と同じ ink #171918(所有者の決定 2026-11-02「アプリを黒にする」。旧: navy #152231)。
+       明るい外観の「地図だけ生成り、ほかの面は白」と同じ組み立てで、地図そのものとピンの色は変えない。
+       一段沈んだ面は #222524(比較の図 consent-login/design/dark-ground-2.png の値)。 */
+    --bg: #171918;
+    --bg-raised: color-mix(in srgb, #d8dad4 8%, #171918);
+    --bg-sunken: #222524;
+    --surface: #171918;
+
+    --fg: #fafafa;
+    --fg-1: #fafafa;
+    --fg-2: #fafafa;                    /* corrected from raw #6A6A5D */
+    --fg-3: #858b86;
+    --fg-muted: #858b86;
+    --fg-whisper: #fafafa;
+    --fg-on-accent: var(--sea-deep);
+    --fg-on-dark: #fafafa;
+
+    /* On a sea-deep background the brand expression *is* the foreground —
+       PDF A-Dark labels the CTA "FG-1". brand-soft drops to sea-light for
+       readable indigo accents that still sit on the dark ground. */
+    --brand: #fafafa; /* CTA / heading text = fg-1 */
+    --brand-deep: var(--sea-deep);         /* equals bg; the brand at its deepest */
+    --brand-soft: var(--sea-light);        /* #5A7A95 — readable indigo accent */
+    --accent: var(--sun-kin);              /* unchanged — KIN is both-mode anchor */
+
+    --border-subtle: rgba(216, 218, 212, 0.16);
+    --border: rgba(216, 218, 212, 0.16);
+    --border-strong: #fafafa;
+
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.32), 0 8px 24px rgba(0,0,0,0.40);
+    --shadow-2: 0 1px 2px rgba(0,0,0,0.40), 0 16px 48px rgba(0,0,0,0.52);
+
+    /* Semantic aliases — dark variants */
+    --color-background: var(--bg);
+    --color-foreground: var(--fg);
+    --color-muted: var(--fg-2);
+    --color-border: var(--border);
+    --color-primary: var(--brand);         /* fg-1 light text */
+    --color-accent: var(--accent);
+    --color-accent-subtle: var(--sun-dull);
+    --color-success: var(--sea-light);
+    --color-warning: var(--sun-akane);
+    --color-error: var(--sun-akane);
+    --akane-text: #D08A7A;                 /* akane lifted for legibility on sea-deep */
+
+    /* Map / pins — dark variants (design: Pin.dc.html sys="a" dark, map-flow dark scrim). */
+    --pin-want-stroke: #7EA0BC;
+    --pin-want-fill: rgba(24, 38, 52, 0.72);
+    --pin-again-fill: #C8984D;
+    --pin-again-stroke: #8A6A32;
+    --pin-again-core: #7C5E2C;
+    --pin-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.5);
+    --map-scrim: rgba(0, 0, 0, 0.30);
+    --sheet-scrim: rgba(0, 0, 0, 0.5);
+    --sheet-shadow: 0 -10px 36px rgba(0, 0, 0, 0.5);
+    --segment-selected-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --fg-label: var(--fg-whisper);
+    --fg-caption-dim: var(--fg-3);
+    --fg-counter-active: var(--fg-3);
+    --fg-footer: rgba(229, 229, 223, 0.5);
+    --fg-placeholder: rgba(229, 229, 223, 0.32);
+  }
+}
+
+/* Forced theme classes for previews */
+.theme-light {
+  color-scheme: light;
+  --bg: #ffffff;
+  --bg-raised: #ffffff;
+  --bg-sunken: color-mix(in srgb, #d8dad4 40%, #ffffff);
+  --surface: #ffffff;
+  --fg: #171918;
+  --fg-1: #171918;
+  --fg-2: #2a2d2b;
+  --fg-3: #2a2d2b;
+  --fg-whisper: #2a2d2b;
+  --border-subtle: #d8dad4;
+  --border: #d8dad4;
+  --border-strong: #171918;
+  --brand: var(--sea-indigo);
+  --brand-soft: var(--sea-pale);
+}
+.theme-dark {
+  color-scheme: dark;
+  --bg: #171918;
+  --bg-raised: color-mix(in srgb, #d8dad4 8%, #171918);
+  --bg-sunken: #222524;
+  --surface: #171918;
+  --fg: #fafafa;
+  --fg-1: #fafafa;
+  --fg-2: #fafafa;
+  --fg-3: #858b86;
+  --fg-whisper: #fafafa;
+  --border-subtle: rgba(216, 218, 212, 0.16);
+  --border: rgba(216, 218, 212, 0.16);
+  --border-strong: #fafafa;
+  --brand: #fafafa;
+  --brand-deep: var(--sea-deep);
+  --brand-soft: var(--sea-light);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-muted: var(--fg-2);
+  --color-border: var(--border);
+  --color-primary: var(--brand);
+  --color-accent: var(--accent);
+  --color-accent-subtle: var(--sun-dull);
+  --color-success: var(--sea-light);
+  --color-warning: var(--sun-akane);
+  --color-error: var(--sun-akane);
+  --akane-text: #D08A7A;
+  --fg-label: var(--fg-whisper);
+  --fg-caption-dim: var(--fg-3);
+  --fg-counter-active: var(--fg-3);
+  --fg-footer: rgba(229, 229, 223, 0.5);
+  --fg-placeholder: rgba(229, 229, 223, 0.32);
+}
+
+/* -------------------------------------------------------------
+   4. Type system
+   ------------------------------------------------------------- */
+:root {
+  /* Family variables.
+     The app body is Quiet Signal too (owner 2026-11-01): Noto Sans + Noto Sans JP
+     for headings, body and labels; Source Code Pro + Noto Sans JP for numerals only.
+     The var() fallbacks keep the stack valid where next/font's class is absent
+     (global-error.tsx has no font class on <html>).
+     Noto Serif JP / Cormorant / Space Grotesk stay loaded only for the LP
+     (lp.css and .wordmark); no app token points at them. */
+  --ff-heading-jp: var(--font-noto-sans, 'Noto Sans'), var(--font-noto-sans-jp, 'Noto Sans JP'), 'Noto Sans', 'Noto Sans JP', sans-serif;
+  --ff-serif: var(--font-noto-sans, 'Noto Sans'), var(--font-noto-sans-jp, 'Noto Sans JP'), 'Noto Sans', 'Noto Sans JP', sans-serif;
+  --ff-sans: var(--font-noto-sans, 'Noto Sans'), var(--font-noto-sans-jp, 'Noto Sans JP'), 'Noto Sans', 'Noto Sans JP', sans-serif;
+  --ff-mono: var(--font-source-code-pro, 'Source Code Pro'), ui-monospace, 'Source Code Pro', 'Noto Sans JP', monospace;
+
+  /* Type scale */
+  --fs-display: 56px;
+  --fs-h1: 40px;
+  --fs-h2: 32px;          /* JP headings sit in 32–40 band */
+  --fs-h3: 22px;
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-whisper: 13px;     /* lede / whisper band */
+  --fs-caption: 12px;
+  --fs-mono: 13px;
+
+  --lh-display: 1.1;
+  --lh-heading: 1.25;     /* JP heading — tight, declarative */
+  --lh-body: 1.75;
+  --lh-tight: 1.4;
+  --lh-whisper: 1.7;
+
+  --tracking-display: -0.01em;
+  --tracking-heading: -0.005em;
+  --tracking-body: 0em;
+  --tracking-mono: 0.02em;
+  --tracking-caps: 0.16em;        /* nav, small inline mono */
+  --tracking-caps-wide: 0.30em;   /* eyebrow / motif caption */
+}
+
+/* Element defaults
+
+   The three line-breaking properties below are the JP typesetting set, and they
+   inherit — declaring them here covers the whole app. keep-all removes the break
+   opportunities between kana and kanji, which turns a run without punctuation
+   into a single unbreakable "word"; the anywhere value of overflow-wrap is what
+   keeps that run from overflowing (break-word would not, since only anywhere
+   affects the intrinsic min-content size). Strict line-break adds the kinsoku
+   set. */
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--ff-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+/* Edge tint — the two invisible bands that feed Safari's toolbar colour.
+
+   iOS 26 dropped theme-color from the toolbar inputs; the colour now comes from
+   whatever fixed / sticky element sits on the viewport edge, falling back to the
+   page background. On /map that edge is the map canvas, whose colour is written
+   inline by the Maps SDK and never follows the media query — so the bars keep the
+   colour they were sampled with. These bands own the edge instead, and their
+   background is the same --bg token as the body, so the OS switch moves them.
+
+   visibility: hidden stays in the sampling set; display: none and backdrop-filter
+   drop out of it. Neither may be introduced here, or the bands stop working while
+   still looking correct in the DOM. */
+.edge-tint {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  background: var(--bg);
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 100;
+}
+.edge-tint-top { top: 0; }
+.edge-tint-bottom { bottom: 0; }
+
+/* JP headings: Noto Serif JP, 700, tight. */
+h1, h2, h3, h4 {
+  font-family: var(--ff-heading-jp);
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--lh-heading);
+  color: var(--fg-1);
+  text-wrap: pretty;
+  margin: 0 0 var(--sp-4);
+}
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+/* Display utility. NOTE: the `.display` class is NOT a heading style
+   for body copy — use it only for hero / wordmark contexts. */
+.display {
+  font-family: var(--ff-heading-jp);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 700;
+  color: var(--fg-1);
+  text-wrap: pretty;
+}
+
+p { margin: 0 0 var(--sp-4); color: var(--fg-1); text-wrap: pretty; }
+small, .small { font-size: var(--fs-small); color: var(--fg-2); }
+
+/* Whisper / lede band — one step lighter, one step smaller. 1–2 lines only. */
+.whisper, .lede {
+  font-family: var(--ff-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  color: var(--fg-whisper);
+  font-weight: 400;
+  margin: 0;
+}
+
+.caption {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+/* Caption-wide — caps-wide motif. By default a plain wide-caps line. */
+.caption-wide {
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-caps-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+/* Caption-lead — caption-wide preceded by a 24px / 1px hairline.
+   Use this whenever a caption opens a section, a slide, or a screen.
+   Example: ─ MAIL · SENT
+   (/login's eyebrow drops text-transform on the instance: ─ Tokyo · 03:00:00) */
+.caption-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--ff-sans);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.1125em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.caption-lead::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 1px solid currentColor;
+}
+
+.mono, .num {
+  font-family: var(--ff-mono);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: var(--tracking-mono);
+}
+
+.italic { font-style: italic; }
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-thickness var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+a:hover { color: var(--accent); text-decoration-thickness: 2px; }
+a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: 1px; }
+
+/* Wordmark — hareMa (camelCase: lower h-a-r-e, capital M, lower a).
+   Cormorant Garamond Italic 500. Use the .wordmark class on the
+   element and put the literal "hareMa" inside.
+   The family is pinned to the old --ff-serif value: the LP (lp.css, PR #20)
+   still shows the Cormorant logo while the app tokens are sans. */
+.wordmark {
+  font-family: var(--font-cormorant), var(--font-noto-serif-jp), 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-size: 26px;
+  line-height: 1;
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* Quote / pull — italic Cormorant for Latin, italic Noto Serif JP for JP. */
+blockquote, .pull {
+  font-family: var(--ff-serif);
+  font-style: normal;
+  font-weight: 400;
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--fg-1);
+  border-left: 1px solid var(--border-strong);
+  padding-left: var(--sp-4);
+  margin: var(--sp-5) 0;
+}
+
+/* -------------------------------------------------------------
+   5. Buttons
+
+   PRIMARY CTA = .btn-hairline — top + bottom 1px hairlines, no fill.
+   See LP hero CTA for canonical example.
+
+   Filled rectangles (.btn-solid) are demoted to secondary use only:
+   destructive confirms, modals, contexts where a hairline would
+   read as decoration. Never use .btn-solid as the principal action
+   on a screen.
+
+   Bordered ghost (.btn) is fine for inline / small-scale actions.
+   ------------------------------------------------------------- */
+
+.btn-hairline {
+  --hairline-color: var(--fg-1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: 18px 0;
+  background: transparent;
+  color: var(--fg-1);
+  border: 0;
+  border-top: 1px solid var(--hairline-color);
+  border-bottom: 1px solid var(--hairline-color);
+  border-radius: 0;
+  font-family: var(--ff-sans);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+/* State is carried by colour, not by touch: Kin says "this can be pressed now",
+   the base ink says "not yet". Hover is deliberately absent — on iOS it fires on
+   tap and used to paint disabled buttons Kin. */
+.btn-hairline:not(:disabled) {
+  --hairline-color: var(--accent);
+  color: var(--accent);
+}
+.btn-hairline:not(:disabled):active {
+  opacity: 0.7;
+  transform: translateY(1px);
+}
+.btn-hairline:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+.btn-hairline .arrow {
+  font-family: var(--ff-sans);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1;
+}
+/* When you need the hairline CTA inline (inside a hero stack, etc.) */
+.btn-hairline.inline { width: auto; min-width: 240px; padding-left: var(--sp-4); padding-right: 0; }
+/* Accent variant — both hairlines are Kin from the start */
+.btn-hairline.accent { --hairline-color: var(--accent); color: var(--accent); }
+
+/* In-flight indicator. Takes the .arrow slot so the label and the button's
+   rhythm stay put while a Server Action is running. Colour follows the button
+   (currentColor), so it needs no token of its own. */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spinner-spin 700ms linear infinite;
+}
+@keyframes spinner-spin {
+  to { transform: rotate(360deg); }
+}
+/* Slowed, not stopped: the rotation is the only signal that the send is running. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2s; }
+}
+
+/* Bordered ghost — inline / form-adjacent / table-row actions. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 10px 16px;
+  font-family: var(--ff-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: transparent;
+  color: var(--fg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn:active { opacity: 0.7; }
+.btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Filled rectangle — demoted. Secondary / destructive only. */
+.btn-solid {
+  background: var(--fg-1);
+  color: var(--bg);
+  border: 1px solid var(--fg-1);
+  border-radius: var(--radius-control);
+  padding: 12px 18px;
+  font-family: var(--ff-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity var(--dur) var(--ease);
+}
+.btn-solid:hover { opacity: 0.85; }
+.btn-solid:active { opacity: 0.7; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--sp-5);
+  transition: border-color var(--dur) var(--ease);
+}
+.card:hover { border-color: var(--border); }
+
+/* Hairline divider */
+.hairline {
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--sp-5) 0;
+}
+
+/* Map search input placeholder — design B-1 の fg-muted・13px(入力テキストは B-2 の 14px)。
+   ::placeholder はインラインで書けないため、地図の検索バーだけに効くようクラスで限定する。 */
+.map-search-input::placeholder {
+  color: var(--fg-muted);
+  font-size: 13px;
+  opacity: 1;
+}
+
+/* -------------------------------------------------------------
+   6. 入力欄の placeholder(地図の検索・保存のシート)
+   ------------------------------------------------------------- */
+
+/* Save sheet S1 memo / source placeholders (design C-1). Class-scoped because
+   ::placeholder cannot be written inline. font-size is left alone so the field's
+   own 16px carries through — 16px is the floor below which iOS zooms the page on
+   focus, and the placeholder is set at the same size. opacity: 1 cancels
+   Firefox's default fade. */
+.sheet-field::placeholder { color: var(--fg-muted); opacity: 1; }
+
+/* Memo placeholder only (ruling of 2026-08-06). Under keep-all, WebKit takes the
+   break opportunity directly after the full-width opening paren, so at 375px the
+   string ends a line on 「（」 — a kinsoku violation Chromium does not produce.
+   balance moves the break to the 読点 instead. Scoped by id: the ruling covers
+   this one string, so no other copy may be re-balanced. */
+#save-sheet-memo::placeholder { text-wrap: balance; }
+
+/* -------------------------------------------------------------
+   7. login-replace の 5 面 — デザインシステム Quiet Signal
+      (/login・ドロワー・退会のダイアログ・ログアウトの失敗・Onboarding の中止(M1 の中の小さな `.qs` の根)。
+       正本 = FREEZE の compare-v3.dc.html の「新」の列・値は design/freeze/project/lr-qs.css と
+       ds/quietsignal/tokens.json のまま)
+   ------------------------------------------------------------- */
+
+/* 製品の :root のトークン(--bg・--fg など)は触らない。この 5 面だけが `.qs`(面の根)に付く。
+   変数は --qs- 接頭(製品の --bg・--fg と取り違えない)。値は tokens.json の token の色: paper / ink / coal / mist /
+   vermilion。vermilion は印(線・棒・×)だけで、文字には使わない。fog は paper で 3.48:1 なので文字に使わない。
+   暗い外観は tokens.json に無い(Light だけ)ので、lr-qs.css の .t-dark(snow / fog)を写し、地だけ ink にする(所有者の決定 2026-11-02)。
+   製品は OS に追従しトグルを持たない(上の 3.)ので、暗い外観も prefers-color-scheme で当てる。 */
+.qs,
+:root:has(.qs-page) {
+  --qs-bg: #ffffff;                    /* paper */
+  --qs-fg: #171918;                    /* ink */
+  --qs-fg2: #2a2d2b;                   /* coal: 本文 */
+  --qs-fg3: #2a2d2b;                   /* coal: 小さい札 */
+  --qs-rule: #d8dad4;                  /* mist: 1px の罫 */
+  --qs-signal: #d94834;                /* vermilion: 印だけ */
+  --qs-scrim: rgba(23, 25, 24, 0.4);   /* ink の 40% */
+  --qs-panel: #ffffff;                 /* paper */
+  --qs-panel-rule: #d8dad4;            /* mist */
+  --qs-p-bg: #171918;                  /* 主ボタン = ink の塗り */
+  --qs-p-fg: #ffffff;                  /* paper */
+  --qs-s-line: #171918;                /* 副ボタンの枠 = ink */
+  --qs-check: #171918;                 /* checkbox の accent-color = ink */
+  --qs-sans: var(--font-noto-sans), var(--font-noto-sans-jp), 'Noto Sans', 'Noto Sans JP', sans-serif;
+  --qs-mono: var(--font-source-code-pro), ui-monospace, 'Source Code Pro', 'Noto Sans JP', monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  .qs,
+  :root:has(.qs-page) {
+    --qs-bg: #171918;                  /* ink(所有者の決定 2026-11-02。旧: navy) */
+    --qs-fg: #fafafa;                  /* snow */
+    --qs-fg2: #fafafa;                 /* snow */
+    --qs-fg3: #858b86;                 /* fog: ink の地で 5.08:1 */
+    --qs-rule: rgba(216, 218, 212, 0.16);
+    --qs-scrim: rgba(23, 25, 24, 0.6);
+    --qs-panel: #171918;               /* ink */
+    --qs-panel-rule: rgba(216, 218, 212, 0.24);
+    --qs-p-bg: #fafafa;                /* snow の塗り */
+    --qs-p-fg: #171918;                /* ink */
+    --qs-s-line: #fafafa;              /* snow */
+    --qs-check: #fafafa;               /* snow */
+    color-scheme: dark;
+  }
+}
+
+/* 面の根の文字の型(折り返しは製品の規則と同じ keep-all / anywhere / strict)。製品の要素の規則
+   (p・h1〜h3 の margin・字体・色、a:hover の金)を、この面の中だけゼロの詳細度で打ち消す。 */
+.qs {
+  font-family: var(--qs-sans);
+  color: var(--qs-fg);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+  -webkit-font-smoothing: antialiased;
+}
+.qs :where(p, h1, h2, h3) { margin: 0; color: inherit; font-family: inherit; text-wrap: initial; }
+.qs a:hover { color: inherit; }
+.qs a:focus-visible, .qs button:focus-visible, .qs input:focus-visible { outline: 2px solid var(--qs-fg); outline-offset: 2px; }
+.qs-ln { display: block; }
+
+/* 全画面の面(/login)の背景。外側(余白・ブラウザの縁)も paper / ink にする。 */
+html:has(.qs-page), body:has(.qs-page) { background: var(--qs-bg); }
+body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
+.qs-page { flex: 1; display: flex; flex-direction: column; width: 100%; background: var(--qs-bg); }
+
+/* ---- 文字の段(tokens.json Scale・README Japanese text) ---- */
+.qs-lab { font: 700 11px/16px var(--qs-sans); letter-spacing: 0.1125em; text-transform: uppercase; color: var(--qs-fg3); }
+.qs-eb { font: 400 13px/20px var(--qs-mono); color: var(--qs-fg3); font-variant-numeric: tabular-nums; }
+.qs-h1 { margin-top: 12px; font: 700 36px/48px var(--qs-sans); letter-spacing: 0.01em; font-feature-settings: 'palt'; color: var(--qs-fg); }
+.qs-lede { margin-top: 16px; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
+
+/* ---- ① /login ---- */
+.qs-lg {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom));
+}
+.qs-hd { display: flex; justify-content: space-between; align-items: center; min-height: 48px; flex: none; }
+.qs-wm { font: 700 18px/24px var(--qs-sans); letter-spacing: -0.01em; color: var(--qs-fg); }
+.qs a.qs-lab { display: flex; align-items: center; min-height: 44px; text-decoration: none; }
+.qs-top48 { flex: none; height: 48px; }
+.qs-hero { flex: none; }
+.qs-gx { flex: 1 1 0; min-height: 24px; }
+.qs-cons { display: flex; flex-direction: column; flex: none; margin-top: 16px; }
+.qs-cr { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 10px 0; box-sizing: border-box; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); cursor: pointer; }
+.qs-cr input { flex: none; width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--qs-check); }
+.qs-cr a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.qs-sso-s { display: flex; flex-direction: column; gap: 12px; flex: none; margin-top: 16px; }
+.qs-ft { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-top: 12px; flex: none; }
+
+/* ---- Apple / Google の公式のボタン(色・表記・寸法は事業者の定めが勝つ) ----
+   Apple = 黒地に白 / 暗い面は白地に黒、Google = 白地 / 暗い面は #131314(lr-qs.css の .ap-b・.ap-w・.go-l・.go-d)。 */
+.qs .sso { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; flex: none; }
+.qs .sso:disabled { opacity: 0.38; cursor: default; }
+.qs .sso-apple {
+  font: 500 15px/20px -apple-system, 'SF Pro Text', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+.qs .sso-google {
+  gap: 10px;
+  font: 500 14px/20px 'Google Sans', var(--qs-sans);
+  letter-spacing: 0;
+  background: #ffffff;
+  color: #1f1f1f;
+  border-color: #747775;
+}
+@media (prefers-color-scheme: dark) {
+  .qs .sso-apple { background: #ffffff; color: #000000; border-color: #ffffff; }
+  .qs .sso-google { background: #131314; color: #e3e3e3; border-color: #8e918f; }
+}
+
+/* ---- 結果の行(失敗)。× は印(vermilion)、文は ink。失敗の色の token は無い ---- */
+.qs .auth-err { display: flex; gap: 8px; align-items: flex-start; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg); flex: none; }
+.qs .auth-err .x { flex: none; margin-top: 5px; color: var(--qs-signal); }
+.qs .auth-err .tx { display: flex; flex-direction: column; margin: 0; color: inherit; }
+
+/* ---- 取り消せない操作の予告(ink の太字 + vermilion の 16×2 の棒) ---- */
+.qs-nt { display: flex; align-items: center; gap: 8px; font: 700 11px/16px var(--qs-sans); letter-spacing: 0.05em; color: var(--qs-fg); flex: none; }
+.qs-bar { display: block; width: 16px; height: 2px; background: var(--qs-signal); flex: none; }
+
+/* ---- ② ドロワーと ④ ログアウトの失敗(幅 320 = 失敗の 2 文が 1 行ずつ収まる幅) ---- */
+.qs-scrim { background: var(--qs-scrim); }
+.qs-dw {
+  box-sizing: border-box;
+  padding: max(12px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom));
+  background: var(--qs-panel);
+  border-left: 1px solid var(--qs-panel-rule);
+}
+.qs-dw-h { display: flex; align-items: center; justify-content: space-between; min-height: 54px; flex: none; }
+.qs-ib { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: -12px; padding: 0; border: 0; background: none; color: var(--qs-fg3); cursor: pointer; }
+.qs-ib:disabled { cursor: default; }
+.qs-it { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 56px; padding: 0; border: 0; border-top: 1px solid var(--qs-rule); background: none; font: 400 16px/26px var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg); text-align: left; cursor: pointer; flex: none; }
+.qs-it:disabled { cursor: default; }
+.qs-ar { color: var(--qs-fg3); }
+.qs-it .spinner { color: var(--qs-fg2); }
+.qs-dw .qs-nt { margin-bottom: 8px; }
+.qs-dw .auth-err { padding: 8px 0 12px; }
+
+/* ---- ③ 退会のダイアログ ---- */
+.qs-dlg {
+  box-sizing: border-box;
+  padding: 24px;
+  background: var(--qs-panel);
+  border: 1px solid var(--qs-panel-rule);
+  border-radius: 12px;
+}
+.qs-dlg-h { margin-top: 12px; font: 700 24px/32px var(--qs-sans); letter-spacing: 0.01em; font-feature-settings: 'palt'; color: var(--qs-fg); }
+.qs-dlg-b { margin-top: 12px; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
+.qs-dlg-b + .qs-dlg-b { margin-top: 8px; }
+.qs-dlg-col { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.qs-dlg .auth-err { margin-top: 16px; }
+.qs-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; box-sizing: border-box; padding: 0 16px; border-radius: 8px; font: 500 16px/24px var(--qs-sans); letter-spacing: 0.04em; cursor: pointer; flex: none; }
+.qs-btn-p { background: var(--qs-p-bg); color: var(--qs-p-fg); border: 1px solid var(--qs-p-bg); }
+.qs-btn-s { background: transparent; color: var(--qs-fg); border: 1px solid var(--qs-s-line); }
+.qs-btn:disabled { opacity: 0.38; cursor: default; }
+
+/* ---- ⑤ Onboarding の中止(M1 の中) ---- */
+.qs-tb { align-self: center; display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; padding: 0 8px; border: 0; background: none; font: 500 16px/24px var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg); text-decoration: underline; text-decoration-color: var(--qs-signal); text-decoration-thickness: 2px; text-underline-offset: 6px; cursor: pointer; flex: none; }
+.qs-tb:disabled { cursor: default; opacity: 0.5; }
+.qs-tb .spinner { color: var(--qs-fg2); }
+.qs-abort { display: flex; flex-direction: column; align-items: center; margin-top: 16px; }
+.qs-abort .auth-err { justify-content: center; margin-top: 8px; }
+.qs-abort-note { margin-top: 8px; text-align: center; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
+
+/* ---- /onboarding(ユーザー名の入力・所有者の決定 2026-11-02 案 A: ログインと同じ全画面・同じ列) ---- */
+.qs-fg { display: flex; flex-direction: column; margin-top: 32px; flex: none; }
+/* 入力欄: 枠 1px・角 8・高さ 48。枠は ink(暗い外観は snow)。mist の罫は paper で約 1.4:1 で、入力欄の境の 3:1 に足りない。 */
+.qs-field { display: flex; align-items: center; gap: 12px; height: 48px; margin-top: 8px; padding: 0 16px; box-sizing: border-box; border: 1px solid var(--qs-s-line); border-radius: var(--radius-control); background: var(--qs-bg); }
+.qs-field[data-invalid] { border-color: var(--qs-signal); }
+.qs-field:focus-within { outline: 2px solid var(--qs-fg); outline-offset: 2px; }
+/* 16px は iOS が focus で拡大しない下限。 */
+.qs-field input { flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; font: 400 16px/24px var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg); outline: none; }
+.qs .qs-field input:focus-visible { outline: none; }
+.qs-field input::placeholder { color: var(--qs-fg3); opacity: 0.6; }
+.qs-count { flex: none; font: 400 13px/20px var(--qs-mono); font-variant-numeric: tabular-nums; color: var(--qs-fg3); }
+.qs-fg .auth-err { margin-top: 8px; }
+.qs-help { margin-top: 8px; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg3); flex: none; }
+/* 主ボタン(所有者の決定 2026-11-02 案 2・参考 Byredo): 墨の塗りはそのまま、字を中央の 400 の 14px(字送り 0.05em)
+   にし、矢印を外し、説明の文からの余白を 48 に広げる。塗り・高さ 48・角 8 は .qs-btn-p のまま。 */
+.qs-go { margin-top: 48px; font: 400 14px/20px var(--qs-sans); letter-spacing: 0.05em; }
+.qs-go-err { margin-top: 12px; }
+
+/* 8. 保存した店 一覧 ⑤ — 取得中の行(design「hareMa 一覧 読み込み中」option 1c)
+
+   帯の寸法と位置は行側のインラインスタイルが持ち、ここに置くのは**インラインで書けないもの
+   だけ** —— キーフレームと 2 つの媒体クエリ。色は light = 沈んだ面 / dark = 浮いた面で分かれ、
+   これも媒体クエリなのでインラインには載らない(--surface と取り違えない:dark では同値だが
+   light では別値で、将来 light 側が動いたときに壊れ方が分かれる)。 */
+.saved-skeleton-bar {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  animation: saved-skeleton-pulse 1600ms var(--ease) infinite;
+}
+@media (prefers-color-scheme: dark) {
+  .saved-skeleton-bar { background: var(--bg-raised); }
+}
+@keyframes saved-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.42; }
+}
+/* Stopped, not slowed — .spinner とは扱いが逆に見えるが、基準は上の逐語コメントと同じで、
+   当てる条件が違うだけ:動きが唯一の信号なら止められない(スピナー)。帯は静止しても
+   「まだ来ていない」を示し続けるので止められる。 */
+@media (prefers-reduced-motion: reduce) {
+  .saved-skeleton-bar { animation: none; }
+}
+
+/* 9. 店舗詳細 ④ — 状態バッジ「行きたい」の色(design 面 8a)
+
+   「また行きたい」は両モード共通の --accent、「もういい」は既存トークン(--border-strong /
+   --fg-muted / --fg-2)がモードで自己解決するので、どちらもインライン style で足りる。
+   「行きたい」だけは light/dark で別トークン(--brand / --brand-soft)を当てる裁定
+   (design 面 8a 註記)で、インライン style には媒体クエリを書けない —— が、インライン
+   style が「カスタムプロパティの参照」であれば、その値自体はクラス側の @media で
+   切り替えられる(インラインが勝つのは `border-color` という宣言そのものに対してで、
+   `--place-detail-badge-want-*` という一段挟んだ変数のカスケードには勝てない。AD-D3
+   repair 2026-08-25。以前は border-color / background に直接 --brand を置いており、
+   インラインの同名宣言に常に負けて dark 側が到達不能だった)。新しい hex は無い
+   (既存トークン名の参照のみ)。 */
+.place-detail-badge-want { --place-detail-badge-want-border: var(--brand); }
+.place-detail-badge-want-dot { --place-detail-badge-want-dot: var(--brand); }
+@media (prefers-color-scheme: dark) {
+  .place-detail-badge-want { --place-detail-badge-want-border: var(--brand-soft); }
+  .place-detail-badge-want-dot { --place-detail-badge-want-dot: var(--brand-soft); }
+}
+
+/* 10. 削除確認 D5(design C-3 = WP-08-save-detail-flow.html:157-158 / WP-10-place-detail.html
+   面 6:386-387)
+
+   スクリムと器の陰影は S1 のボトムシート(--sheet-scrim / --sheet-shadow)とは別の rgba を design
+   が当てている —— dim は rgba(26,30,39,.35) / dark rgba(0,0,0,.55)(シートは .30 / .5)、器の
+   shadow は 0 24px 64px rgba(0,0,0,.28) / dark rgba(0,0,0,.6)(シートは 0 -10px 36px の別形)。
+   既存トークンを流用すると design の byte と食い違うため、この対だけ新設する。新しい hex は無い
+   (rgba のみ)。破壊確定のボタン文字は --akane-text を使うので、この 2 トークンには含めない。 */
+:root {
+  --dlg-scrim: rgba(26, 30, 39, 0.35);
+  --dlg-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dlg-scrim: rgba(0, 0, 0, 0.55);
+    --dlg-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* 11. アカウント右ドロワー E-0(design hareMa アカウントフロー.dc.html・etag 1785977989176170)
+
+   スクリムは中央ダイアログと同値(--dlg-scrim を参照する)。ドロワー本体の外向きの影だけ design が
+   別の値を当てている —— light -10px 0 40px rgba(26,30,39,.20) / dark rgba(0,0,0,.5)(E-0 Light/Dark
+   frame の box-shadow・シートの 0 -10px 36px とは別形)。新しい hex は無い(rgba のみ)。 */
+:root {
+  --drawer-shadow: -10px 0 40px rgba(26, 30, 39, 0.2);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --drawer-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  }
+}
+/* WP-12.5: public pages — begin */
+
+.public { background: var(--bg); min-height: 100svh; flex: 1; color: var(--fg-1); }
+.public-header { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.public-header .wordmark { font: 700 18px/24px var(--ff-sans); font-style: normal; letter-spacing: -0.01em; }
+.public-header a { font: 700 11px/16px var(--ff-sans); letter-spacing: 0.05em; color: var(--fg-3); text-decoration: none; }
+.public-content { margin: 0 auto; padding: 34px 24px 48px; }
+.public-content h1 { font-family: var(--ff-heading-jp); font-size: 24px; line-height: 1.5; letter-spacing: 0.01em; font-feature-settings: 'palt'; font-weight: 700; margin: 14px 0 22px; }
+.public-document { max-width: 720px; }
+.public-revised { color: var(--fg-2); font: 400 13px/20px var(--ff-sans); letter-spacing: 0.02em; margin-bottom: 34px; }
+.public-legal-body { font-size: 16px; line-height: 1.7; letter-spacing: 0.02em; overflow-wrap: normal; word-break: normal; line-break: strict; }
+.public-legal-body section { margin-top: 28px; }
+.public-legal-body h2 { font-family: var(--ff-heading-jp); font-size: 18px; line-height: 1.5; font-weight: 700; margin-bottom: 12px; }
+.public-legal-body h3 { font-family: var(--ff-heading-jp); font-size: 16px; font-weight: 700; margin: 18px 0 8px; }
+.public-legal-body p { margin: 0 0 12px; }
+.public-legal-body ol { list-style: decimal; padding-left: 1.8em; margin-bottom: 12px; }
+.public-legal-body li { padding-left: .25em; margin-bottom: 8px; }
+.public-legal-body ul { list-style: disc; padding-left: 1.8em; margin-bottom: 12px; }
+.public-legal-body blockquote { border-left: 2px solid var(--border); padding-left: 16px; margin-bottom: 14px; }
+.public-legal-body table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 12px 0; }
+.public-legal-body th, .public-legal-body td { border: 1px solid var(--border); padding: 8px; min-width: 100px; text-align: left; }
+.public-legal-body a { color: var(--brand); text-decoration: underline; overflow-wrap: anywhere; }
+.public-footer { max-width: 1100px; margin: auto; padding: 22px 24px; border-top: 1px solid var(--border); display: block; justify-content: space-between; gap: 20px; color: var(--fg-2); font-family: var(--ff-sans); font-size: 13px; line-height: 20px; letter-spacing: 0.02em; }
+.public-footer nav { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
+.public-footer a { color: inherit; text-decoration: none; }
+@media (min-width: 768px) {
+  .public-content { padding: 52px 24px 56px; }
+  .public-content h1 { font-size: 30px; }
+  .public-header, .public-footer { padding-left: 36px; padding-right: 36px; }
+  .public-footer { display: flex; }
+  .public-footer nav { margin-bottom: 0; }
+}
+/* WP-12.5: public pages — end */

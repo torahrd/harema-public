@@ -1,0 +1,243 @@
+/* lp.css — hareMa の LP(`/`)の見た目。Quiet Signal の Quiet Field(版 1793537994-c95e)。
+   正 = /mnt/project-files/harema/lp-impl/ref/ の lp3-subset.css → app-screen.css → bw.css → quiet-field.css(この順に重なる)。
+   ref からの変更は PLAN lp-impl 改訂 2 の 1-2 のとおり:
+   (1) 選択子を .lp の下に入れる (2) 変数を --lp-* にする (3) 書体を next/font の変数で書く
+   (4) アプリの画面の色を globals.css のトークンから読む (5) 確認用の仮(.phone の灰・.app の display:none)は写さない
+   (6) ロゴはゴシック(所有者の決定 2026-11-02 19:29 JST・ログインの .qs-wm と同じ値) (7) 構造の切替の幅を 1040px に上げる (8) dark は OS に追従。
+   色の値は次の「値の塊」(light / dark)だけに置く。直すときはここだけを直す。 */
+
+/* ---- 値の塊(light / dark) ---- */
+.lp.qf,
+:root:has(.lp.qf) {
+  --lp-bg: #ffffff;
+  --lp-fg: #171918;
+  --lp-fg2: #2a2d2b;
+  --lp-meta: #2a2d2b;
+  --lp-rule: #d8dad4;
+  --lp-btn-bg: #171918;
+  --lp-btn-fg: #ffffff;
+  --lp-frame: #d8dad4;
+  --lp-signal: #4e644a;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  .lp.qf,
+  :root:has(.lp.qf) {
+    --lp-bg: #171918;
+    --lp-fg: #fafafa;
+    --lp-fg2: #d8dad4;
+    --lp-meta: #d8dad4;
+    --lp-rule: rgba(216, 218, 212, 0.22);
+    --lp-btn-bg: #fafafa;
+    --lp-btn-fg: #171918;
+    --lp-frame: rgba(216, 218, 212, 0.22);
+    --lp-signal: #d8dad4;
+    color-scheme: dark;
+  }
+}
+
+/* 背景の外側(iOS で引っ張ったときの余白・端の帯)も LP の地にする */
+html:has(.lp.qf),
+body:has(.lp.qf) { background: var(--lp-bg); }
+body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
+
+/* ---- lp3-subset.css ---- */
+/* 注: ref の .act-note の margin-top:12px は、.lp p{margin:0}(詳細度が上)に負けて効かない。面(所有者が見た物)は 0 なので、写さない。 */
+.lp{box-sizing:border-box;width:100%;min-width:0;background:var(--lp-bg);color:var(--lp-fg);font-family:var(--font-noto-sans),var(--font-noto-sans-jp),'Noto Sans','Noto Sans JP',sans-serif;font-size:16px;line-height:1.8;letter-spacing:.04em;font-weight:400;word-break:auto-phrase;line-break:strict;overflow-wrap:anywhere}
+.lp *,.lp *::before,.lp *::after{box-sizing:border-box}
+/* 製品の要素の規則(h1〜h3・p の margin・字体・色・text-wrap、a:hover の金)を LP の中だけ打ち消す。:where で詳細度 0 */
+.lp :where(h1,h2,h3,p){margin:0;color:inherit;font-family:inherit;text-wrap:initial}
+.lp :where(a):hover{color:inherit}
+.lp h1,.lp h2,.lp h3,.lp p,.lp ol,.lp ul,.lp dl,.lp dd,.lp dt{margin:0;padding:0}
+.lp ol,.lp ul{list-style:none}
+.lp a{color:inherit;text-decoration:none}
+.lp h1,.lp h2,.lp h3{font-feature-settings:"palt";letter-spacing:.02em}
+.lp .lp-in{max-width:1280px;margin:0 auto;padding-left:48px;padding-right:48px}
+.lp .lp-head{display:flex;align-items:center;justify-content:space-between;gap:16px;height:88px}
+.lp .wordmark{font-family:var(--font-noto-sans),var(--font-noto-sans-jp),'Noto Sans','Noto Sans JP',sans-serif;font-style:normal;font-weight:700;font-size:18px;line-height:24px;letter-spacing:-.01em}
+.lp .lp-nav{display:flex;align-items:center;gap:32px}
+.lp .lp-nav a{display:block;padding:12px 0;font-size:14px;line-height:20px}
+.lp .act{display:flex;flex-direction:column;align-items:flex-start}
+.lp .cta{display:inline-flex;align-items:center;justify-content:center;min-width:240px;min-height:52px;padding:0 40px;border-radius:8px;background:var(--lp-btn-bg);color:var(--lp-btn-fg);font-size:16px;line-height:24px;font-weight:700;letter-spacing:.12em}
+.lp .act-note{font-size:13px;line-height:20px;letter-spacing:.04em;color:var(--lp-fg2)}
+.lp .dn{display:block;font-size:13px;line-height:20px;font-weight:700;letter-spacing:.05em;color:var(--lp-meta)}
+.lp .phone{--s:1;position:relative;flex:none;width:calc(390px * var(--s));height:calc(844px * var(--s));border-radius:calc(28px * var(--s));overflow:hidden;box-shadow:0 0 0 1px var(--lp-frame)}
+.lp .phone-in{width:390px;height:844px;transform:scale(var(--s));transform-origin:0 0}
+.lp .facts{display:flex;flex-direction:column}
+.lp .fact{display:grid;grid-template-columns:160px minmax(0,1fr);column-gap:24px;padding:24px 0;border-top:1px solid var(--lp-rule)}
+.lp .fact:last-child{border-bottom:1px solid var(--lp-rule)}
+.lp .fact dt{font-size:13px;line-height:28px;font-weight:700;color:var(--lp-meta)}
+.lp .fact-links{display:flex;flex-wrap:wrap;column-gap:24px;margin-top:4px}
+.lp .lp-foot{border-top:1px solid var(--lp-rule);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:24px;padding-bottom:40px}
+.lp .lp-foot nav{display:flex;flex-wrap:wrap;column-gap:24px}
+.lp .lp-foot a{display:block;padding:12px 0;font-size:13px}
+@media (max-width:600px){
+  .lp .lp-in{padding-left:24px;padding-right:24px}
+  .lp .lp-head{height:64px}
+  .lp .act{align-items:stretch}
+  .lp .cta{width:100%;min-width:0}
+  .lp .fact{grid-template-columns:minmax(0,1fr);row-gap:4px;padding:20px 0}
+  .lp .lp-foot{flex-direction:column;align-items:flex-start;gap:0}
+}
+
+/* ---- app-screen.css(アプリの画面の部品。色は globals.css のトークンを読む = dark ではアプリの dark の値に替わる) ---- */
+.lp .app{--a-bg:var(--bg);--a-surface:var(--surface);--a-sunken:var(--bg-sunken);--a-fg1:var(--fg-1);--a-fg2:var(--fg-2);--a-fg3:var(--fg-3);--a-muted:var(--fg-muted);--a-border:var(--border);--a-border-subtle:var(--border-subtle);--a-border-strong:var(--border-strong);--a-accent:var(--accent);--a-akane:var(--akane-text);--a-shadow1:var(--shadow-1);--seg-shadow:0 1px 2px rgba(26,30,39,.16)}
+.lp .app{position:relative;display:block;width:390px;height:844px;overflow:hidden;background:var(--a-bg);color:var(--a-fg1);font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;font-size:16px;line-height:1.75;letter-spacing:0;font-weight:400;text-align:left;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere;line-break:strict}
+.lp .app *,.lp .app *::before,.lp .app *::after{box-sizing:border-box}
+.lp .app p{margin:0}
+.lp .app button{margin:0;font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;cursor:pointer}
+.lp .app-shot{position:absolute;left:0;top:0;display:block;width:390px;height:844px;max-width:none;margin:0;border:0}
+.lp .sh-scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:var(--sheet-scrim);z-index:20}
+.lp .sh{position:absolute;left:0;right:0;bottom:0;z-index:21;display:flex;flex-direction:column;background:var(--a-surface);border-top:1px solid var(--a-border);border-radius:16px 16px 0 0;padding:10px 0 0;box-shadow:var(--sheet-shadow)}
+.lp .sh-top{padding:0 20px}
+.lp .sh-grab{width:40px;height:4px;border-radius:2px;background:var(--a-border-strong);margin:0 auto 16px}
+.lp .sh-name{font-family:var(--font-noto-serif-jp),'Noto Serif JP',serif;font-weight:700;font-size:19px;line-height:1.75;color:var(--a-fg1)}
+.lp .sh-addr{font-size:12px;line-height:1.75;color:var(--a-fg2);margin:4px 0 18px}
+.lp .sh-flow{padding:0 20px}
+.lp .sh-cap{display:block;font-family:var(--font-space-grotesk),'Space Grotesk',var(--font-noto-sans-jp),'Noto Sans JP',monospace;font-size:10px;line-height:1.75;letter-spacing:.16em;text-transform:uppercase;color:var(--a-fg2)}
+.lp .sh-cap-state{margin-bottom:8px}
+.lp .sh-cap-memo{margin:18px 0 8px}
+.lp .sh-cap-src{margin:16px 0 8px}
+.lp .sh-seg{display:flex;background:var(--a-sunken);border:1px solid var(--a-border);border-radius:6px;padding:3px;gap:3px}
+.lp .sh-seg button{flex:1;text-align:center;padding:9px 0;border:0;font-size:13px;line-height:1.75;color:var(--a-fg2);background:transparent}
+.lp .sh-seg button.on{font-weight:600;color:var(--a-fg1);background:var(--a-surface);border-radius:4px;box-shadow:var(--seg-shadow)}
+.lp .sh-field{display:block;width:100%;border:1px solid var(--a-border);border-radius:6px;padding:11px 12px;font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;font-size:16px;line-height:1.5;color:var(--a-fg1);background:var(--a-surface);outline:none;margin:0}
+.lp .sh-field::placeholder{color:var(--a-fg3);opacity:1}
+.lp .sh-memo{min-height:66px;line-height:1.7;resize:none}
+.lp .sh-note{margin:7px 0 0;font-size:11px;line-height:1.75;color:var(--a-fg2)}
+.lp .sh-bottom{padding:18px 20px 26px}
+.lp .sh-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:18px 0;background:transparent;border:0;border-top:1px solid var(--a-accent);border-bottom:1px solid var(--a-accent);border-radius:0;font-weight:700;font-size:15px;line-height:1.75;letter-spacing:.04em;color:var(--a-accent);text-align:left}
+.lp .sh-cta .arrow{font-family:var(--font-space-grotesk),'Space Grotesk',monospace;font-weight:400;font-size:18px;line-height:1}
+.lp .sh-del{display:flex;width:100%;justify-content:center;margin-top:10px;padding:10px 16px;font-size:14px;line-height:1.75;font-weight:500;letter-spacing:.02em;background:transparent;color:var(--a-akane);border:1px solid var(--a-border-strong);border-radius:2px}
+.lp .sh-edit .sh-grab{margin-bottom:14px}
+.lp .sh-edit .sh-addr{margin-bottom:14px}
+.lp .sh-edit .sh-cap-memo{margin-top:16px}
+.lp .sh-edit .sh-memo{min-height:52px}
+.lp .sh-edit .sh-bottom{padding:14px 20px 24px}
+
+/* ---- bw.css(構造・寸法・和文の折れ) ---- */
+.lp.bw{letter-spacing:.02em;line-height:1.7}
+.bw .hd{word-break:keep-all;line-break:strict}
+.bw .nw{white-space:nowrap}
+.bw .h1{font-size:48px;line-height:1.4;font-weight:700}
+.bw .h2{font-size:36px;line-height:1.4;font-weight:700}
+.bw .h3{font-size:24px;line-height:1.5;font-weight:700}
+.bw .lead{margin-top:24px;max-width:21em;font-size:18px;line-height:1.6;letter-spacing:.02em;color:var(--lp-fg2)}
+.bw .body{color:var(--lp-fg2)}
+.bw .body+.body{margin-top:48px}
+.bw .body,.bw .do-t,.bw .fact dd{text-wrap:pretty}
+.bw .dn{font-family:var(--font-source-code-pro),'Source Code Pro',monospace;font-weight:500}
+.bw .act-note+.act-note{margin-top:4px}
+.bw .s1{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:10px;align-items:center;padding-top:16px;padding-bottom:96px}
+.bw .s1-text{min-width:0}
+.bw .s1 .act{margin-top:48px}
+.bw .s1-shot{display:flex;justify-content:center;min-width:0}
+.bw .s1-shot .phone{--s:.8}
+.bw .sec{border-top:1px solid var(--lp-rule);padding-top:96px;padding-bottom:96px}
+.bw .trio,.bw .does{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:48px}
+.bw .trio{margin-top:48px}
+.bw .trio .phone{--s:.72}
+.bw .does{margin-top:24px}
+.bw .does li{min-width:0}
+.bw .do-n{display:flex;align-items:baseline;gap:12px}
+.bw .do-t{margin-top:8px;color:var(--lp-fg2)}
+.bw .s3{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);column-gap:10px}
+.bw .s3-head,.bw .s3-main{min-width:0}
+.bw .s3-main{max-width:40em}
+.bw .sub{margin-top:48px}
+.bw .facts{margin-top:16px}
+.bw .s3 .act{margin-top:48px}
+.bw .phone{border-radius:2px;filter:grayscale(1)}
+/* 構造の切替(1040px 以下で単列・3 枚は縮める)。ref は 600px だけで、601〜1040px で段 1 の画面が文と線に重なるため上げた(DISPOSITION H1) */
+@media (max-width:1040px){
+  .bw .s1{grid-template-columns:minmax(0,1fr)}
+  .bw .s1-shot{margin-top:32px}
+  .bw .trio{column-gap:8px;margin-top:24px}
+  .bw .trio .phone{--s:.2885}
+  .bw .does{grid-template-columns:minmax(0,1fr);margin-top:24px}
+  .bw .does li{padding:16px 0;border-top:1px solid var(--lp-rule)}
+  .bw .does li:last-child{border-bottom:1px solid var(--lp-rule)}
+  .bw .s3{grid-template-columns:minmax(0,1fr)}
+  .bw .s3-main{margin-top:16px}
+}
+/* 値(字の大きさ・余白)の切替は 600px のまま */
+@media (max-width:600px){
+  .bw .h1{font-size:36px;line-height:1.4}
+  .bw .h2{font-size:24px;line-height:1.5}
+  .bw .h3{font-size:18px;line-height:1.6}
+  .bw .lead{margin-top:16px}
+  .bw .s1{padding-top:32px;padding-bottom:48px}
+  .bw .s1 .act{margin-top:24px}
+  .bw .s1-shot .phone{--s:.9077}
+  .bw .sec{padding-top:48px;padding-bottom:48px}
+  .bw .do-t{margin-top:4px}
+  .bw .sub{margin-top:32px}
+  .bw .s3 .act{margin-top:32px}
+}
+
+/* ---- quiet-field.css(色・字・線。段 1 = 文・moss の線 1 本・地図の画面) ---- */
+.qf .phone{filter:none}
+.qf .h1,.qf .h2{font-family:var(--font-noto-sans),var(--font-noto-sans-jp),'Noto Sans','Noto Sans JP',sans-serif;font-weight:700;letter-spacing:0}
+.qf .h1{font-size:72px;line-height:1.4}
+.qf .dn{font-family:var(--font-source-code-pro),'Source Code Pro',var(--font-noto-sans-jp),'Noto Sans JP',monospace;font-size:13px;line-height:20px;font-weight:500;letter-spacing:0;color:var(--lp-fg2)}
+.qf .s1{grid-template-columns:minmax(0,8fr) minmax(0,4fr);align-items:stretch;padding-top:96px;padding-bottom:96px}
+.qf .s1-text{align-self:center}
+.qf .s1-shot{justify-content:flex-end;align-items:center;border-left:1px solid var(--lp-signal);padding-left:64px}
+@media (max-width:1040px){
+  .qf .s1{grid-template-columns:minmax(0,1fr)}
+  .qf .s1-shot{border-left:0;padding-left:0;border-top:1px solid var(--lp-signal);padding-top:32px;justify-content:center}
+}
+/* 1041〜1059px では段 1 の画面(312px)が列の幅をわずかに超えて線にかかるので、少しだけ縮める(1041 で列 311.7px)。 */
+@media (min-width:1041px) and (max-width:1059px){
+  .qf .s1-shot .phone{--s:.79}
+}
+/* 601〜700px でも「ひとつの地図に。」が 1 行に収まるよう、h1 は 700px 以下で 48px にする(72px だと「。」だけの行が出る・impl 実測 601px) */
+@media (max-width:700px){
+  .qf .h1{font-size:48px;line-height:1.4}
+}
+@media (max-width:600px){
+  .qf .h1{font-size:48px;line-height:1.4}
+  .qf .h2{font-size:24px;line-height:1.5}
+  .qf .s1{padding-top:48px;padding-bottom:48px}
+}
+/* 390px より狭いスマホ(360・375)では、390 で 1 行に収まる「ひとつの地図に。」と、段 1 の一文の 3 行が崩れないよう、
+   h1 と段 1 の一文を本文の幅に比例して縮める(390 の本文幅 342px での 48px・18px より少し小さい割合。字の幅は環境で少し違うので余裕を持たせる)。 */
+@media (max-width:389px){
+  .qf .h1{font-size:calc((100vw - 48px) * 46 / 342)}
+  .qf .s1 .lead{font-size:calc((100vw - 48px) * 17.5 / 342)}
+}
+
+/* 決まった文言の折れ。段 1 の一文は所有者が決めた 3 行(2026-10-31 10:22)・402 では見出しの .ln の前で改行・和文の中の欧文は字間を足さない */
+.qf .s1 .lead .lb{display:block;text-wrap:balance}
+.qf .s1 .lead .lat{letter-spacing:0}
+@media (max-width:600px){
+  .qf .s3-head .ln::before,.qf .s2>.h2 .ln::before,.qf .s1 .lead .ln::before{content:"\A";white-space:pre}
+}
+
+
+/* iPhone アプリの公開前の枠(所有者の決定 2026-11-02: 案 A と B の両方。DESIGN = harema/lp-impl/app-download/DESIGN.md)。
+   線と字だけ・押せない表示。アイコンは PC の幅だけ(公開後は QR に替える場所)。 */
+.lp .app-dl{border:1px solid var(--lp-rule);border-radius:2px;background:transparent;max-width:100%}
+.lp .app-dl-s1{display:inline-flex;align-self:flex-start;align-items:baseline;gap:12px;margin-top:24px;padding:12px 16px;font-size:13px;line-height:20px;letter-spacing:.04em}
+.lp .app-dl-k{font-weight:700;color:var(--lp-meta)}
+.lp .app-dl-v{font-weight:400;color:var(--lp-fg2)}
+.lp .app-dl-fact{display:flex;width:fit-content;align-items:center;gap:16px;margin-top:16px;padding:12px 20px 12px 12px}
+.lp .app-icon{display:block;flex:none;width:80px;height:80px}
+.lp .app-icon img{display:block;width:80px;height:80px;border-radius:18px;box-shadow:0 0 0 1px var(--lp-rule)}
+.lp .app-dl-text{display:flex;flex-direction:column;min-width:0}
+.lp .app-dl-text wbr{display:none}
+.lp .app-soon{display:block;font-size:13px;line-height:20px;font-weight:700;letter-spacing:.04em;color:var(--lp-meta)}
+.lp .app-note{display:block;margin-top:4px;font-size:13px;line-height:20px;font-weight:400;letter-spacing:.04em;color:var(--lp-fg2)}
+@media (max-width:600px){
+  .lp .app-icon{display:none}
+  .lp .app-dl-fact{width:100%;padding:12px 16px}
+}
+
+/* 開発中の注釈(所有者の決定 2026-11-03 10:02 JST: 段 1 の注記と足の両方・頭に※。改行は QS のとおり句読点の後の <wbr> と keep-all で、固定しない)。値は .act-note のまま。 */
+.lp .dev-note{position:relative;padding-left:1em}
+.lp .dev-note .dev-mark{position:absolute;left:0;top:0}
+.lp .lp-foot .dev-foot{flex-basis:100%}
+
+/* Coming soon のページの X へのリンク(所有者の決定 2026-11-03 10:03 JST: 案 B・頭は「最新情報は」)。字は .lead に近い 16px、リンクの所だけ下線。 */
+.lp .x-link{margin-top:16px;font-size:16px;line-height:24px;letter-spacing:.02em;color:var(--lp-fg)}
+.lp .x-link a{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}

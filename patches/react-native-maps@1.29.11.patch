@@ -1,0 +1,16 @@
+diff --git a/ios/AirGoogleMaps/AIRGoogleMapMarker.m b/ios/AirGoogleMaps/AIRGoogleMapMarker.m
+index 2102e49d0412ddffa487c997c74c5521cf0d4a01..a1f97ff3567040fe1677f1def5e8460ce8731863 100644
+--- a/ios/AirGoogleMaps/AIRGoogleMapMarker.m
++++ b/ios/AirGoogleMaps/AIRGoogleMapMarker.m
+@@ -293,7 +293,11 @@ CGRect unionRect(CGRect a, CGRect b) {
+ }
+ 
+ - (void)setCoordinate:(CLLocationCoordinate2D)coordinate {
++    // hareMa: GMSMarker animates position implicitly (~0.25s). Position motion is driven from JS, so disable it.
++    [CATransaction begin];
++    [CATransaction setDisableActions:YES];
+     _realMarker.position = coordinate;
++    [CATransaction commit];
+     _coordinates = coordinate;
+ }
+ 
