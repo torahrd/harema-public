@@ -229,14 +229,8 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .app-soon{display:block;font-size:13px;line-height:20px;font-weight:700;letter-spacing:.04em;color:var(--lp-meta)}
 .lp .app-note{display:block;margin-top:4px;font-size:13px;line-height:20px;font-weight:400;letter-spacing:.04em;color:var(--lp-fg2)}
 @media (max-width:600px){
-  .lp .app-icon{display:none}
-  .lp .app-dl-fact{width:100%;padding:12px 16px}
+  .lp .app-dl-fact{width:100%;padding:12px 16px 12px 12px}
 }
-
-/* 開発中の注釈(所有者の決定 2026-11-03 10:02 JST: 段 1 の注記と足の両方・頭に※。改行は QS のとおり句読点の後の <wbr> と keep-all で、固定しない)。値は .act-note のまま。 */
-.lp .dev-note{position:relative;padding-left:1em}
-.lp .dev-note .dev-mark{position:absolute;left:0;top:0}
-.lp .lp-foot .dev-foot{flex-basis:100%}
 
 /* Coming soon のページの X へのリンク(所有者の決定 2026-11-03 10:03 JST: 案 B・頭は「最新情報は」)。字は .lead に近い 16px、リンクの所だけ下線。 */
 .lp .x-link{margin-top:16px;font-size:16px;line-height:24px;letter-spacing:.02em;color:var(--lp-fg)}

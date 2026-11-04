@@ -9,8 +9,7 @@ import mapLight from './_public/lp/map-light.webp'
 import mapDark from './_public/lp/map-dark.webp'
 import mapR1Light from './_public/lp/map-r1-1b-light.webp'
 import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
-import appIconLight from './_public/lp/app-icon-light.webp'
-import appIconDark from './_public/lp/app-icon-dark.webp'
+import appIcon from './_public/lp/app-icon.webp'
 import { SiteAnalytics } from './_public/site-analytics'
 import './lp.css'
 
@@ -47,11 +46,10 @@ function Shot({ name, alt, eager = false }: { name: keyof typeof SHOTS; alt: str
 
 // iPhone アプリの公開前の枠(所有者の決定 2026-11-02 23:56 JST: 案 A と B の両方・A の QR の場所にはアプリのアイコン)。
 // App Store の公式のバッジは公開か予約注文の後でないと使えないので、LP の線と字だけの枠にする。押せる物ではないのでリンクにしない。
+// アイコンはアプリと同じ「椀に昇る日と海」(harema#26・PR #69)。ライトもダークも同じ暗い地の絵なので 1 枚。
 function AppIcon() {
-  const common = { alt: '', width: 80, height: 80, unoptimized: true }
-  const { props: light } = getImageProps({ ...common, src: appIconLight })
-  const { props: dark } = getImageProps({ ...common, src: appIconDark })
-  return <picture className="app-icon"><source media="(prefers-color-scheme: dark)" srcSet={dark.src} /><img src={light.src} width={80} height={80} alt="" loading="lazy" decoding="async" /></picture>
+  const { props } = getImageProps({ alt: '', width: 80, height: 80, unoptimized: true, src: appIcon })
+  return <picture className="app-icon"><img src={props.src} width={80} height={80} alt="" loading="lazy" decoding="async" /></picture>
 }
 
 export default function Home() {
@@ -74,7 +72,6 @@ export default function Home() {
 <a className="cta" href="/login">はじめる</a>
 <p className="act-note"><span className="nw">Apple または Google のアカウントで、</span><wbr /><span className="nw">ブラウザのまま始められます。</span></p>
 <p className="act-note">無料で使えます。</p>
-<p className="act-note dev-note hd"><span className="dev-mark" aria-hidden="true">※</span>開発中のため、<wbr />画面や機能は変わることがあります。</p>
 <p className="app-dl app-dl-s1"><span className="app-dl-k">iPhone アプリ</span><span className="app-dl-v" lang="en">Coming soon</span></p>
 </div>
 </div>
@@ -167,7 +164,7 @@ export default function Home() {
 <dl className="facts">
 <div className="fact"><dt>データ</dt><dd>保存した店は、ほかの利用者には公開されません。退会すると、アカウントと保存した店を削除します。</dd></div>
 <div className="fact"><dt>運営</dt><dd>hareMa 運営者。お問い合わせは <a href="https://x.com/htoranosuke" target="_blank" rel="noopener">X</a> で受け付けています。<span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
-<div className="fact"><dt>アプリ</dt><dd><span className="hd"><span className="nw">ブラウザ版と iPhone のアプリを、</span><wbr />並行して作っています。<wbr /><span className="nw">ブラウザ版から順次公開予定です。</span></span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
+<div className="fact"><dt>アプリ</dt><dd><span className="hd">iPhone のアプリを準備しています。<wbr />ブラウザでは、<wbr />いますぐ使えます。</span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
 </dl>
 <div className="act">
 <a className="cta" href="/login">はじめる</a>
@@ -179,7 +176,6 @@ export default function Home() {
 </main>
 
 <footer className="lp-foot lp-in">
-<p className="act-note dev-note dev-foot hd"><span className="dev-mark" aria-hidden="true">※</span>hareMa は開発中です。<wbr /><span className="nw">画面や機能は、変わることがあります。</span></p>
 <nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">お問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
 </footer>
