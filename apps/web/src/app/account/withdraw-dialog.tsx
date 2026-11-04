@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { SignInProvider } from '@/lib/auth/core'
 import type { SsoProvider } from '@/lib/auth/browser-flow'
+import { markLpNotice } from '@/lib/lp-notice'
 import { ActionError } from '../_auth-ui/action-error'
 import { SsoButton } from '../_auth-ui/sso-button'
 import {
@@ -56,7 +57,8 @@ export function WithdrawDialog({
     reauthenticateAndWithdraw(target)
       .then((outcome) => {
         if (outcome.kind === 'done') {
-          // 遷移を待つ間はボタンを二度押させない(pending のまま)
+          // LP の知らせの印を置いてから移る。遷移を待つ間はボタンを二度押させない(pending のまま)
+          markLpNotice('withdraw')
           router.replace('/')
           return
         }

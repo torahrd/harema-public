@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import { randomBytes } from 'node:crypto'
 import { describe, it } from 'node:test'
 import {
+  ID_TOKEN_MAX_LENGTH,
   SESSION_LIFETIME_SEC,
   acceptLogin,
   classifyRefreshResponse,
@@ -12,7 +13,9 @@ import {
   clearedCookieAttributes,
   createKeyStore,
   openSession,
+  parseBearerAuthorization,
   parseSessionKeys,
+  resolveTokenUser,
   resolveVerifiedUser,
   safeNextPath,
   sealSession,
@@ -422,6 +425,97 @@ describe('LR-A4 getVerifiedUser の判定', () => {
     assert.equal(classifySessionValidity({ data: null, status: 500, hadError: true }), 'unavailable')
     assert.equal(classifySessionValidity({ data: null, status: 503, hadError: true }), 'unavailable')
     assert.equal(classifySessionValidity({ data: null, status: 200, hadError: false }), 'unavailable')
+  })
+})
+
+describe('Bearer の判定(resolveTokenUser)', () => {
+  const run = async (token, validity, extra = {}, options = {}) => {
+    const log = { dbCalls: 0 }
+    const result = await resolveTokenUser(
+      token,
+      {
+        verifyIdToken: (t) => verify(t),
+        checkSessionValidity: async () => {
+          log.dbCalls += 1
+          return validity
+        },
+        ...extra,
+      },
+      options,
+    )
+    return { result, log }
+  }
+
+  it('(a) parseBearerAuthorization: 正しい形だけトークンを返す', () => {
+    assert.equal(parseBearerAuthorization('Bearer abc.DEF_ghi-123'), 'abc.DEF_ghi-123')
+    assert.equal(parseBearerAuthorization(`Bearer ${'a'.repeat(ID_TOKEN_MAX_LENGTH)}`), 'a'.repeat(ID_TOKEN_MAX_LENGTH))
+    for (const bad of [
+      'bearer abc',
+      'BEARER abc',
+      'Bearer  abc',
+      'Bearer abc ',
+      ' Bearer abc',
+      'Bearer ',
+      'Bearer',
+      `Bearer ${'a'.repeat(ID_TOKEN_MAX_LENGTH + 1)}`,
+      'Basic abc',
+      'Bearer abc def',
+      'Bearer a+b',
+      'Bearer abc\n',
+      '',
+      null,
+    ]) {
+      assert.equal(parseBearerAuthorization(bad), null, `拒むべき: ${JSON.stringify(bad)}`)
+    }
+  })
+
+  it('(b) 署名が通らない → rejected・DB を呼ばない', async () => {
+    const forged = signToken({ key: keyB, claims: baseClaims() })
+    const { result, log } = await run(forged, 'valid')
+    assert.deepEqual(result, { ok: false, reason: 'rejected' })
+    assert.equal(log.dbCalls, 0)
+  })
+
+  it('(c) 期限切れ → expired・DB を呼ばない', async () => {
+    const expired = signToken({ key: keyA, claims: baseClaims({ iat: NOW - 7200, exp: NOW - 3600 }) })
+    const { result, log } = await run(expired, 'valid')
+    assert.deepEqual(result, { ok: false, reason: 'expired' })
+    assert.equal(log.dbCalls, 0)
+  })
+
+  it('(d) 鍵の一覧が取れない・一覧に無い kid → keys_unavailable・DB を呼ばない', async () => {
+    const unavailable = await run(good(), 'valid', { verifyIdToken: async () => ({ ok: false, reason: 'keys_unavailable' }) })
+    assert.deepEqual(unavailable.result, { ok: false, reason: 'keys_unavailable' })
+    assert.equal(unavailable.log.dbCalls, 0)
+    const otherKid = await run(signToken({ key: keyA, kid: 'other', claims: baseClaims() }), 'valid')
+    assert.deepEqual(otherKid.result, { ok: false, reason: 'keys_unavailable' })
+    assert.equal(otherKid.log.dbCalls, 0)
+  })
+
+  it('(e) DB が偽・401 → session_invalid', async () => {
+    const fake = await run(good(), 'invalid')
+    assert.deepEqual(fake.result, { ok: false, reason: 'session_invalid' })
+    assert.equal(fake.log.dbCalls, 1)
+    assert.equal(classifySessionValidity({ data: null, status: 401, hadError: true }), 'invalid')
+  })
+
+  it('(f) DB の通信の失敗・5xx → session_unavailable', async () => {
+    const down = await run(good(), 'unavailable')
+    assert.deepEqual(down.result, { ok: false, reason: 'session_unavailable' })
+    assert.equal(classifySessionValidity({ data: null, status: 503, hadError: true }), 'unavailable')
+  })
+
+  it('(g) 有効 → { id: sub, authTime, provider }', async () => {
+    const { result } = await run(good({ firebase: { sign_in_provider: 'apple.com' } }), 'valid')
+    assert.deepEqual(result, { ok: true, user: { id: 'lr-a-uid-0001', authTime: NOW - 60, provider: 'apple' } })
+  })
+
+  it('(h) expectedSub が違う → rejected・DB を呼ばない / 同じなら通る', async () => {
+    const wrong = await run(good(), 'valid', {}, { expectedSub: 'someone-else' })
+    assert.deepEqual(wrong.result, { ok: false, reason: 'rejected' })
+    assert.equal(wrong.log.dbCalls, 0)
+    const same = await run(good(), 'valid', {}, { expectedSub: 'lr-a-uid-0001' })
+    assert.equal(same.result.ok, true)
   })
 })
 

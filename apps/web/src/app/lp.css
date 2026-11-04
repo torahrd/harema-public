@@ -235,3 +235,7 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 /* Coming soon のページの X へのリンク(所有者の決定 2026-11-03 10:03 JST: 案 B・頭は「最新情報は」)。字は .lead に近い 16px、リンクの所だけ下線。 */
 .lp .x-link{margin-top:16px;font-size:16px;line-height:24px;letter-spacing:.02em;color:var(--lp-fg)}
 .lp .x-link a{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+/* 「運営」の行の X へのリンク(所有者の決定 2026-11-04 10:05 JST 案 B)。下線は .x-link a と同じ値。 */
+.lp .x-ul{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+/* 文ごとに行を始める(所有者の決定 2026-11-04 10:44 JST 案 4)。入らない文は後ろの文がひとかたまりで次の行へ移り、文の中は <wbr>(句読点の後)だけで折れる。 */
+.lp .sent{display:inline-block}

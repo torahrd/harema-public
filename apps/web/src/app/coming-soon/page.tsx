@@ -41,7 +41,7 @@ export default function ComingSoonPage() {
 </main>
 
 <footer className="lp-foot lp-in">
-<nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">お問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
+<nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">X でお問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
 </footer>
 <SiteAnalytics />

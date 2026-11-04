@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"src/lib/auth/test/*.test.mjs\" \"src/app/map/test/*.test.mjs\" \"src/app/saved/test/*.test.mjs\" \"src/lib/cron/test/*.test.mjs\" \"src/lib/places/test/*.test.mjs\" \"src/lib/test/*.test.mjs\"",
+    "test": "node --import ./src/lib/mobile-api/test/register-ts-resolve.mjs --test \"src/lib/auth/test/*.test.mjs\" \"src/lib/mobile-api/test/*.test.mjs\" \"src/app/map/test/*.test.mjs\" \"src/app/saved/test/*.test.mjs\" \"src/lib/cron/test/*.test.mjs\" \"src/lib/places/test/*.test.mjs\" \"src/lib/test/*.test.mjs\"",
     "check:legal": "node scripts/check-legal-sync.mjs"
   },
   "dependencies": {

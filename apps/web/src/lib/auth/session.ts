@@ -11,9 +11,11 @@ import {
   clearedCookieAttributes,
   openSession,
   parseSessionKeys,
+  resolveTokenUser,
   resolveVerifiedUser,
   type SessionKey,
   type SessionValidity,
+  type TokenUserResult,
   type VerifiedUser,
 } from './core'
 import { verifyFirebaseIdToken } from './firebase'
@@ -78,6 +80,18 @@ export async function getVerifiedUser(): Promise<VerifiedUser | null> {
         // Server Component からは cookie を書けない(Next.js の制約)
       }
     },
+  })
+}
+
+/**
+ * 渡された ID トークン(mobile の受け口の `Authorization: Bearer`)から、`getVerifiedUser()` と同じ核
+ * (`resolveTokenUser`)で利用者を返す。cookie を読まない・書かない。署名・iss・aud・期限と DB の `session_is_valid()` が
+ * 真のときだけ `ok: true`。失敗の理由は呼び出し側(受け口の包み)が 401 / 503 に分ける。
+ */
+export async function getVerifiedUserFromToken(idToken: string): Promise<TokenUserResult> {
+  return await resolveTokenUser(idToken, {
+    verifyIdToken: (token) => verifyFirebaseIdToken(token),
+    checkSessionValidity,
   })
 }
 

@@ -1,14 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { SsoProvider } from '@/lib/auth/browser-flow'
 import { ActionError } from '../_auth-ui/action-error'
 import { SsoButton } from '../_auth-ui/sso-button'
-import { LoginEyebrow } from './login-eyebrow'
 import { loginWithSso, prepareLogin } from './login-client'
-import { LOGIN_ERROR, LOGIN_LEDE_LINES } from './login-copy'
+import { LOGIN_ERROR, LOGIN_HEADING, LOGIN_LEDE_PHRASES, LOGIN_NOTES } from './login-copy'
 
 /**
  * ログインの画面(login-replace・FREEZE compare-v3 の ① の「新」)。メールのログインは撤去した
@@ -60,17 +59,15 @@ export function LoginForm() {
   return (
     <>
       <div className="qs-hero">
-        <LoginEyebrow />
         <h1 className="qs-h1">
-          静かな夕暮れに、
-          <br />
-          あなたの羅針盤を。
+          <span className="nw">{LOGIN_HEADING}</span>
         </h1>
         <p className="qs-lede">
-          {LOGIN_LEDE_LINES.map((line) => (
-            <span key={line} className="qs-ln">
-              {line}
-            </span>
+          {LOGIN_LEDE_PHRASES.map((phrase, i) => (
+            <Fragment key={phrase}>
+              {i > 0 && <wbr />}
+              <span className="nw">{phrase}</span>
+            </Fragment>
           ))}
         </p>
       </div>
@@ -108,6 +105,21 @@ export function LoginForm() {
             <span className="qs-ln">に同意する</span>
           </span>
         </label>
+      </div>
+
+      {/* 注釈(案 B)。※ は読み上げに出さず、本文だけを読む。折りは固定せず、句ごとに nowrap・句の間に wbr。 */}
+      <div className="qs-notes">
+        {LOGIN_NOTES.map((phrases) => (
+          <p key={phrases[0]} className="qs-note">
+            <span className="m" aria-hidden="true">※</span>
+            {phrases.map((phrase, i) => (
+              <Fragment key={phrase}>
+                {i > 0 && <wbr />}
+                <span className="nw">{phrase}</span>
+              </Fragment>
+            ))}
+          </p>
+        ))}
       </div>
 
       <div className="qs-gx" />

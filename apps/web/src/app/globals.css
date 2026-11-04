@@ -489,8 +489,7 @@ small, .small { font-size: var(--fs-small); color: var(--fg-2); }
 
 /* Caption-lead — caption-wide preceded by a 24px / 1px hairline.
    Use this whenever a caption opens a section, a slide, or a screen.
-   Example: ─ MAIL · SENT
-   (/login's eyebrow drops text-transform on the instance: ─ Tokyo · 03:00:00) */
+   Example: ─ MAIL · SENT */
 .caption-lead {
   display: inline-flex;
   align-items: center;
@@ -797,7 +796,6 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 
 /* ---- 文字の段(tokens.json Scale・README Japanese text) ---- */
 .qs-lab { font: 700 11px/16px var(--qs-sans); letter-spacing: 0.1125em; text-transform: uppercase; color: var(--qs-fg3); }
-.qs-eb { font: 400 13px/20px var(--qs-mono); color: var(--qs-fg3); font-variant-numeric: tabular-nums; }
 .qs-h1 { margin-top: 12px; font: 700 36px/48px var(--qs-sans); letter-spacing: 0.01em; font-feature-settings: 'palt'; color: var(--qs-fg); }
 .qs-lede { margin-top: 16px; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
 
@@ -815,13 +813,18 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .qs-hd { display: flex; justify-content: space-between; align-items: center; min-height: 48px; flex: none; }
 .qs-wm { font: 700 18px/24px var(--qs-sans); letter-spacing: -0.01em; color: var(--qs-fg); }
 .qs a.qs-lab { display: flex; align-items: center; min-height: 44px; text-decoration: none; }
-.qs-top48 { flex: none; height: 48px; }
+.qs-top48 { flex: none; height: 48px; display: flex; align-items: center; }
+.qs a.qs-wm { display: flex; align-items: center; min-height: 44px; text-decoration: none; }
 .qs-hero { flex: none; }
 .qs-gx { flex: 1 1 0; min-height: 24px; }
 .qs-cons { display: flex; flex-direction: column; flex: none; margin-top: 16px; }
 .qs-cr { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 10px 0; box-sizing: border-box; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); cursor: pointer; }
 .qs-cr input { flex: none; width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--qs-check); }
 .qs-cr a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.qs-notes { display: flex; flex-direction: column; gap: 4px; flex: none; margin-top: 8px; }
+.qs-note { position: relative; padding-left: 1em; text-align: left; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
+.qs-note .m { position: absolute; left: 0; top: 0; }
+.nw { white-space: nowrap; }
 .qs-sso-s { display: flex; flex-direction: column; gap: 12px; flex: none; margin-top: 16px; }
 .qs-ft { display: flex; justify-content: space-between; align-items: center; min-height: 44px; margin-top: 12px; flex: none; }
 
@@ -995,13 +998,21 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
     --drawer-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
   }
 }
+/* login-back: トップへ戻る(/login・/terms・/privacy 共通。値は一覧・詳細の戻ると同じ) */
+.back-top { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -4px; flex: none; }
+.back-top-box { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--surface); }
+:is(.qs, .public) a.back-top:focus-visible { outline: none; }
+.qs a.back-top:focus-visible .back-top-box { outline: 2px solid var(--qs-fg); outline-offset: 2px; }
+.public a.back-top:focus-visible .back-top-box { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
 /* WP-12.5: public pages — begin */
 
 .public { background: var(--bg); min-height: 100svh; flex: 1; color: var(--fg-1); }
-.public-header { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--border); }
-.public-header .wordmark { font: 700 18px/24px var(--ff-sans); font-style: normal; letter-spacing: -0.01em; }
-.public-header a { font: 700 11px/16px var(--ff-sans); letter-spacing: 0.05em; color: var(--fg-3); text-decoration: none; }
-.public-content { margin: 0 auto; padding: 34px 24px 48px; }
+.public-header { max-width: 1100px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 8px 24px; border-bottom: 1px solid var(--border); }
+.public-header .wordmark { font: 700 18px/24px var(--ff-sans); font-style: normal; letter-spacing: -0.01em; color: inherit; }
+.public-header a { display: flex; align-items: center; min-height: 44px; font: 700 11px/16px var(--ff-sans); letter-spacing: 0.05em; color: var(--fg-3); text-decoration: none; }
+.public-content { margin: 0 auto; padding: 8px 24px 48px; }
+.public-content > .back-top { margin-bottom: 16px; }
 .public-content h1 { font-family: var(--ff-heading-jp); font-size: 24px; line-height: 1.5; letter-spacing: 0.01em; font-feature-settings: 'palt'; font-weight: 700; margin: 14px 0 22px; }
 .public-document { max-width: 720px; }
 .public-revised { color: var(--fg-2); font: 400 13px/20px var(--ff-sans); letter-spacing: 0.02em; margin-bottom: 34px; }
@@ -1021,7 +1032,7 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .public-footer nav { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
 .public-footer a { color: inherit; text-decoration: none; }
 @media (min-width: 768px) {
-  .public-content { padding: 52px 24px 56px; }
+  .public-content { padding: 8px 24px 56px; }
   .public-content h1 { font-size: 30px; }
   .public-header, .public-footer { padding-left: 36px; padding-right: 36px; }
   .public-footer { display: flex; }

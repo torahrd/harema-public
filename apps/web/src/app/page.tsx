@@ -11,6 +11,7 @@ import mapR1Light from './_public/lp/map-r1-1b-light.webp'
 import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
 import appIcon from './_public/lp/app-icon.webp'
 import { SiteAnalytics } from './_public/site-analytics'
+import { LpNotice } from './_public/lp-notice'
 import './lp.css'
 
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default function Home() {
 <a href="/login">ログイン</a>
 </nav>
 </header>
+<LpNotice />
 
 <main>
 <section className="s1 lp-in" aria-labelledby="w-h1">
@@ -162,8 +164,9 @@ export default function Home() {
 <p className="body hd">行ったら<span className="nw">「もういい」に</span>分けるだけで、<wbr />そのお店は地図からすぐに消えます。<wbr />ほかの人の点数やおすすめは出しません。<wbr />地図に残るのは、<wbr />行くべきお店だけです。</p>
 <h3 className="h3 hd sub">始める前に</h3>
 <dl className="facts">
+<div className="fact"><dt>ログイン</dt><dd><span className="hd"><span className="nw">Apple/Google のアカウントで行います。</span><wbr /><span className="nw">hareMa は</span>パスワードを持たず、<wbr />ユーザー名を除き、<wbr />メールアドレスや氏名も、<wbr />データベースに保存しません。</span></dd></div>
 <div className="fact"><dt>データ</dt><dd>保存した店は、ほかの利用者には公開されません。退会すると、アカウントと保存した店を削除します。</dd></div>
-<div className="fact"><dt>運営</dt><dd>hareMa 運営者。お問い合わせは <a href="https://x.com/htoranosuke" target="_blank" rel="noopener">X</a> で受け付けています。<span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
+<div className="fact"><dt>運営</dt><dd>hareMa 運営者。<wbr /><span className="sent"><span className="nw">お問い合わせは、</span><wbr /><span className="nw"><a className="x-ul" href="https://x.com/htoranosuke" target="_blank" rel="noopener">X(@htoranosuke)↗</a> で受け付けています。</span></span><span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
 <div className="fact"><dt>アプリ</dt><dd><span className="hd">iPhone のアプリを準備しています。<wbr />ブラウザでは、<wbr />いますぐ使えます。</span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
 </dl>
 <div className="act">
@@ -176,7 +179,7 @@ export default function Home() {
 </main>
 
 <footer className="lp-foot lp-in">
-<nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">お問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
+<nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">X でお問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
 </footer>
 <SiteAnalytics />

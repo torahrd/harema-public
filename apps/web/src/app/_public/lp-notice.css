@@ -1,0 +1,6 @@
+/* ログアウト・退会の後だけ出る知らせの見た目。値は --lp-* の変数だけ(色の値を持たない)。 */
+.lp .lp-ntc{display:flex;align-items:flex-start;width:fit-content;max-width:100%;border:1px solid var(--lp-rule);border-radius:2px;background:transparent;padding:0 4px 0 16px;font-size:13px;line-height:20px;letter-spacing:.04em;font-weight:400;color:var(--lp-fg)}
+.lp .lp-ntc-ck{display:flex;align-items:center;flex:none;height:20px;margin:12px 8px 12px 0}
+.lp .lp-ntc-t{flex:1;min-width:0;margin:12px 0}
+.lp .lp-ntc-x{display:flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-left:8px;padding:0;border:0;background:none;cursor:pointer}
+@media (max-width:600px){.lp .lp-ntc{width:100%}}

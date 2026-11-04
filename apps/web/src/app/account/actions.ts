@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect, RedirectType } from 'next/navigation'
 import { usernameSchema } from '@harema/shared/validations'
 import { runLogout } from '@/lib/auth/account-core'
 import { revokeThisSession } from '@/lib/auth/account'
@@ -19,8 +20,12 @@ export type UpdateUsernameResult =
   | { ok: true }
   | { ok: false; reason: 'invalid_input' | 'unauthenticated' | 'failed' }
 
-/** 成功時は cookie を消して { ok: true } を返す。遷移は client が行う。 */
-export type SignOutResult = { ok: true } | { ok: false; reason: 'failed' }
+/**
+ * 失敗だけを値で返す。成功は cookie を消した後のサーバの redirect で LP へ移す(値は返らない)。
+ * cookie を変えた Server Action の応答は今の頁(/map)を描き直し、地図のガードの /login への redirect が
+ * client の移動に勝つため(logout-dest・framework-traps)。replace にするのは、戻るで /map → /login に着かないため。
+ */
+export type SignOutResult = { ok: false; reason: 'failed' }
 
 /**
  * D1 ユーザー名変更。クライアント入力をサーバ側で usernameSchema(trim・不可視文字拒否・1〜15
@@ -55,9 +60,9 @@ export async function updateUsername(
 
 /**
  * ログアウト。そのログインだけを止める失効の行を DB に書き(`revoke_this_session()`・ほかの端末のログインは止めない)、
- * 成功したときだけ cookie を消して { ok: true } を返す(LP への遷移は client)。例外・通信の失敗・時間切れは、完了と表示せず、cookie を保ち、
+ * 成功したときだけ cookie を消して LP へ redirect する(サーバが移す。理由は SignOutResult)。例外・通信の失敗・時間切れは、完了と表示せず、cookie を保ち、
  * 失敗を返す(押し直せる)。開ける cookie が無いとき、または DB が「有効なログインでない」と答えたときは、
- * 止める対象が既に無いので cookie を消して成功を返す。判定は account-core の `runLogout`。
+ * 止める対象が既に無いので cookie を消して LP へ移す。判定は account-core の `runLogout`。
  */
 export async function signOut(): Promise<SignOutResult> {
   // 開ける cookie が無い(期限切れ・壊れた cookie)なら止める対象が無い。
@@ -74,5 +79,5 @@ export async function signOut(): Promise<SignOutResult> {
   }
 
   await clearSessionCookie()
-  return { ok: true }
+  redirect('/', RedirectType.replace)
 }

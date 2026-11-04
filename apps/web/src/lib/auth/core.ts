@@ -551,11 +551,74 @@ export type ResolveDeps = {
 }
 
 /**
+ * `Authorization: Bearer <ID トークン>` の header からトークンを取り出す(mobile の受け口の入口)。
+ * `Bearer` は大文字小文字を区別し、空白は 1 つだけ。トークンは JWT の文字(英数字・`_`・`.`・`-`)だけで、
+ * 長さは `ID_TOKEN_MAX_LENGTH` 以下。合わなければ null。query・本文のトークンは読まない。
+ */
+export function parseBearerAuthorization(header: string | null): string | null {
+  if (header === null) return null
+  const match = /^Bearer ([A-Za-z0-9_.-]+)$/.exec(header)
+  const token = match?.[1]
+  if (token === undefined || token.length > ID_TOKEN_MAX_LENGTH) return null
+  return token
+}
+
+export type TokenUserFailure =
+  | 'rejected'
+  | 'expired'
+  | 'keys_unavailable'
+  | 'session_invalid'
+  | 'session_unavailable'
+
+export type TokenUserResult =
+  | { ok: true; user: VerifiedUser }
+  | { ok: false; reason: TokenUserFailure }
+
+export type TokenUserDeps = {
+  verifyIdToken: (token: string) => Promise<VerifyResult>
+  /** DB の `session_is_valid()` を、この ID トークンで問う。 */
+  checkSessionValidity: (idToken: string) => Promise<SessionValidity>
+}
+
+/**
+ * ID トークンから「署名を検証した利用者」を返す共通の核(cookie の経路と Bearer の経路が同じ順で通る)。
+ * 順: 署名・iss・aud・期限・iat・auth_time(`verifyIdToken`)→ `expectedSub` の照合(あれば)→ DB の `session_is_valid()`。
+ * DB の判定が真のときだけ利用者を返す。署名が通らない・sub が違う → `rejected`(DB を呼ばない)。
+ * 期限切れ → `expired`。公開鍵の一覧が取れない・一覧に無い kid → `keys_unavailable`(どちらも DB を呼ばない)。
+ * DB が偽 → `session_invalid`。DB が判定できない → `session_unavailable`。
+ */
+export async function resolveTokenUser(
+  token: string,
+  deps: TokenUserDeps,
+  options: { expectedSub?: string } = {},
+): Promise<TokenUserResult> {
+  const verified = await deps.verifyIdToken(token)
+  if (!verified.ok) {
+    if (verified.reason === 'expired') return { ok: false, reason: 'expired' }
+    if (verified.reason === 'keys_unavailable' || verified.reason === 'kid') {
+      return { ok: false, reason: 'keys_unavailable' }
+    }
+    return { ok: false, reason: 'rejected' }
+  }
+  if (options.expectedSub !== undefined && verified.claims.sub !== options.expectedSub) {
+    return { ok: false, reason: 'rejected' }
+  }
+  const validity = await deps.checkSessionValidity(token)
+  if (validity === 'invalid') return { ok: false, reason: 'session_invalid' }
+  if (validity === 'unavailable') return { ok: false, reason: 'session_unavailable' }
+  return {
+    ok: true,
+    user: { id: verified.claims.sub, authTime: verified.claims.auth_time, provider: verified.claims.provider },
+  }
+}
+
+/**
  * cookie から「署名を検証した利用者」を返す。DB の判定が真のときだけ利用者を返す。
  * - DB が偽: cookie を消して未ログイン。
  * - DB が判定できない・ID トークンの期限切れ・公開鍵の一覧が取れない: その要求だけ未ログイン(cookie は変えない)。
  * - cookie が開けない・署名が通らない: cookie を消して未ログイン。
  * 偽・判定できないときは、呼び出し側が secret key の操作と Place Details の呼び出しに進まない。
+ * 検証の順は `resolveTokenUser`(Bearer の経路と共通)。ここは cookie を開けることと、cookie を消すかの判断だけを持つ。
  */
 export async function resolveVerifiedUser(
   raw: string | undefined,
@@ -568,25 +631,12 @@ export async function resolveVerifiedUser(
     return null
   }
   const { session } = opened
-  const verified = await deps.verifyIdToken(session.it)
-  if (!verified.ok) {
-    // 期限切れ(更新が一時に失敗している間)・一覧の取得の失敗・一覧に無い kid(鍵の入れ替わり直後)は、確定した失効ではない
-    if (verified.reason !== 'expired' && verified.reason !== 'keys_unavailable' && verified.reason !== 'kid') {
-      deps.clearCookie()
-    }
-    return null
-  }
-  if (verified.claims.sub !== session.sub) {
-    deps.clearCookie()
-    return null
-  }
-  const validity = await deps.checkSessionValidity(session.it)
-  if (validity === 'invalid') {
-    deps.clearCookie()
-    return null
-  }
-  if (validity === 'unavailable') return null
-  return { id: verified.claims.sub, authTime: verified.claims.auth_time, provider: verified.claims.provider }
+  const result = await resolveTokenUser(session.it, deps, { expectedSub: session.sub })
+  if (result.ok) return result.user
+  // 期限切れ(更新が一時に失敗している間)・一覧の取得の失敗・一覧に無い kid(鍵の入れ替わり直後)・DB が判定できない
+  // は確定した失効ではないので、cookie を消さない
+  if (result.reason === 'rejected' || result.reason === 'session_invalid') deps.clearCookie()
+  return null
 }
 
 // ── POST /auth/session の受付(LR-B6 の判定の核) ──────────────────────

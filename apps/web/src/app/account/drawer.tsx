@@ -1,9 +1,10 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, unstable_rethrow } from 'next/navigation'
 import { useRef, useState, type TouchEvent as ReactTouchEvent } from 'react'
 import type { SignInProvider } from '@/lib/auth/core'
 import { ActionError } from '../_auth-ui/action-error'
+import { clearLpNotice, markLpNotice } from '@/lib/lp-notice'
 import { signOut } from './actions'
 import {
   DRAWER_ARIA_LABEL,
@@ -130,16 +131,17 @@ export function AccountDrawer({
     if (pendingLogout) return
     setPendingLogout(true)
     setLogoutFailed(false)
+    // 成功はサーバが cookie を消して LP へ移す(actions.ts の redirect)。移った後では置けないので、印は呼ぶ前に置く。
+    markLpNotice('logout')
     try {
-      const result = await signOut()
-      if (result.ok) {
-        window.location.assign('/')
-        return
-      }
-    } catch {
-      // 到達不能など。完了と表示せず、失敗を示して押し直せる状態に戻す
+      await signOut()
+    } catch (error) {
+      // 成功の移動は redirect の throw として届く。握りつぶさずに Next.js へ返す(framework-traps)。
+      unstable_rethrow(error)
+      // 到達不能などの本当の失敗はここを通って下へ。
     }
-    // ここへ来たのは失敗(cookie はサーバが保っている)。ログアウトの下に失敗の 2 文を出す(FREEZE ④)。
+    // 失敗(cookie はサーバが保っている)。印を消し、ログアウトの下に失敗の 2 文を出す(FREEZE ④)。
+    clearLpNotice()
     setLogoutFailed(true)
     setPendingLogout(false)
   }

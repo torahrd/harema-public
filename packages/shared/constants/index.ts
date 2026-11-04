@@ -28,3 +28,4 @@ export {
   isFoodPlaceType,
   classifyPlaceTypes,
 } from './place-types'
+export { googleMapsHref } from './google-maps-link'

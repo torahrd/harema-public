@@ -9,7 +9,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { SavedPlaceStatus } from '@harema/shared/constants'
+import { googleMapsHref, type SavedPlaceStatus } from '@harema/shared/constants'
 import { ja } from '@harema/shared/i18n'
 import { FullViewportShell } from '@/app/full-viewport-shell'
 import { MapToast } from '@/app/map/map-toast'
@@ -51,11 +51,6 @@ type EnterpriseDetails = {
 /** http(s) の値かどうか(C-S11。安全でないスキームをリンク化しない)。 */
 function isHttpUrl(value: string): boolean {
   return value.startsWith('http://') || value.startsWith('https://')
-}
-
-/** Google マップ外部リンクの公式 URL 形式(`specification.md:238` の逐語形。Places 課金対象外)。 */
-function googleMapsHref(displayName: string, googlePlaceId: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(displayName)}&query_place_id=${googlePlaceId}`
 }
 
 /** サーバ(page.tsx)から渡す、この画面が要る値だけ(saved_places.id は渡さない —— このスライスの

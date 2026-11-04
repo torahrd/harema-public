@@ -12,10 +12,13 @@ import { redirect, RedirectType } from 'next/navigation'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@harema/supabase/types'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
-import { fetchOgTitle } from '@/lib/ogp/fetch-og-title'
-import { claimOgpFetch, completeOgpFetch } from '@/lib/ogp/fetch-throttle'
-import { fetchPlaceLocation } from '@/lib/places/details'
-import { upsertVerifiedPlace } from '@/lib/supabase/admin'
+import {
+  runFetchSourceTitle,
+  runSavePlace,
+  type FetchSourceTitleResult,
+  type SavePlaceResult,
+} from '@/lib/places/save-core'
+import { createFetchSourceTitleDeps, createSavePlaceDeps } from '@/lib/places/save-deps'
 
 /**
  * S1(保存/編集シート)のサーバ側。4 つの action はいずれもリクエストハンドラ内で Supabase
@@ -23,12 +26,6 @@ import { upsertVerifiedPlace } from '@/lib/supabase/admin'
  * ID トークンの sub と DB の判定)のみで行う(§11.1-4)。共有 places への書込だけは検証済み座標を用途限定の admin 関数へ渡す。
  * 保存済み店舗の読取・書込・削除はユーザースコープのクライアントと own-only RLS を使う。
  */
-
-/**
- * 未評価の初期状態。ここへ**戻す**遷移だけが不可(spec §6.2・§8)。DB CHECK には置かず
- * アプリ層で拒否する —— UI の disabled は DevTools で外れるので、権威はこの action にある。
- */
-const UNRATED_STATUS: SavedPlaceStatus = 'want_to_go'
 
 export type ResolveSavedPlaceResult =
   | { ok: true; mode: 'create' }
@@ -42,22 +39,7 @@ export type ResolveSavedPlaceResult =
     }
   | { ok: false; reason: 'invalid_input' | 'unauthenticated' | 'failed' }
 
-export type FetchSourceTitleResult =
-  | { ok: true; title: string }
-  | { ok: false; reason: 'not_a_url' | 'unauthenticated' | 'unavailable' }
-
-export type SavePlaceResult =
-  | { ok: true; mode: 'created' | 'updated' }
-  | {
-      ok: false
-      reason:
-        | 'invalid_input'
-        | 'unauthenticated'
-        | 'place_not_found'
-        | 'status_reverted'
-        | 'conflict'
-        | 'failed'
-    }
+export type { FetchSourceTitleResult, SavePlaceResult }
 
 /**
  * 削除の結果。**識別子を 1 つも返さない** —— 呼び出し元が次の操作のために持ち回れる値を
@@ -170,23 +152,7 @@ export async function fetchSourceTitle(
   }
   const supabase = await createUserSupabase()
 
-  // 鍵は uid で HMAC する(利用者を跨いだ対応表を無効化する)。uid は上の getVerifiedUser() 由来のみ。
-  const claim = await claimOgpFetch(supabase, user.id, parsed.data)
-  if (!claim.allowed) {
-    // 同一 URL の取得済みタイトルがあるなら、外へ出ずにそれを返す —— 貼り直しのような通常操作を
-    // 抑制で失敗にしないため。無い場合(回数上限・同時実行・取得できなかった URL)は失敗に畳む。
-    return claim.cachedTitle.length > 0
-      ? { ok: true, title: claim.cachedTitle }
-      : { ok: false, reason: 'unavailable' }
-  }
-
-  const title = await fetchOgTitle(parsed.data)
-  // 失敗も記録する:lease を解放し、同じ URL への再挑戦を窓の間だけ外へ出さない。
-  const recorded = await completeOgpFetch(supabase, claim.key, title)
-  if (!recorded || !title) {
-    return { ok: false, reason: 'unavailable' }
-  }
-  return { ok: true, title }
+  return await runFetchSourceTitle(parsed.data, createFetchSourceTitleDeps(supabase, user.id))
 }
 
 /**
@@ -204,76 +170,14 @@ export async function savePlace(
   if (!parsed.success) {
     return { ok: false, reason: 'invalid_input' }
   }
-  const { googlePlaceId, status, memo, sourceText, sourceTitle } = parsed.data
-
   const user = await getVerifiedUser()
   if (!user) {
     return { ok: false, reason: 'unauthenticated' }
   }
   const supabase = await createUserSupabase()
 
-  // 実在しない place_id で places に行を作らせない。座標もここで取ったものに固定する。
-  const resolved = await fetchPlaceLocation(googlePlaceId)
-  if (!resolved) {
-    return { ok: false, reason: 'place_not_found' }
-  }
-
-  let placeId: string
-  try {
-    placeId = await upsertVerifiedPlace(resolved)
-  } catch {
-    return { ok: false, reason: 'failed' }
-  }
-
-  const { data: existing, error: existingError } = await supabase
-    .from('saved_places')
-    .select('status')
-    .eq('user_id', user.id)
-    .eq('place_id', placeId)
-    .maybeSingle()
-  if (existingError) {
-    return { ok: false, reason: 'failed' }
-  }
-
-  if (!existing) {
-    const { error: insertError } = await supabase.from('saved_places').insert({
-      user_id: user.id,
-      place_id: placeId,
-      status,
-      memo,
-      source_text: sourceText,
-      source_title: sourceTitle,
-    })
-    if (insertError) {
-      // UNIQUE(user_id, place_id) の競合(= 別タブ等で先に保存された)。行は作られていないので
-      // 成功に畳まない。クライアントは編集モードで開き直す(S-13 裁定)。
-      if (insertError.code === '23505') {
-        return { ok: false, reason: 'conflict' }
-      }
-      return { ok: false, reason: 'failed' }
-    }
-    return { ok: true, mode: 'created' }
-  }
-
-  // 評価済み(want_to_go 以外)から「行きたい」へは戻せない。
-  if (existing.status !== UNRATED_STATUS && status === UNRATED_STATUS) {
-    return { ok: false, reason: 'status_reverted' }
-  }
-
-  const { error: updateError } = await supabase
-    .from('saved_places')
-    .update({
-      status,
-      memo,
-      source_text: sourceText,
-      source_title: sourceTitle,
-    })
-    .eq('user_id', user.id)
-    .eq('place_id', placeId)
-  if (updateError) {
-    return { ok: false, reason: 'failed' }
-  }
-  return { ok: true, mode: 'updated' }
+  // 順序(実在検証 → places の upsert → 既存行の有無で insert / update → 逆戻りの拒否)は runSavePlace が持つ(mobile の受け口と共通)
+  return await runSavePlace(parsed.data, createSavePlaceDeps(supabase, user.id))
 }
 
 /**
