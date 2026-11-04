@@ -25,10 +25,21 @@ index c1052fbc6adf6695e09ccad0e2a31413b3ec3894..e07e53417e77975f69b5b6f139cf5fa9
      PRODUCT_BUNDLE_IDENTIFIER: `"${bundleIdentifier}"`,
      PRODUCT_NAME: `"${targetName}"`,
 diff --git a/plugin/swift/ShareExtensionViewController.swift b/plugin/swift/ShareExtensionViewController.swift
-index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..15017dd80f43c5a7b32a9c3fd630d7fc03da2825 100644
+index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..fc2c572b6f4c065ad8f7654f8d056089c28524f6 100644
 --- a/plugin/swift/ShareExtensionViewController.swift
 +++ b/plugin/swift/ShareExtensionViewController.swift
-@@ -73,6 +73,10 @@ class ShareExtensionViewController: UIViewController {
+@@ -54,6 +54,10 @@ class ShareExtensionViewController: UIViewController {
+   var reactNativeFactory: ShareExtensionReactNativeFactory?
+   var reactNativeFactoryDelegate: ShareExtensionReactNativeDelegateSuperclass?
+   private var isCleanedUp = false
++  // 外観が決まるまで RN を作らない(hareMa の patch)。共有の中身と、画面が出た時の外観の両方がそろってから作る。
++  private var hasResolvedAppearance = false
++  private var isShareDataReady = false
++  private var pendingShareData: [String: Any]?
+ 
+   deinit {
+     print("🧹 ShareExtensionViewController deinit")
+@@ -73,6 +77,10 @@ class ShareExtensionViewController: UIViewController {
      setupLoadingIndicator()
      isCleanedUp = false
      
@@ -39,7 +50,7 @@ index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..15017dd80f43c5a7b32a9c3fd630d7fc
      // Set the contentScaleFactor for the main view of this view controller
      self.view.contentScaleFactor = UIScreen.main.scale
      
-@@ -86,6 +90,54 @@ class ShareExtensionViewController: UIViewController {
+@@ -86,6 +94,64 @@ class ShareExtensionViewController: UIViewController {
      setupNotificationCenterObserver()
    }
    
@@ -80,8 +91,18 @@ index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..15017dd80f43c5a7b32a9c3fd630d7fc
 +  
 +  override func viewIsAppearing(_ animated: Bool) {
 +    super.viewIsAppearing(animated)
-+    // window が付いた後の値で直す
++    // window が付いた後の値で直し、そろっていれば RN を作る
 +    syncAppearanceToReactNative(post: true)
++    hasResolvedAppearance = true
++    mountReactNativeIfReady()
++  }
++  
++  override func viewDidAppear(_ animated: Bool) {
++    super.viewDidAppear(animated)
++    // 出し終えた時の値で、もう一度合わせる(viewIsAppearing が来なかった時も、ここで RN を作る)
++    syncAppearanceToReactNative(post: true)
++    hasResolvedAppearance = true
++    mountReactNativeIfReady()
 +  }
 +  
 +  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -94,3 +115,27 @@ index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..15017dd80f43c5a7b32a9c3fd630d7fc
    override func viewDidDisappear(_ animated: Bool) {
      super.viewDidDisappear(animated)
      // we need to clean up when the view is closed via a swipe
+@@ -104,7 +170,22 @@ class ShareExtensionViewController: UIViewController {
+         print("❌ Self was deallocated")
+         return
+       }
+-      
++      self.pendingShareData = sharedData
++      self.isShareDataReady = true
++      self.mountReactNativeIfReady()
++    }
++  }
++  
++  // RN を作るのは、共有の中身がそろい、かつ画面が出て外観が決まった後(hareMa の patch)。
++  // 拡張の process は使い回され、viewDidLoad の時の外観は前回の値のことがある(実測: 明で開いても current=2・vc=暗)。
++  // RN の Appearance は作られた時の値を読み、その直後の変化の知らせは JS の購読が付く前だと捨てられる
++  // (RCTEventEmitter は購読が 0 のとき送らない)。先に正しい値を置いてから作れば、この 2 つに当たらない。
++  private func mountReactNativeIfReady() {
++    guard !isCleanedUp, hasResolvedAppearance, isShareDataReady, reactNativeFactory == nil else { return }
++    let sharedData = pendingShareData
++    pendingShareData = nil
++    NSLog("[ShareExtension] mount RN appearance=%@", RCTCurrentOverrideAppearancePreference() ?? "nil")
++    do {
+       reactNativeFactoryDelegate = ReactNativeDelegate()
+       reactNativeFactoryDelegate!.dependencyProvider = RCTAppDependencyProvider()
+       reactNativeFactory = ShareExtensionReactNativeFactory(delegate: reactNativeFactoryDelegate!)

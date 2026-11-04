@@ -68,7 +68,7 @@ export function LoginForm() {
         </p>
       </div>
 
-      {/* 同意の文は句読点の後だけで折る(所有者 2026-11-04。入りきらない所は読点を足した)。 */}
+      {/* 同意の文は句読点の後だけで折る(所有者 2026-11-04)。1 つ目は読点を使わず 1 行に入れる(案 A)。 */}
       <div data-login-consent className="qs-cons">
         <label className="qs-cr" data-login-consent-row>
           <input
@@ -80,10 +80,8 @@ export function LoginForm() {
           />
           <span>
             <span className="qs-ph">
-              <Link href="/terms" onClick={(event) => event.stopPropagation()}>利用規約</Link>と、
-            </span>
-            <span className="qs-ph">
-              <Link href="/privacy" onClick={(event) => event.stopPropagation()}>プライバシーポリシー</Link>に同意する
+              <Link href="/terms" onClick={(event) => event.stopPropagation()}>利用規約</Link>と
+              <Link href="/privacy" onClick={(event) => event.stopPropagation()}>プライバシーポリシー</Link>に同意
             </span>
           </span>
         </label>
