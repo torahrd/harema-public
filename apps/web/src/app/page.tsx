@@ -12,6 +12,7 @@ import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
 import appIcon from './_public/lp/app-icon.webp'
 import { SiteAnalytics } from './_public/site-analytics'
 import { LpNotice } from './_public/lp-notice'
+import { LpClock } from './_public/lp-clock'
 import './lp.css'
 
 export const metadata: Metadata = {
@@ -68,6 +69,7 @@ export default function Home() {
 <main>
 <section className="s1 lp-in" aria-labelledby="w-h1">
 <div className="s1-text">
+<LpClock />
 <h1 className="h1 hd" id="w-h1">散らばる店を、<wbr />ひとつの地図に。</h1>
 <p className="lead hd"><span className="lb"><span className="nw">「行きたい」</span><wbr /><span className="nw">「また行きたい」</span></span><span className="lb">あなたが<wbr />訪れるべき<wbr />お店だけを<wbr />表示する</span><span className="lb">あなた専用の<wbr />地図が<wbr />作れる<wbr />アプリです。</span></p>
 <div className="act">
@@ -148,7 +150,7 @@ export default function Home() {
 <ol className="does">
 <li><h3 className="h3 hd do-n"><span className="dn">01</span>保存する</h3><p className="do-t hd">気になった店を、<wbr />その場で保存。</p></li>
 <li><h3 className="h3 hd do-n"><span className="dn">02</span>地図で見る</h3><p className="do-t hd">今いる場所の近くの<wbr /><span className="nw">行きたい店が、</span><wbr /><span className="nw">ピンで分かる。</span></p></li>
-<li><h3 className="h3 hd do-n"><span className="dn">03</span>評価する</h3><p className="do-t hd">行ったら<wbr /><span className="nw">「また行きたい」か</span><wbr /><span className="nw">「もういい」を</span><wbr />自分で付ける。<wbr /><span className="nw">「もういい」は</span><wbr />地図から消える。</p></li>
+<li><h3 className="h3 hd do-n"><span className="dn">03</span>評価する</h3><p className="do-t hd">行ったら、<wbr /><span className="sent" style={{ display: 'inline-block', maxWidth: '100%' }}>「また行きたい」か<wbr /><span className="nw">「もういい」を付ける。</span></span><span className="sent" style={{ display: 'inline-block', maxWidth: '100%' }}>「もういい」は地図から消える。</span></p></li>
 </ol>
 </section>
 
@@ -165,7 +167,7 @@ export default function Home() {
 <h3 className="h3 hd sub">始める前に</h3>
 <dl className="facts">
 <div className="fact"><dt>ログイン</dt><dd><span className="hd"><span className="nw">Apple/Google のアカウントで行います。</span><wbr /><span className="nw">hareMa は</span>パスワードを持たず、<wbr />ユーザー名を除き、<wbr />メールアドレスや氏名も、<wbr />データベースに保存しません。</span></dd></div>
-<div className="fact"><dt>データ</dt><dd>保存した店は、ほかの利用者には公開されません。退会すると、アカウントと保存した店を削除します。</dd></div>
+<div className="fact"><dt>データ</dt><dd className="hd">保存した店は、<wbr />ほかの利用者には公開されません。<span className="sent" style={{ display: 'inline-block', maxWidth: '100%' }}>退会すると、<wbr />アカウントと保存した店を削除します。</span></dd></div>
 <div className="fact"><dt>運営</dt><dd>hareMa 運営者。<wbr /><span className="sent"><span className="nw">お問い合わせは、</span><wbr /><span className="nw"><a className="x-ul" href="https://x.com/htoranosuke" target="_blank" rel="noopener">X(@htoranosuke)↗</a> で受け付けています。</span></span><span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
 <div className="fact"><dt>アプリ</dt><dd><span className="hd">iPhone のアプリを準備しています。<wbr />ブラウザでは、<wbr />いますぐ使えます。</span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
 </dl>

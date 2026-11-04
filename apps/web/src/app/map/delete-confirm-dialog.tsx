@@ -7,6 +7,7 @@ import {
   deleteConfirmBody,
 } from './save-sheet-copy'
 import { BODY, heading } from '../text-styles'
+import { JpText } from '../_ui/jp-text'
 
 /**
  * D5(design C-3 = WP-08-save-detail-flow.html / 面 6 = WP-10-place-detail.html)。見出しと
@@ -80,7 +81,7 @@ export function DeleteConfirmDialog({
             margin: 0,
           }}
         >
-          {deleteConfirmBody(displayName)}
+          <JpText text={deleteConfirmBody(displayName)} />
         </p>
         <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
           <button

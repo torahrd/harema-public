@@ -23,4 +23,4 @@ export const SAVED_LIST_EMPTY = '保存した店は、まだありません。'
  * 住所の位置には何も出さない。行は落とさない —— 件数バッジは DB の真値なので、落とすと
  * バッジと行数が食い違う。
  */
-export const PLACE_DETAILS_UNAVAILABLE = 'この店の情報を読み込めませんでした。'
+export const PLACE_DETAILS_UNAVAILABLE = '店舗の情報を読み込めませんでした。'

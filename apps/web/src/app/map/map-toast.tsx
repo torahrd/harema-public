@@ -3,6 +3,7 @@
 import { SAVE_SUCCESS_TOAST } from './save-sheet-copy'
 import type { MapToastVariant, SearchErrorVariant } from './types'
 import { META } from '../text-styles'
+import { JpText } from '../_ui/jp-text'
 
 /**
  * 上部トースト(design ④ 逐語)。2b 造形を踏襲しつつ、失敗は成功と記号で分ける ——
@@ -12,8 +13,8 @@ import { META } from '../text-styles'
  *
  * 文言は失敗 2 種で分ける。直前の操作が違うため —— 入力中(A: 候補の取得失敗)と選択後
  * (B: 詳細の取得失敗)で、尾が名指す次の一手が「検索」と「選び直し」に分かれる。骨格
- * 「いま、〜ませんでした。」は共通。「失敗しました」は使わない(主語を道具に移し、道具が
- * できなかったと引き取る)。「いま、」が一時性を示してユーザーを責めない。
+ * 「〜ませんでした。」は共通。「失敗しました」は使わない(主語を道具に移し、道具が
+ * できなかったと引き取る)。「いま、」は付けない(所有者 2026-10-23・11-04)。
  *
  * 位置決めは持たない。MapChrome の toastSlot がチュール下端 +9px にアンカーする(検索を
  * 開いていない間に位置情報バナーが出ていれば、バナー下端 +9px。所有者 2026-11-02 D13 案 C)
@@ -22,12 +23,12 @@ import { META } from '../text-styles'
 const MESSAGES: Record<SearchErrorVariant, { body: string; tail: string }> = {
   // A · AUTOCOMPLETE · 候補の取得失敗
   suggestions: {
-    body: 'いま、候補を探せませんでした。',
+    body: '候補を探せませんでした。',
     tail: '少し待って、もう一度検索してください。',
   },
   // B · FETCHFIELDS · 詳細の取得失敗
   details: {
-    body: 'いま、この場所を開けませんでした。',
+    body: 'この場所を開けませんでした。',
     tail: '少し待って、もう一度お選びください。',
   },
 }
@@ -107,8 +108,8 @@ export function MapToast({
       >
         {error ? (
           <>
-            {error.body}{' '}
-            <span style={{ color: 'var(--fg-whisper)' }}>{error.tail}</span>
+            <JpText text={error.body} />{' '}
+            <span style={{ color: 'var(--fg-whisper)' }}><JpText text={error.tail} /></span>
           </>
         ) : (
           successMessage

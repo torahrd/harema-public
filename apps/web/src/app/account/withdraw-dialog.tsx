@@ -13,8 +13,9 @@ import {
   WITHDRAW_DIALOG_BODY_LINES,
   WITHDRAW_DIALOG_TITLE,
   WITHDRAW_ERROR,
-  withdrawReauthLines,
+  withdrawReauthText,
 } from './drawer-copy'
+import { JpText } from '../_ui/jp-text'
 import { prepareWithdraw, reauthenticateAndWithdraw } from './withdraw-client'
 
 /**
@@ -47,7 +48,7 @@ export function WithdrawDialog({
     prepareWithdraw()
   }, [])
   const providers: readonly SsoProvider[] = provider === null ? ['apple', 'google'] : [provider]
-  const reauthLines = withdrawReauthLines(provider)
+  const reauthText = withdrawReauthText(provider)
 
   const onReauth = (target: SsoProvider) => {
     if (pending) return
@@ -115,15 +116,10 @@ export function WithdrawDialog({
         </h3>
         <div id="withdraw-dialog-body">
           <p className="qs-dlg-b">
-            {WITHDRAW_DIALOG_BODY_LINES.map((line) => (
-              <span key={line} className="qs-ln">
-                {line}
-              </span>
-            ))}
+            <JpText text={WITHDRAW_DIALOG_BODY_LINES.join('')} />
           </p>
           <p className="qs-dlg-b" data-withdraw-reauth-note>
-            <span className="qs-ln">{reauthLines[0]}</span>
-            {reauthLines[1]}
+            <JpText text={reauthText} />
           </p>
         </div>
         <div className="qs-dlg-col">

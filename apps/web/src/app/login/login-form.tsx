@@ -7,7 +7,8 @@ import type { SsoProvider } from '@/lib/auth/browser-flow'
 import { ActionError } from '../_auth-ui/action-error'
 import { SsoButton } from '../_auth-ui/sso-button'
 import { loginWithSso, prepareLogin } from './login-client'
-import { LOGIN_ERROR, LOGIN_HEADING, LOGIN_LEDE_PHRASES, LOGIN_NOTES } from './login-copy'
+import { JpText } from '../_ui/jp-text'
+import { CONSENT_FOREIGN, LOGIN_ERROR, LOGIN_HEADING, LOGIN_LEDE, LOGIN_NOTES } from './login-copy'
 
 /**
  * ログインの画面(login-replace・FREEZE compare-v3 の ① の「新」)。メールのログインは撤去した
@@ -63,16 +64,11 @@ export function LoginForm() {
           <span className="nw">{LOGIN_HEADING}</span>
         </h1>
         <p className="qs-lede">
-          {LOGIN_LEDE_PHRASES.map((phrase, i) => (
-            <Fragment key={phrase}>
-              {i > 0 && <wbr />}
-              <span className="nw">{phrase}</span>
-            </Fragment>
-          ))}
+          <JpText text={LOGIN_LEDE} />
         </p>
       </div>
 
-      {/* 同意の文は今のまま。折りは意味の切れ目で固定する(1 行に収まらないことを FREEZE の確認で実測済み)。 */}
+      {/* 同意の文は句読点の後だけで折る(所有者 2026-11-04。入りきらない所は読点を足した)。 */}
       <div data-login-consent className="qs-cons">
         <label className="qs-cr" data-login-consent-row>
           <input
@@ -83,12 +79,12 @@ export function LoginForm() {
             onChange={(event) => setTermsAccepted(event.target.checked)}
           />
           <span>
-            <span className="qs-ln">
-              <Link href="/terms" onClick={(event) => event.stopPropagation()}>利用規約</Link>と
-              <Link href="/privacy" onClick={(event) => event.stopPropagation()}>プライバシーポリシー</Link>
-              に
+            <span className="qs-ph">
+              <Link href="/terms" onClick={(event) => event.stopPropagation()}>利用規約</Link>と、
             </span>
-            <span className="qs-ln">同意する</span>
+            <span className="qs-ph">
+              <Link href="/privacy" onClick={(event) => event.stopPropagation()}>プライバシーポリシー</Link>に同意する
+            </span>
           </span>
         </label>
         <label className="qs-cr" data-login-consent-row>
@@ -100,9 +96,7 @@ export function LoginForm() {
             onChange={(event) => setForeignTransferAccepted(event.target.checked)}
           />
           <span>
-            <span className="qs-ln">海外の事業者への個人情報の提供</span>
-            <span className="qs-ln">(プライバシーポリシー第 7 条)</span>
-            <span className="qs-ln">に同意する</span>
+            <JpText text={CONSENT_FOREIGN} />
           </span>
         </label>
       </div>

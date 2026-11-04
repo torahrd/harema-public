@@ -24,3 +24,73 @@ index c1052fbc6adf6695e09ccad0e2a31413b3ec3894..e07e53417e77975f69b5b6f139cf5fa9
      LD_RUNPATH_SEARCH_PATHS: `"$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"`,
      PRODUCT_BUNDLE_IDENTIFIER: `"${bundleIdentifier}"`,
      PRODUCT_NAME: `"${targetName}"`,
+diff --git a/plugin/swift/ShareExtensionViewController.swift b/plugin/swift/ShareExtensionViewController.swift
+index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..15017dd80f43c5a7b32a9c3fd630d7fc03da2825 100644
+--- a/plugin/swift/ShareExtensionViewController.swift
++++ b/plugin/swift/ShareExtensionViewController.swift
+@@ -73,6 +73,10 @@ class ShareExtensionViewController: UIViewController {
+     setupLoadingIndicator()
+     isCleanedUp = false
+     
++    // 暗い外観への追従(hareMa の patch)。RN の工場と Appearance を作る前に外観を置く。
++    NSLog("[ShareExtension] appearance current=%ld", UITraitCollection.current.userInterfaceStyle.rawValue)
++    syncAppearanceToReactNative(post: false)
++    
+     // Set the contentScaleFactor for the main view of this view controller
+     self.view.contentScaleFactor = UIScreen.main.scale
+     
+@@ -86,6 +90,54 @@ class ShareExtensionViewController: UIViewController {
+     setupNotificationCenterObserver()
+   }
+   
++  // 外観の同期(hareMa の patch)。
++  // 拡張の中では RCTKeyWindow() が nil になり、RN の Appearance は init で "light" に固まる。
++  // 開いた後に外観が変わっても、RN への知らせが来ない。
++  // そのため、(1) RCTOverrideAppearancePreference で RN の外観を置く、
++  // (2) 変化の知らせ RCTUserInterfaceStyleDidChangeNotification を自分で投げる、の 2 つを行う。
++  // 更新の口は traitCollectionDidChange の 1 本(iOS 16.4 以降で同じ道を通る)。
++  private func resolvedTraitCollection() -> (UITraitCollection, String) {
++    let candidates: [(UITraitCollection?, String)] = [
++      (view.window?.traitCollection, "window"),
++      (traitCollection, "vc"),
++      (UIScreen.main.traitCollection, "screen"),
++    ]
++    for (trait, source) in candidates {
++      if let trait = trait, trait.userInterfaceStyle != .unspecified {
++        return (trait, source)
++      }
++    }
++    return (UIScreen.main.traitCollection, "screen")
++  }
++  
++  private func syncAppearanceToReactNative(post: Bool) {
++    if isCleanedUp { return }
++    let (trait, source) = resolvedTraitCollection()
++    let scheme = trait.userInterfaceStyle == .dark ? "dark" : "light"
++    RCTOverrideAppearancePreference(scheme)
++    NSLog("[ShareExtension] appearance %@ (%@)", scheme, source)
++    if post {
++      NotificationCenter.default.post(
++        name: NSNotification.Name("RCTUserInterfaceStyleDidChangeNotification"),
++        object: self,
++        userInfo: ["traitCollection": trait]
++      )
++    }
++  }
++  
++  override func viewIsAppearing(_ animated: Bool) {
++    super.viewIsAppearing(animated)
++    // window が付いた後の値で直す
++    syncAppearanceToReactNative(post: true)
++  }
++  
++  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
++    super.traitCollectionDidChange(previousTraitCollection)
++    if previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle {
++      syncAppearanceToReactNative(post: true)
++    }
++  }
++  
+   override func viewDidDisappear(_ animated: Bool) {
+     super.viewDidDisappear(animated)
+     // we need to clean up when the view is closed via a swipe

@@ -30,20 +30,17 @@ export const USERNAME_SUBMIT = '更新する'
 export const WITHDRAW_DIALOG_TITLE = '退会しますか？'
 export const WITHDRAW_DIALOG_BODY_LINES = [
   'アカウントを削除します。',
-  '保存した店・メモ・履歴は',
-  'すべて消え、元に戻せません。',
+  '保存した店・メモ・履歴は、すべて消え、元に戻せません。',
 ] as const
 
 /**
  * 本人の確認の 1 文(2 行)。「ログインに使っている Google のアカウントで確認すると、そのまま退会します。」
  * (Apple でログインした人は Apple)。事業者が分からない(ID トークンに載っていない)ときは名を省く。
  */
-export function withdrawReauthLines(provider: 'google' | 'apple' | null): readonly [string, string] {
-  if (provider === null) {
-    return ['ログインに使っている', 'アカウントで確認すると、そのまま退会します。']
-  }
+export function withdrawReauthText(provider: 'google' | 'apple' | null): string {
+  if (provider === null) return 'ログインしたアカウントで、確認すると、そのまま退会します。'
   const name = provider === 'apple' ? 'Apple' : 'Google'
-  return [`ログインに使っている ${name} の`, 'アカウントで確認すると、そのまま退会します。']
+  return `ログインした ${name} で、確認すると、そのまま退会します。`
 }
 
 // 退会の失敗(印を書けず何も消えていない = やり直せる・ボタンの下に 1 つだけ)。ログアウトの失敗は別の文。

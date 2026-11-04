@@ -788,6 +788,7 @@ blockquote, .pull {
 .qs a:hover { color: inherit; }
 .qs a:focus-visible, .qs button:focus-visible, .qs input:focus-visible { outline: 2px solid var(--qs-fg); outline-offset: 2px; }
 .qs-ln { display: block; }
+.qs-ph { display: inline-block; max-width: 100%; }
 
 /* 全画面の面(/login)の背景。外側(余白・ブラウザの縁)も paper / ink にする。 */
 html:has(.qs-page), body:has(.qs-page) { background: var(--qs-bg); }
@@ -1016,7 +1017,7 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .public-content h1 { font-family: var(--ff-heading-jp); font-size: 24px; line-height: 1.5; letter-spacing: 0.01em; font-feature-settings: 'palt'; font-weight: 700; margin: 14px 0 22px; }
 .public-document { max-width: 720px; }
 .public-revised { color: var(--fg-2); font: 400 13px/20px var(--ff-sans); letter-spacing: 0.02em; margin-bottom: 34px; }
-.public-legal-body { font-size: 16px; line-height: 1.7; letter-spacing: 0.02em; overflow-wrap: normal; word-break: normal; line-break: strict; }
+.public-legal-body { font-size: 16px; line-height: 1.7; letter-spacing: 0.02em; word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 .public-legal-body section { margin-top: 28px; }
 .public-legal-body h2 { font-family: var(--ff-heading-jp); font-size: 18px; line-height: 1.5; font-weight: 700; margin-bottom: 12px; }
 .public-legal-body h3 { font-family: var(--ff-heading-jp); font-size: 16px; font-weight: 700; margin: 18px 0 8px; }

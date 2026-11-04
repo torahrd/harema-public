@@ -7,7 +7,10 @@
 export const LOGIN_HEADING = 'ログイン・登録'
 
 /** リードの句の並び。web は句ごとに nowrap の span + `<wbr>`、mobile は句ごとの Text を折り返す row に並べる。折りは固定しない。 */
-export const LOGIN_LEDE_PHRASES = ['Apple または Google の', 'アカウントで続けます。'] as const
+export const LOGIN_LEDE = 'Apple か Google のアカウントで続けます。'
+
+/** 2 つ目の同意。句読点の後だけで折る(所有者 2026-11-04)。 */
+export const CONSENT_FOREIGN = '海外の事業者への、個人情報の提供に同意する。(プライバシーポリシー第 7 条)'
 
 export const LOGIN_ERROR = ['エラーが発生しました。', '少し待って、もう一度お試しください。'] as const
 

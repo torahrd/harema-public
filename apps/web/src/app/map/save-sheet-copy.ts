@@ -65,8 +65,8 @@ export const DELETE_CONFIRM_TITLE = '削除しますか？'
  */
 export function deleteConfirmBody(displayName: string): string {
   return displayName.length > 0
-    ? `「${displayName}」を保存した店から削除します。メモ・状態・出典も消え、元に戻せません。`
-    : 'この店を保存した店から削除します。メモ・状態・出典も消え、元に戻せません。'
+    ? `「${displayName}」を、保存した店から削除します。メモ・状態・出典も消え、元に戻せません。`
+    : 'この店を、保存した店から削除します。メモ・状態・出典も消え、元に戻せません。'
 }
 
 export const DELETE_CONFIRM_CANCEL = 'キャンセル'

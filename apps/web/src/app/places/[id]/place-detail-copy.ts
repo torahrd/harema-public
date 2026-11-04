@@ -36,8 +36,8 @@ export const EXTERNAL_ARROW = '↗'
  * 店名・住所の取得失敗(面 1b)。計画 §8.2 の確定 copy(出所:design
  * `WP-10-place-detail.html:156` `.sd-fail` / `.sd-fail2`)。
  */
-// 字は「いま、この店の名前と住所を読み込めませんでした。」のまま。16px・390 で語の途中で折れないよう、読点でなく助詞「を」の後ろで 2 つのブロックに分ける(app-qs)。
-export const DETAIL_FETCH_FAIL_LINE_1 = ['いま、この店の名前と住所を', '読み込めませんでした。'] as const
+// 「いま、」を外し(所有者 2026-10-23・11-04)、「この」を除いて 1 行に入る長さにした(402px で 1 行)。
+export const DETAIL_FETCH_FAIL_LINE_1 = ['店の名前と住所を読み込めませんでした。'] as const
 export const DETAIL_FETCH_FAIL_LINE_2 = '少し待って、もう一度開いてください。'
 
 /** 展開パネルの見出し(design `.sd-pcap`、面 3/4/5/9 に逐語で実在)。 */
@@ -51,7 +51,7 @@ export const DETAIL_PANEL_MISSING = '—'
 /**
  * Enterprise 取得(展開時)が reject したときの 1 文。design にこのコマは無い
  * (`WP-10-coordinator-handoff.md` U5)。文言そのものは 2026-08-24 の確定事項で、
- * 骨格の出所は `specification.md:244`(検索失敗トーストの「いま、〜ませんでした。」)。
+ * 骨格の出所は `specification.md`(検索失敗トーストの「〜ませんでした。」。「いま、」は付けない)。
  * 値欄の `DETAIL_PANEL_MISSING`(情報が無い)とは別の意味なので混同しない。
  */
-export const DETAIL_ENTERPRISE_FETCH_FAIL = 'いま、詳細情報を読み込めませんでした。'
+export const DETAIL_ENTERPRISE_FETCH_FAIL = '詳細情報を読み込めませんでした。'

@@ -9,7 +9,7 @@ import { BODY, heading } from '../text-styles'
  * ソフトに再試行する公開 API を持たない(`useApiLoadingStatus` / `useApiIsLoaded` のみ公開)。
  * 地図画面と一覧の地図(saved/saved-list-map.tsx)が同じカードを使う。
  */
-const MAPS_LOAD_FAIL_TITLE = 'いま、地図を表示できませんでした'
+const MAPS_LOAD_FAIL_TITLE = '地図を表示できませんでした'
 const MAPS_LOAD_FAIL_BODY = '少し待って、もう一度読み込んでください。'
 const MAPS_LOAD_FAIL_RETRY = '再試行'
 

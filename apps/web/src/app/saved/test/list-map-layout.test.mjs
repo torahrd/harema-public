@@ -144,7 +144,7 @@ describe('ソースの確かめ', () => {
         const p = join(dir, name)
         if (statSync(p).isDirectory()) {
           if (name !== 'test') walk(p)
-        } else if (/\.tsx?$/.test(name) && readFileSync(p, 'utf8').includes("'いま、地図を表示できませんでした'")) {
+        } else if (/\.tsx?$/.test(name) && readFileSync(p, 'utf8').includes("'地図を表示できませんでした'")) {
           hits.push(p)
         }
       }

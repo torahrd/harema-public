@@ -11,7 +11,8 @@
         "FIREBASE_X509_URL_OVERRIDE",
         "VERCEL",
         "VERCEL_ENV",
-        "HAREMA_LP_ONLY"
+        "HAREMA_LP_ONLY",
+        "CRON_SECRET"
       ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },

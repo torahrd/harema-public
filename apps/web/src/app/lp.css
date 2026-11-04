@@ -180,6 +180,7 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .qf .h1,.qf .h2{font-family:var(--font-noto-sans),var(--font-noto-sans-jp),'Noto Sans','Noto Sans JP',sans-serif;font-weight:700;letter-spacing:0}
 .qf .h1{font-size:72px;line-height:1.4}
 .qf .dn{font-family:var(--font-source-code-pro),'Source Code Pro',var(--font-noto-sans-jp),'Noto Sans JP',monospace;font-size:13px;line-height:20px;font-weight:500;letter-spacing:0;color:var(--lp-fg2)}
+.lp .lp-clk{margin-bottom:12px;font-family:var(--font-source-code-pro),'Source Code Pro',var(--font-noto-sans-jp),'Noto Sans JP',monospace;font-size:16px;line-height:26px;font-weight:400;letter-spacing:0;color:var(--lp-fg2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .qf .s1{grid-template-columns:minmax(0,8fr) minmax(0,4fr);align-items:stretch;padding-top:96px;padding-bottom:96px}
 .qf .s1-text{align-self:center}
 .qf .s1-shot{justify-content:flex-end;align-items:center;border-left:1px solid var(--lp-signal);padding-left:64px}
