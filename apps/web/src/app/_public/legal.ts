@@ -594,7 +594,7 @@ export const privacy: LegalDocument = {
   "title": "プライバシーポリシー",
   "revisedOn": "2026.11.05",
   "preamble": [
-    "hareMa(以下「本サービス」といいます)の運営者は、利用者の情報を次のとおり取り扱います。本ポリシーは利用規約(https://harema.app/terms)の一部です。ログインのための Apple・Google・Firebase とのやり取りや、公開ページの閲覧に伴う情報の取り扱いにも適用します。本ポリシーは、harema.app の web と、スマートフォン向けのアプリの両方に適用します。web とアプリで取り扱いが異なるところは、「web では」「iOS アプリでは」のように書き分けます。"
+    "hareMa(以下「本サービス」)の運営者は、利用者の情報を次のとおり取り扱います。本ポリシーは利用規約の一部です。利用規約は https://harema.app/terms です。ログインでは、Apple・Google・Firebase と通信します。本ポリシーは、この通信や、公開ページの閲覧に伴う情報にも適用します。本ポリシーは、harema.app の web と、スマートフォンのアプリの両方に適用します。web とアプリで取り扱いが異なるところは、「web では」「iOS アプリでは」と書きます。"
   ],
   "articles": [
     {

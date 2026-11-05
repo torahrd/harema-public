@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { googleMapsHref, type SavedPlaceStatus } from '@harema/shared/constants'
 import { ja } from '@harema/shared/i18n'
 import { FullViewportShell } from '@/app/full-viewport-shell'
+import type { DetailBack } from '@/app/map/detail-origin'
 import { MapToast } from '@/app/map/map-toast'
 import { SaveSheet } from '@/app/map/save-sheet'
 import type { MapLaunchContext } from '@/app/map/types'
@@ -20,7 +21,6 @@ import type { PlaceDisplay } from '@/app/saved/types'
 import { clientEnv } from '@/env/client'
 import { getPlaceDetails } from '@/lib/places/details-cache'
 import {
-  DETAIL_BACK_LABEL,
   DETAIL_EDIT_ARROW,
   DETAIL_EDIT_LABEL,
   DETAIL_ENTERPRISE_FETCH_FAIL,
@@ -66,6 +66,8 @@ export type PlaceDetailData = {
 }
 
 type PlaceDetailScreenProps = {
+  /** 戻るの行き先と読み上げ名(地図から開いたときだけ地図。`detailBack`)。 */
+  back: DetailBack
   data: PlaceDetailData
 }
 
@@ -91,15 +93,15 @@ const TOAST_VISIBLE_MS = 4000
  * 一覧・地図と同じ形で中身を分けて包む。**地図コンポーネントそのものは描かない**(起動するのは
  * Places ライブラリの解決だけで、地図インスタンスの生成契機は無い)。
  */
-export function PlaceDetailScreen({ data }: PlaceDetailScreenProps) {
+export function PlaceDetailScreen({ data, back }: PlaceDetailScreenProps) {
   return (
     <APIProvider apiKey={clientEnv.googleMapsApiKey} language="ja" region="JP">
-      <PlaceDetailView data={data} />
+      <PlaceDetailView data={data} back={back} />
     </APIProvider>
   )
 }
 
-function PlaceDetailView({ data }: PlaceDetailScreenProps) {
+function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
   const [display, setDisplay] = useState<PlaceDisplay | undefined>(undefined)
@@ -301,8 +303,8 @@ function PlaceDetailView({ data }: PlaceDetailScreenProps) {
         }}
       >
         <Link
-          href="/saved"
-          aria-label={DETAIL_BACK_LABEL}
+          href={back.href}
+          aria-label={back.label}
           style={{
             flex: 'none',
             width: 36,

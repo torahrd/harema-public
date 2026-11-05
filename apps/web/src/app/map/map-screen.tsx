@@ -23,6 +23,7 @@ import { fetchPlaceFields, getPlaceDetails } from '@/lib/places/details-cache'
 import { AccountDrawer, type AccountSnapshot } from '../account/drawer'
 import { CurrentLocationButton } from './current-location-button'
 import { CurrentLocationMarker } from './current-location-marker'
+import { placeDetailHrefFromMap } from './detail-origin'
 import { LocationPermissionBanner } from './location-permission-banner'
 import { MapChrome } from './map-chrome'
 import { MapsLoadFailCard } from './maps-load-fail-card'
@@ -503,6 +504,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
                 key={marker.id}
                 position={{ lat: marker.latitude, lng: marker.longitude }}
                 zIndex={marker.status === 'visit_again' ? 2 : 1}
+                onClick={() => router.push(placeDetailHrefFromMap(marker.id))}
               >
                 <Pin status={marker.status} />
               </AdvancedMarker>

@@ -1,11 +1,14 @@
 import { notFound, redirect } from 'next/navigation'
 import { savedPlaceIdSchema } from '@harema/shared/validations'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
+import { detailBack } from '@/app/map/detail-origin'
 import { PlaceDetailScreen } from './place-detail-screen'
 
 type PlaceDetailPageProps = {
   /** Next 16 の動的セグメントは Promise。await してから分割代入する。 */
   params: Promise<{ id: string }>
+  /** `?from=map`(地図のピンから開いたとき)だけ戻るを地図へ。値は `detailBack` が固定の 2 択に絞る。 */
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 /**
@@ -25,8 +28,9 @@ type PlaceDetailPageProps = {
  * 画面の描画(即時表示の Client・展開パネル・外部リンク)は WP-10 の後続スライスで足す。
  * このファイルが持つのは認証 → profiles → uuid 検証 → 1 行 select → 404 までである。
  */
-export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) {
+export default async function PlaceDetailPage({ params, searchParams }: PlaceDetailPageProps) {
   const { id } = await params
+  const query = await searchParams
 
   const user = await getVerifiedUser()
   if (!user) {
@@ -78,6 +82,7 @@ export default async function PlaceDetailPage({ params }: PlaceDetailPageProps) 
   // 開く編集シートへ渡すためだけにここで消費する(DB へは書き戻さない)。
   return (
     <PlaceDetailScreen
+      back={detailBack(query.from)}
       data={{
         status: row.status,
         memo: row.memo,

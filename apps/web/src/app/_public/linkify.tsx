@@ -1,3 +1,4 @@
+import { jpLines } from '../_ui/jp-lines'
 import { splitLinks } from './linkify-core'
 import type { Block, LegalDocument, Paragraph } from './legal'
 
@@ -5,6 +6,32 @@ export function Linkify({ text }: { text: string }) {
   return splitLinks(text).map((part, index) => part.kind === 'url'
     ? <a key={index} href={part.value} target="_blank" rel="noopener">{part.value}</a>
     : <span key={index}>{part.value}</span>)
+}
+
+/** 句と文を、ほかの所で折れない塊にする(行より長い塊だけは中で折れる)。JpText と同じ。 */
+const UNIT = { display: 'inline-block', maxWidth: '100%' } as const
+/** 文と句に切る間、URL を 1 字の印に置き換える(URL の中の「?」「!」で切らないため)。私用領域の字で、本文には出ない。 */
+const URL_MARK = '\uE000'
+
+/**
+ * 前文を、和文の折り方の決まり(所有者 2026-11-04:文ごとに行を始め、文の中は「、」「。」の後だけで折る。入る限り 1 行に詰める)
+ * で描き、URL はリンクにする。折り方は JpText(jpLines)と同じ。前文の句は 402px の 1 行に入る長さに書いてある。
+ */
+export function PhrasedLinkify({ text }: { text: string }) {
+  const parts = splitLinks(text)
+  const urls = parts.flatMap((part) => part.kind === 'url' ? [part.value] : [])
+  const masked = parts.map((part) => part.kind === 'url' ? URL_MARK : part.value).join('')
+  let next = 0
+  const sentences = jpLines(masked).map((phrases) => phrases.map((phrase) => phrase.split(URL_MARK).map((piece, i) => ({ url: i > 0 ? urls[next++] : undefined, piece }))))
+  return sentences.map((phrases, s) => (
+    <span key={s} style={UNIT}>
+      {phrases.map((pieces, p) => (
+        <span key={p} style={UNIT}>
+          {pieces.map(({ url, piece }, i) => <span key={i}>{url !== undefined && <a href={url} target="_blank" rel="noopener">{url}</a>}{piece}</span>)}
+        </span>
+      ))}
+    </span>
+  ))
 }
 
 function Blocks({ blocks }: { blocks: Block[] }) {
@@ -28,7 +55,7 @@ function ParagraphBody({ paragraph }: { paragraph: Paragraph }) {
 
 export function LegalBody({ document, name }: { document: LegalDocument; name: 'terms' | 'privacy' }) {
   return <div className="public-legal-body" data-legal-body={name}>
-    {document.preamble.map((sentence, n) => <div key={n} data-legal-seg={`pre${n + 1}`}><p data-legal-leaf="t"><Linkify text={sentence} /></p></div>)}
+    {document.preamble.map((sentence, n) => <div key={n} data-legal-seg={`pre${n + 1}`}><p data-legal-leaf="t"><PhrasedLinkify text={sentence} /></p></div>)}
     {document.articles.map((article) => <section key={article.no} data-legal-seg={`a${article.no}`}><h2 data-legal-leaf="h">第 {article.no} 条({article.heading})</h2>{article.paragraphs.map((paragraph, n) => paragraph.no
       ? (n > 0 && article.paragraphs[n - 1]?.no ? null : <ol key={n}>{article.paragraphs.slice(n).filter((entry, j, all) => entry.no && all.slice(0, j).every((prior) => prior.no)).map((entry, offset) => <li key={offset} data-legal-seg={`p${n + offset + 1}`} value={entry.no}><ParagraphBody paragraph={entry} /></li>)}</ol>)
       : <div key={n} data-legal-seg={`p${n + 1}`}><ParagraphBody paragraph={paragraph} /></div>)}</section>)}

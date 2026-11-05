@@ -8,8 +8,8 @@ export const PIN_OUTLINE_PATH =
  * 状態別ピン(spec §7 / design Pin.dc.html sys="a" を逐語移植)。24×30px・viewBox 0 0 24 30。
  * 行きたい(want_to_go)= 藍の輪郭 / また行きたい(visit_again)= 金の充填。もういいは地図に
  * 出さない(クエリ層で除外)ので描かない。色・drop-shadow は globals.css の pin トークン
- * (@media 追従・Tailwind の dark バリアントは使わない)。表示専用でタップハンドラは持たない
- * (S1 起動は後続 WP)。
+ * (@media 追従・Tailwind の dark バリアントは使わない)。押すと詳細へ行く処理は
+ * このコンポーネントでなく map-screen 側(`AdvancedMarker` の `onClick`)が持つ。
  */
 export function Pin({ status }: { status: SavedPlaceStatus }) {
   if (status === 'visit_again') {
