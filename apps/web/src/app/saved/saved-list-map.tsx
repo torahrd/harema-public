@@ -16,6 +16,7 @@ import {
 } from '@harema/shared/constants'
 import { clientEnv } from '@/env/client'
 import { MapsLoadFailCard } from '../map/maps-load-fail-card'
+import { useMapsAuthFailure } from '../map/use-maps-auth-failure'
 import { ListPin } from './list-pin'
 import {
   cameraForMarkers,
@@ -48,9 +49,10 @@ type SavedListMapProps = {
  */
 export function SavedListMap({ rows, status, selectedId, onSelect, onClear }: SavedListMapProps) {
   const apiStatus = useApiLoadingStatus()
+  const mapsAuthFailed = useMapsAuthFailure()
 
-  if (apiStatus === APILoadingStatus.FAILED) {
-    // Maps JS 本体が読めない。地図は 1 枚も描けないので下地を出さず、地図画面と同じカードを出す。
+  if (apiStatus === APILoadingStatus.FAILED || mapsAuthFailed) {
+    // Maps JS 本体が読めない、または鍵が拒否された(gm_authFailure)。地図は 1 枚も描けないので下地を出さず、地図画面と同じカードを出す。
     return (
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'var(--bg)' }} />

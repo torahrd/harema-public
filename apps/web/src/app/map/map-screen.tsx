@@ -42,6 +42,7 @@ import {
   type ClassifiedSuggestion,
 } from './use-autocomplete-suggestions'
 import { MAP_EDGE_INSET } from './sheet-cover'
+import { useMapsAuthFailure } from './use-maps-auth-failure'
 import { useSheetCover } from './use-sheet-cover'
 import { watchErrorRevokesLocation } from './watch-error'
 
@@ -79,7 +80,10 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   const apiStatus = useApiLoadingStatus()
   // Maps JS 本体が読み込めなかった(面 10・WP-10 S10)。地図は 1 枚も描けていないので下地を
   // 出さない(design のオフライン面 B-4 との見分け方)。
-  const mapsFailed = apiStatus === APILoadingStatus.FAILED
+  // 鍵の拒否(gm_authFailure)も同じ扱い: vis.gl は AUTH_FAILURE を立てず、放置すると
+  // 地図の上の物を動かした時に Google の中で TypeError が出て error.tsx(500)に落ちる。
+  const mapsAuthFailed = useMapsAuthFailure()
+  const mapsFailed = apiStatus === APILoadingStatus.FAILED || mapsAuthFailed
   const router = useRouter()
   const [, startTransition] = useTransition()
 
