@@ -15,6 +15,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["constants/**/*.ts", "validations/**/*.ts", "i18n/**/*.ts", "current-location/**/*.ts"],
+  "include": ["constants/**/*.ts", "validations/**/*.ts", "i18n/**/*.ts", "current-location/**/*.ts", "search-scope/**/*.ts"],
   "exclude": ["node_modules"]
 }

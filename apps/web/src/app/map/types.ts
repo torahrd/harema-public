@@ -25,7 +25,10 @@ export type MapLaunchContext = {
   location: { lat: number; lng: number } | null
 }
 
-/** 検索モード。店舗 = 飲食のみフラット表示 / マップ = 場所 + 飲食店の 2 グループ。 */
+/**
+ * 検索の範囲(画面に出ない内部の名前)。store = 「飲食店以外を検索結果に含める」スイッチがオフ(飲食だけ) /
+ * map = オン(飲食と場所を Google の順のまま見出しなしで混ぜる)。
+ */
 export type SearchMode = 'store' | 'map'
 
 /**

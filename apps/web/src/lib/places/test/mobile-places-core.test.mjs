@@ -164,10 +164,27 @@ describe('T-W6 応答の読み取り', () => {
       classifyPlaceTypes,
     )
     assert.deepEqual(groups, {
-      food: [{ placeId: 'r1', mainText: 'ラーメン店', secondaryText: '渋谷' }],
-      location: [{ placeId: 's1', mainText: '渋谷駅', secondaryText: '東京' }],
+      // rank = 残した候補の Google の順(捨てた x1・queryPrediction は数えない): r1 → 0・s1 → 1
+      food: [{ placeId: 'r1', mainText: 'ラーメン店', secondaryText: '渋谷', rank: 0 }],
+      location: [{ placeId: 's1', mainText: '渋谷駅', secondaryText: '東京', rank: 1 }],
     })
     assert.ok(!JSON.stringify(groups).includes('types'))
+  })
+
+  it('SV-1 候補の rank: 捨てた候補(先頭・途中)は数えず、群ごとでなく通しの番号', () => {
+    const groups = readAutocompleteResponse(
+      {
+        suggestions: [
+          prediction('x1', ['store', 'establishment']),
+          prediction('s1', ['train_station', 'transit_station'], '渋谷駅', '東京'),
+          { queryPrediction: { text: { text: 'ramen' } } },
+          prediction('r1', ['restaurant', 'food', 'establishment'], 'ラーメン店', '渋谷'),
+        ],
+      },
+      classifyPlaceTypes,
+    )
+    assert.equal(groups.location[0].rank, 0)
+    assert.equal(groups.food[0].rank, 1)
   })
 
   it('候補 0 件({})→ 空の 2 群 / 形の違う応答 → null(投げない)', () => {

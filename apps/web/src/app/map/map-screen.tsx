@@ -326,6 +326,8 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
 
   const closeSearch = useCallback(() => {
     setSearchOpen(false)
+    // 検索を閉じるたびにスイッチはオフ(飲食店だけ)へ戻す(所有者 2026-11-05 02:48)
+    setMode('store')
     setQuery('')
     setComposing(false)
     resetSession()
@@ -525,8 +527,6 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
         onComposingChange={setComposing}
         onSearchFocus={() => setSearchOpen(true)}
         onClear={closeSearch}
-        mode={mode}
-        onModeChange={setMode}
         disabled={chromeDisabled}
         onMenuClick={() => setDrawerOpen(true)}
         toastSlot={
@@ -556,6 +556,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
             mode={mode}
             suggestions={suggestions}
             onSelect={handleSelectSuggestion}
+            onModeChange={setMode}
           />
         )}
       </MapChrome>

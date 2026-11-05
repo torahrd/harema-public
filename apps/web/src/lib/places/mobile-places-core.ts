@@ -142,6 +142,8 @@ export function readAutocompleteResponse(
   // 候補が 0 件のとき Google は `suggestions` を含めない
   if (suggestions === undefined) return groups
   if (!Array.isArray(suggestions)) return null
+  // rank: 残した候補への 0 始まりの通し番号(群ごとでなく、捨てた候補は数えない)
+  let rank = 0
   for (const item of suggestions) {
     if (!isObject(item) || !isObject(item.placePrediction)) continue
     const prediction = item.placePrediction
@@ -152,7 +154,13 @@ export function readAutocompleteResponse(
     const structured = isObject(prediction.structuredFormat) ? prediction.structuredFormat : {}
     const mainText = readText(structured.mainText)
     if (mainText.length === 0) continue
-    groups[bucket].push({ placeId, mainText, secondaryText: readText(structured.secondaryText) })
+    groups[bucket].push({
+      placeId,
+      mainText,
+      secondaryText: readText(structured.secondaryText),
+      rank,
+    })
+    rank += 1
   }
   return groups
 }

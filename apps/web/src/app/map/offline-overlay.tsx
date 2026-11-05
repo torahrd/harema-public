@@ -3,7 +3,7 @@
 import { BODY, heading } from '../text-styles'
 
 /**
- * オフライン状態(design B-4 逐語)。地図を減光し、中央にカードを出す。検索・セグメント・現在地は
+ * オフライン状態(design B-4 逐語)。地図を減光し、中央にカードを出す。検索・現在地は
  * map-screen 側で disabled 造形になる。「再試行」と `online` イベントで復帰する。
  */
 

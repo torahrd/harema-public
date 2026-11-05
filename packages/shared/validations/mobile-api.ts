@@ -80,11 +80,16 @@ export const mobileSourceTitleRequestSchema = z.object({
   url: z.string().refine((value) => codePointLength(value) <= SOURCE_TEXT_MAX_LENGTH),
 })
 
-/** 候補の 1 件。types は返さない(分類はサーバで済ませる)。 */
+/**
+ * 候補の 1 件。types は返さない(分類はサーバで済ませる)。
+ * rank = Google が返した順の 0 始まりの番号(分類で捨てた候補は数えない)。スイッチがオンの時に
+ * 飲食と場所を Google の順のまま混ぜるのに使う。
+ */
 export type MobileSuggestion = {
   placeId: string
   mainText: string
   secondaryText: string
+  rank: number
 }
 
 export type MobileSuggestionGroups = {

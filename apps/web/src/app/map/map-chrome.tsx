@@ -1,13 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import type { SearchMode } from './types'
-import { META } from '../text-styles'
 
 /**
  * 検索チュール(design MapChrome.dc.html / B-1・B-2・B-3 を ±0 移植)。検索バー(通常 /
- * フォーカス時 border-accent / disabled)+ ハンバーガー 44×44(WP-11: 右ドロワーを開く)+
- * セグメント 188px 右寄せ(店舗 / マップ)。サジェストパネルは children で差し込む
+ * フォーカス時 border-accent / disabled)+ ハンバーガー 44×44(WP-11: 右ドロワーを開く)。
+ * 「飲食店以外を検索結果に含める」のスイッチは検索中だけ候補の枠の一番上に出す(search-suggestions.tsx)。サジェストパネルは children で差し込む
  * (design の flex 列 gap:9 に同居させるため)。位置は上部・safe-area 追従。
  */
 
@@ -23,8 +21,6 @@ type MapChromeProps = {
   onComposingChange: (composing: boolean) => void
   onSearchFocus: () => void
   onClear: () => void
-  mode: SearchMode
-  onModeChange: (mode: SearchMode) => void
   disabled: boolean
   /**
    * ハンバーガー(≡)。アカウント右ドロワー(WP-11・design E-0)を開く。オフライン中・Maps JS
@@ -32,7 +28,7 @@ type MapChromeProps = {
    */
   onMenuClick: () => void
   /**
-   * トースト(design ④・保存成功)。固定行(検索バー + セグメント)の下端に 9px でアンカーする
+   * トースト(design ④・保存成功)。固定行(検索欄)の下端に 9px でアンカーする
    * ためチュール側で位置決めする —— design の「定位置 9px」はチュームの縦リズムと同値なので、
    * 実測値のハードコードではなく同じ gap から導く。overlay として重ねるので、サジェスト
    * パネル(children)を押し下げない。
@@ -60,8 +56,6 @@ export function MapChrome({
   onComposingChange,
   onSearchFocus,
   onClear,
-  mode,
-  onModeChange,
   disabled,
   onMenuClick,
   toastSlot,
@@ -104,10 +98,10 @@ export function MapChrome({
         gap: 9,
       }}
     >
-      {/* 固定行(検索バー + セグメント)。トーストはこの下端を基準に 9px 下へ重ねる(toastBelowBanner
+      {/* 固定行(検索欄の行だけ)。トーストはこの下端を基準に 9px 下へ重ねる(toastBelowBanner
           のときはバナーの下へ)。ここも
-          z-index を持たない(持てば同じ理由でトーストが閉じ込められる)ので、見えている 2 行が
-          それぞれ 10 を宣言する。 */}
+          z-index を持たない(持てば同じ理由でトーストが閉じ込められる)ので、見えている行が
+          10 を宣言する。 */}
       <div
         style={{
           position: 'relative',
@@ -265,36 +259,6 @@ export function MapChrome({
           </button>
         </div>
 
-        {/* セグメント(店舗 / マップ)右寄せ 188px。 */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            display: 'flex',
-            alignSelf: 'flex-end',
-            background: 'var(--bg-sunken)',
-            border: `1px solid ${disabled ? 'var(--border-subtle)' : 'var(--border)'}`,
-            borderRadius: 'var(--radius-control)',
-            padding: 3,
-            gap: 3,
-            width: 188,
-            opacity: disabled ? 0.6 : 1,
-          }}
-        >
-          <SegmentButton
-            label="店舗"
-            selected={mode === 'store'}
-            disabled={disabled}
-            onClick={() => onModeChange('store')}
-          />
-          <SegmentButton
-            label="マップ"
-            selected={mode === 'map'}
-            disabled={disabled}
-            onClick={() => onModeChange('map')}
-          />
-        </div>
-
         {/* 16 は地図画面のルート文脈での値。バナー(11)・現在地ボタン(15)より上、S1 の
             スクリム(20)と .edge-tint(100)より下。 */}
         {!anchorToBanner && toastLayer}
@@ -316,45 +280,5 @@ export function MapChrome({
         <div style={{ position: 'relative', zIndex: 10 }}>{children}</div>
       )}
     </div>
-  )
-}
-
-function SegmentButton({
-  label,
-  selected,
-  disabled,
-  onClick,
-}: {
-  label: string
-  selected: boolean
-  disabled: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        flex: 1,
-        textAlign: 'center',
-        padding: '7px 0',
-        ...META,
-        fontWeight: selected ? 700 : 400,
-        color: disabled
-          ? 'var(--fg-muted)'
-          : selected
-            ? 'var(--fg-1)'
-            : 'var(--fg-2)',
-        background: !disabled && selected ? 'var(--surface)' : 'transparent',
-        // 外の枠(角 8・枠 1・内側の余白 3)と同心にするため 8 − 1 − 3 = 4。
-        borderRadius: 4,
-        border: 0,
-        boxShadow: !disabled && selected ? 'var(--shadow-1)' : 'none',
-        cursor: disabled ? 'default' : 'pointer',
-      }}
-    >
-      {label}
-    </button>
   )
 }

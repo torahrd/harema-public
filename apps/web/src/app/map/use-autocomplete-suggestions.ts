@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { classifySuggestions } from './classify-suggestions'
 import {
   SEARCH_DEBOUNCE_MS,
   classifyPlaceTypes,
@@ -12,6 +13,8 @@ export type ClassifiedSuggestion = {
   placeId: string
   mainText: string
   secondaryText: string
+  /** Google が返した順の 0 始まりの番号(捨てた候補は数えない)。 */
+  rank: number
   prediction: google.maps.places.PlacePrediction
 }
 
@@ -55,10 +58,12 @@ type Params = {
 
 /**
  * Autocomplete。無フィルタ 1 リクエストで候補を取り、クライアント側で types を共有定数と交差
- * させて「飲食」「場所」へ分類する(非該当は破棄)。発火するのは **IME の変換が確定していて、
+ * させて「飲食」「場所」へ分類し(非該当は破棄)、残した候補に Google の順の rank を付ける
+ * (`classifySuggestions`)。スイッチの切り替えでは取り直さない。
+ * 発火するのは **IME の変換が確定していて、
  * かつ `meetsSearchMinLength` を満たす入力**だけ。デバウンス(SEARCH_DEBOUNCE_MS)+
  * AutocompleteSessionToken(選択確定の fetchFields までを 1 セッション・確定後に resetSession で
- * 再生成)。連続入力・モード切替の stale レスポンスは世代 id で破棄する。取得失敗は onError。
+ * 再生成)。連続入力の stale レスポンスは世代 id で破棄する。取得失敗は onError。
  *
  * 候補の name / address は画面表示のためだけに保持し、DB・サーバへ送らない(規約遵守)。
  */
@@ -131,19 +136,7 @@ export function useAutocompleteSuggestions({
       })
         .then(({ suggestions: raw }) => {
           if (cancelled || requestId !== requestIdRef.current) return
-          const grouped: GroupedSuggestions = { food: [], location: [] }
-          for (const item of raw) {
-            const prediction = item.placePrediction
-            if (!prediction) continue
-            const bucket = classifyPlaceTypes(prediction.types)
-            if (!bucket) continue
-            grouped[bucket].push({
-              placeId: prediction.placeId,
-              mainText: prediction.mainText?.text ?? prediction.text.text,
-              secondaryText: prediction.secondaryText?.text ?? '',
-              prediction,
-            })
-          }
+          const grouped: GroupedSuggestions = classifySuggestions(raw, classifyPlaceTypes)
           setFetched({ query: trimmed, groups: grouped })
         })
         .catch(() => {
