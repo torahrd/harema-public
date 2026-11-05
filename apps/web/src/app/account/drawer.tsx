@@ -15,6 +15,8 @@ import {
   ITEM_SAVED,
   ITEM_USERNAME,
   ITEM_WITHDRAW,
+  LINK_PRIVACY,
+  LINK_TERMS,
 } from './drawer-copy'
 import { UsernameDialog } from './username-dialog'
 import { WithdrawDialog } from './withdraw-dialog'
@@ -256,6 +258,15 @@ export function AccountDrawer({
             )}
           </button>
           {logoutFailed && <ActionError lines={LOGOUT_ERROR} />}
+          {/* 規約とポリシー(harema#111・案 B)。新しいタブで開き、地図の位置を残す。 */}
+          <div className="qs-dw-lk">
+            <a href="/terms" target="_blank" rel="noopener">
+              {LINK_TERMS}
+            </a>
+            <a href="/privacy" target="_blank" rel="noopener">
+              {LINK_PRIVACY}
+            </a>
+          </div>
         </nav>
       </div>
 

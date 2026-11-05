@@ -890,6 +890,9 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .qs-it .spinner { color: var(--qs-fg2); }
 .qs-dw .qs-nt { margin-bottom: 8px; }
 .qs-dw .auth-err { padding: 8px 0 12px; }
+/* ログアウトの下の規約とポリシー(harema#111・案 B。LP の足元と同じ 13px の下線の文字。押せる高さ 44px) */
+.qs-dw-lk { display: flex; gap: 20px; margin-top: 12px; flex: none; }
+.qs-dw-lk a { display: flex; align-items: center; min-height: 44px; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
 /* ---- ③ 退会のダイアログ ---- */
 .qs-dlg {

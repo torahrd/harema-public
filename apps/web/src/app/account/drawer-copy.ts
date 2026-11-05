@@ -15,6 +15,10 @@ export const ITEM_USERNAME = 'ユーザー名変更'
 export const ITEM_WITHDRAW = '退会'
 export const ITEM_LOGOUT = 'ログアウト'
 
+// ログアウトの下の小さな文字リンク(harema#111・所有者 2026-11-05 案 B。LP の足元と同じ文字)。web は新しいタブで開く。
+export const LINK_TERMS = '利用規約'
+export const LINK_PRIVACY = 'プライバシーポリシー'
+
 // 退会の直前に置く予告(ink の太字 11px + vermilion の 16×2 の棒・Quiet Signal)。E-4 の予告と同じ文言・同じ型。
 export const IRREVERSIBLE_NOTICE = '取り消せません'
 

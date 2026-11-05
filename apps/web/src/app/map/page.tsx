@@ -78,6 +78,7 @@ export default async function MapPage() {
     return [
       {
         id: row.id,
+        googlePlaceId: place.google_place_id,
         status: row.status,
         latitude: place.latitude,
         longitude: place.longitude,

@@ -7,6 +7,8 @@ import type { SavedPlaceStatus } from '@harema/shared/constants'
  */
 export type SavedPlaceMarker = {
   id: string
+  /** 押した時に S1 を開くための Google の place_id(POI ラベルを押した時と同じ入口へ渡す)。 */
+  googlePlaceId: string
   status: Exclude<SavedPlaceStatus, 'no_thanks'>
   latitude: number
   longitude: number

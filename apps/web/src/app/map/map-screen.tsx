@@ -23,7 +23,6 @@ import { fetchPlaceFields, getPlaceDetails } from '@/lib/places/details-cache'
 import { AccountDrawer, type AccountSnapshot } from '../account/drawer'
 import { CurrentLocationButton } from './current-location-button'
 import { CurrentLocationMarker } from './current-location-marker'
-import { placeDetailHrefFromMap } from './detail-origin'
 import { LocationPermissionBanner } from './location-permission-banner'
 import { MapChrome } from './map-chrome'
 import { MapsLoadFailCard } from './maps-load-fail-card'
@@ -398,11 +397,9 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   // POI ラベルタップ(confirmed item 3)。placeId があれば常に stop() で標準ポップアップを抑制し、
   // types を非同期取得して飲食ならシームへ、非飲食は無反応。POI の name は一時利用のみ(DB へ送らない)。
   // セッションを持たない経路なのでキャッシュを読んでよい —— 同じ POI の再タップは無課金になる。
-  const handleMapClick = useCallback(
-    (event: MapMouseEvent) => {
-      const placeId = event.detail.placeId
-      if (!placeId) return
-      event.stop()
+  // 保存のピンも同じ入口を通る(所有者の決定 2026-11-05「地図上の未保存の名前をタップした時と同じ挙動で」)。
+  const openPlaceSheet = useCallback(
+    (placeId: string) => {
       if (!places) return
       if (placeFetchInFlightRef.current) return
       placeFetchInFlightRef.current = true
@@ -431,6 +428,16 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
         })
     },
     [places, map, showToast],
+  )
+
+  const handleMapClick = useCallback(
+    (event: MapMouseEvent) => {
+      const placeId = event.detail.placeId
+      if (!placeId) return
+      event.stop()
+      openPlaceSheet(placeId)
+    },
+    [openPlaceSheet],
   )
 
   const handleRetry = useCallback(() => {
@@ -504,7 +511,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
                 key={marker.id}
                 position={{ lat: marker.latitude, lng: marker.longitude }}
                 zIndex={marker.status === 'visit_again' ? 2 : 1}
-                onClick={() => router.push(placeDetailHrefFromMap(marker.id))}
+                onClick={() => openPlaceSheet(marker.googlePlaceId)}
               >
                 <Pin status={marker.status} />
               </AdvancedMarker>

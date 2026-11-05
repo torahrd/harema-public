@@ -27,7 +27,7 @@ describe('detailBack', () => {
 })
 
 describe('配線(ソース照合)', () => {
-  it('地図のピンは押すと詳細へ行くだけ(配線)', () => {
+  it('地図のピンは押すと、地図の店名(POI)を押した時と同じ入口で S1 を開く(配線)', () => {
     const src = read('../map-screen.tsx')
     const i = src.indexOf('savedPlaces.map(')
     assert.notEqual(i, -1)
@@ -35,9 +35,11 @@ describe('配線(ソース照合)', () => {
     assert.notEqual(j, -1)
     const block = src.slice(i, j)
     assert.equal(count(block, 'onClick='), 1)
-    assert.equal(count(block, 'router.push(placeDetailHrefFromMap(marker.id))'), 1)
+    assert.equal(count(block, 'onClick={() => openPlaceSheet(marker.googlePlaceId)}'), 1)
+    assert.equal(count(block, 'router.push'), 0)
     assert.equal(count(block, 'getPlaceDetails'), 0)
-    assert.equal(count(block, 'fetchPlaceFields'), 0)
+    // POI ラベルの押下も同じ入口(openPlaceSheet)を通る。
+    assert.match(src, /event\.stop\(\)\s*openPlaceSheet\(placeId\)/)
   })
 
   it('詳細の戻るは back から取り、削除の後は一覧のまま(配線)', () => {
