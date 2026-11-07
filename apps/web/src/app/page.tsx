@@ -10,6 +10,8 @@ import mapDark from './_public/lp/map-dark.webp'
 import mapR1Light from './_public/lp/map-r1-1b-light.webp'
 import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
 import appIcon from './_public/lp/app-icon.webp'
+import appStoreBadge from './_public/lp/app-store-badge-ja.svg'
+import appStoreQr from './_public/lp/app-store-qr.svg'
 import { SiteAnalytics } from './_public/site-analytics'
 import { LpNotice } from './_public/lp-notice'
 import { LpClock } from './_public/lp-clock'
@@ -46,12 +48,25 @@ function Shot({ name, alt, eager = false }: { name: keyof typeof SHOTS; alt: str
   return <picture><source media="(prefers-color-scheme: dark)" srcSet={dark.src} /><img className="app-shot" src={light.src} width={390} height={844} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} decoding="async" /></picture>
 }
 
-// iPhone アプリの公開前の枠(所有者の決定 2026-11-02 23:56 JST: 案 A と B の両方・A の QR の場所にはアプリのアイコン)。
-// App Store の公式のバッジは公開か予約注文の後でないと使えないので、LP の線と字だけの枠にする。押せる物ではないのでリンクにしない。
+// iPhone アプリ(App Store で公開 2026-11-07)。バッジは Apple の配布の物をそのまま(日本語版・黒・高さ 40px 以上・周りの余白は高さの 1/4 以上・1 つの画面構成に 1 つなので LP では段 1 の 1 か所だけ。所有者の決定 2026-11-07 案「上」)。
+// QR はアプリのページの URL を符号にした物(PC の幅だけ。スマホの画面の QR はその端末で読めない)。
+const APP_STORE_URL = 'https://apps.apple.com/jp/app/harema/id6830447181'
+
+function AppStoreBadge({ className }: { className: string }) {
+  const { props } = getImageProps({ alt: 'App Store からダウンロード', width: 109, height: 40, unoptimized: true, src: appStoreBadge })
+  return <a className={className} href={APP_STORE_URL} target="_blank" rel="noopener"><picture><img src={props.src} width={109} height={40} alt="App Store からダウンロード" /></picture></a>
+}
+
 // アイコンはアプリと同じ「椀に昇る日と海」(harema#26・PR #69)。ライトもダークも同じ暗い地の絵なので 1 枚。
 function AppIcon() {
   const { props } = getImageProps({ alt: '', width: 80, height: 80, unoptimized: true, src: appIcon })
   return <picture className="app-icon"><img src={props.src} width={80} height={80} alt="" loading="lazy" decoding="async" /></picture>
+}
+
+// PC の幅だけ出す QR(app-store-qr.svg は segno で APP_STORE_URL を符号にした物・誤り訂正 M・周りに 4 マス)。
+function AppQr() {
+  const { props } = getImageProps({ alt: '', width: 96, height: 96, unoptimized: true, src: appStoreQr })
+  return <picture className="app-qr"><img src={props.src} width={96} height={96} alt="" loading="lazy" decoding="async" /></picture>
 }
 
 export default function Home() {
@@ -76,7 +91,7 @@ export default function Home() {
 <a className="cta" href="/login">はじめる</a>
 <p className="act-note"><span className="nw">Apple または Google のアカウントで、</span><wbr /><span className="nw">ブラウザのまま始められます。</span></p>
 <p className="act-note">無料で使えます。</p>
-<p className="app-dl app-dl-s1"><span className="app-dl-k">iPhone アプリ</span><span className="app-dl-v" lang="en">Coming soon</span></p>
+<AppStoreBadge className="app-badge app-badge-s1" />
 </div>
 </div>
 <div className="s1-shot">
@@ -169,7 +184,7 @@ export default function Home() {
 <div className="fact"><dt>ログイン</dt><dd><span className="hd"><span className="nw">Apple/Google のアカウントで行います。</span><wbr /><span className="nw">hareMa は</span>パスワードを持たず、<wbr />ユーザー名を除き、<wbr />メールアドレスや氏名も、<wbr />データベースに保存しません。</span></dd></div>
 <div className="fact"><dt>データ</dt><dd className="hd">保存した店は、<wbr />ほかの利用者には公開されません。<span className="sent" style={{ display: 'inline-block', maxWidth: '100%' }}>退会すると、<wbr />アカウントと保存した店を削除します。</span></dd></div>
 <div className="fact"><dt>運営</dt><dd>hareMa 運営者。<wbr /><span className="sent"><span className="nw">お問い合わせは、</span><wbr /><span className="nw"><a className="x-ul" href="https://x.com/htoranosuke" target="_blank" rel="noopener">X(@htoranosuke)↗</a> で受け付けています。</span></span><span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
-<div className="fact"><dt>アプリ</dt><dd><span className="hd">iPhone のアプリを準備しています。<wbr />ブラウザでは、<wbr />いますぐ使えます。</span><span className="app-dl app-dl-fact"><AppIcon /><span className="app-dl-text"><span className="app-soon" lang="en">Coming soon</span><wbr /><span className="app-note">App Store で公開予定です。</span></span></span></dd></div>
+<div className="fact"><dt>アプリ</dt><dd><span className="hd"><span className="nw">iPhone のアプリなら、</span><wbr /><span className="nw">ほかのアプリの共有から、</span><wbr /><span className="nw">切り替えずに保存できます。</span></span><span className="app-get"><AppIcon /><AppQr /><span className="app-get-text"><a className="x-ul" href={APP_STORE_URL} target="_blank" rel="noopener">App Store で見る ↗</a><span className="app-qr-note"><span className="nw">iPhone のカメラで読み取ると、</span><wbr /><span className="nw">App Store が開きます。</span></span></span></span></dd></div>
 </dl>
 <div className="act">
 <a className="cta" href="/login">はじめる</a>
@@ -183,6 +198,7 @@ export default function Home() {
 <footer className="lp-foot lp-in">
 <nav aria-label="フッター"><a href="https://x.com/htoranosuke" target="_blank" rel="noopener">X でお問い合わせ ↗</a><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></nav>
 <span className="lp-copy">© hareMa</span>
+<p className="lp-credit"><span className="nw">Apple、Apple のロゴ、</span><wbr /><span className="nw">App Store、iPhone は、</span><wbr /><span className="nw">Apple Inc. の商標です。</span></p>
 </footer>
 <SiteAnalytics />
 </div>

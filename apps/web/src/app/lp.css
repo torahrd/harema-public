@@ -216,22 +216,23 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 }
 
 
-/* iPhone アプリの公開前の枠(所有者の決定 2026-11-02: 案 A と B の両方。DESIGN = harema/lp-impl/app-download/DESIGN.md)。
-   線と字だけ・押せない表示。アイコンは PC の幅だけ(公開後は QR に替える場所)。 */
-.lp .app-dl{border:1px solid var(--lp-rule);border-radius:2px;background:transparent;max-width:100%}
-.lp .app-dl-s1{display:inline-flex;align-self:flex-start;align-items:baseline;gap:12px;margin-top:24px;padding:12px 16px;font-size:13px;line-height:20px;letter-spacing:.04em}
-.lp .app-dl-k{font-weight:700;color:var(--lp-meta)}
-.lp .app-dl-v{font-weight:400;color:var(--lp-fg2)}
-.lp .app-dl-fact{display:flex;width:fit-content;align-items:center;gap:16px;margin-top:16px;padding:12px 20px 12px 12px}
-.lp .app-icon{display:block;flex:none;width:80px;height:80px}
+/* iPhone アプリ(App Store で公開 2026-11-07)。バッジは Apple の決まり(高さ 40px 以上・周りの余白は高さの 1/4 = 10px 以上・形も色も変えない)。
+   QR は PC の幅だけ(白の地に黒・周りに 4 マスの余白を含む SVG)。スマホはアイコン。 */
+.lp .app-badge{display:inline-block;align-self:flex-start;line-height:0;padding:10px;margin:-10px}
+.lp .app-badge picture,.lp .app-badge img{display:block;width:auto;height:40px}
+.lp .app-badge-s1{margin-top:14px}
+.lp .app-get{display:flex;align-items:center;gap:20px;margin-top:16px}
+.lp .app-icon{display:none;flex:none;width:80px;height:80px}
 .lp .app-icon img{display:block;width:80px;height:80px;border-radius:18px;box-shadow:0 0 0 1px var(--lp-rule)}
-.lp .app-dl-text{display:flex;flex-direction:column;min-width:0}
-.lp .app-dl-text wbr{display:none}
-.lp .app-soon{display:block;font-size:13px;line-height:20px;font-weight:700;letter-spacing:.04em;color:var(--lp-meta)}
-.lp .app-note{display:block;margin-top:4px;font-size:13px;line-height:20px;font-weight:400;letter-spacing:.04em;color:var(--lp-fg2)}
+.lp .app-qr{display:block;flex:none;width:96px;height:96px}
+.lp .app-qr img{display:block;width:96px;height:96px;border-radius:2px;box-shadow:0 0 0 1px var(--lp-rule)}
+.lp .app-get-text{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.lp .app-qr-note{font-size:13px;line-height:20px;letter-spacing:.04em;color:var(--lp-fg2)}
 @media (max-width:600px){
-  .lp .app-dl-fact{width:100%;padding:12px 16px 12px 12px}
+  .lp .app-icon{display:block}
+  .lp .app-qr,.lp .app-qr-note{display:none}
 }
+.lp .lp-credit{flex-basis:100%;margin:0;font-size:12px;line-height:20px;color:var(--lp-meta)}
 
 /* Coming soon のページの X へのリンク(所有者の決定 2026-11-03 10:03 JST: 案 B・頭は「最新情報は」)。字は .lead に近い 16px、リンクの所だけ下線。 */
 .lp .x-link{margin-top:16px;font-size:16px;line-height:24px;letter-spacing:.02em;color:var(--lp-fg)}
