@@ -20,9 +20,12 @@ import {
 } from '@harema/shared/constants'
 import { clientEnv } from '@/env/client'
 import { fetchPlaceFields, getPlaceDetails } from '@/lib/places/details-cache'
+import { installModalTiming } from '@/lib/install-prompt'
+import { takePendingShare } from '@/lib/share-pending'
 import { AccountDrawer, type AccountSnapshot } from '../account/drawer'
 import { CurrentLocationButton } from './current-location-button'
 import { CurrentLocationMarker } from './current-location-marker'
+import { HomeScreenDialog } from './home-screen-dialog'
 import { LocationPermissionBanner } from './location-permission-banner'
 import { MapChrome } from './map-chrome'
 import { MapsLoadFailCard } from './maps-load-fail-card'
@@ -31,6 +34,14 @@ import { OfflineOverlay } from './offline-overlay'
 import { Pin } from './pin'
 import { SaveSheet } from './save-sheet'
 import { SearchSuggestions } from './search-suggestions'
+import {
+  EMPTY_SOURCE_STATE,
+  sourceOnCloseSearch,
+  sourceOnCloseSheet,
+  sourceOnLaunch,
+  sourceOnOpenSheet,
+  type SourceState,
+} from './sheet-initial'
 import type {
   MapLaunchContext,
   MapToastVariant,
@@ -42,6 +53,7 @@ import {
   type ClassifiedSuggestion,
 } from './use-autocomplete-suggestions'
 import { MAP_EDGE_INSET } from './sheet-cover'
+import { useInstallPrompt } from './use-install-prompt'
 import { useMapsAuthFailure } from './use-maps-auth-failure'
 import { useSheetCover } from './use-sheet-cover'
 import { watchErrorRevokesLocation } from './watch-error'
@@ -93,8 +105,15 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   // ref ではなく state で持つ —— 確定した瞬間に取得を走らせる必要がある。
   const [composing, setComposing] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  // 共有から来た出典。launchSource = 検索を開いたときの値、sheetSource = 開いたシートへ渡す値
+  // (closeSearch が launchSource を捨てるので、シートへ渡す値は別に持つ)。
+  const [source, setSource] = useState<SourceState>(EMPTY_SOURCE_STATE)
+  // 共有の続き(/share が置いた中身)は最初の mount で 1 回だけ読む(StrictMode の 2 回目で上書きしない)。
+  const pendingShareReadRef = useRef(false)
   // アカウント右ドロワー(WP-11・design E-0)。≡ で開き、スクリム / 右スワイプで閉じる。
   const [drawerOpen, setDrawerOpen] = useState(false)
+  // メニューから開いたユーザー名変更・退会のダイアログ(drawer が持つ状態の写し)。
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false)
   // geolocation API が無い環境は要求しても現在地を出せないので初期から 'unavailable'
   // (既定エリアのまま・バナー無し)。SSR は navigator 不在で 'unavailable' になるが、いずれの
   // 値でもボタンは非 disabled・バナー非表示で DOM は一致する。
@@ -104,6 +123,9 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
       : 'unavailable',
   )
   const [bannerDismissed, setBannerDismissed] = useState(false)
+  // ホーム画面に追加する案内(Android の Chrome だけ)。モーダルは位置情報の許可を求めている最中(idle)・
+  // 共有の続きの検索・保存シート・メニューが開いている間は出さない(出す間隔と記録は lib/install-prompt.ts)。
+  const installPrompt = useInstallPrompt()
   const [retryingLocation, setRetryingLocation] = useState(false)
   const retrySpinnerTimerRef = useRef<number | undefined>(undefined)
   // 連打ガード(in-flight)。解決前の再入を捨てる —— Place Details は 1 回ごとに課金される。
@@ -119,6 +141,14 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
 
   // S1 の起動コンテキスト。null = シートを出していない。
   const [sheetContext, setSheetContext] = useState<MapLaunchContext | null>(null)
+  const showHomeDialog =
+    installPrompt.modalDue &&
+    installModalTiming({
+      locationPending: locationState === 'idle',
+      searchOpen,
+      sheetOpen: sheetContext !== null,
+      drawerOpen: drawerOpen || accountDialogOpen,
+    })
   // シートが開いている間、地図の器の下端をシートの上端まで縮める(Google の帰属表示を隠さない。
   // https://developers.google.com/maps/documentation/javascript/policies)。bottom は hook が
   // DOM に直接書く(器の props の bottom は 0 のまま)。
@@ -328,7 +358,22 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
     }
   }, [toast, dismissToast])
 
+  useEffect(() => {
+    if (pendingShareReadRef.current) return
+    pendingShareReadRef.current = true
+    const apply = () => {
+      const pending = takePendingShare()
+      if (!pending) return
+      // query が空でも検索は開く(iOS と同じ)。
+      setSearchOpen(true)
+      setQuery(pending.query)
+      setSource((state) => sourceOnLaunch(state, pending.sourceText))
+    }
+    apply()
+  }, [])
+
   const closeSearch = useCallback(() => {
+    setSource(sourceOnCloseSearch)
     setSearchOpen(false)
     // 検索を閉じるたびにスイッチはオフ(飲食店だけ)へ戻す(所有者 2026-11-05 02:48)
     setMode('store')
@@ -361,6 +406,8 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
             }
             const location = { lat: loc.lat(), lng: loc.lng() }
             map?.panTo(location)
+            // closeSearch が launchSource を捨てる前に、出典をシートへ移す。
+            setSource(sourceOnOpenSheet)
             closeSearch()
             setSheetContext({
               googlePlaceId: place.id,
@@ -415,6 +462,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
           if (!loc) return
           const location = { lat: loc.lat(), lng: loc.lng() }
           map?.panTo(location)
+          setSource(sourceOnOpenSheet)
           setSheetContext({
             googlePlaceId: place.id,
             displayName: place.displayName ?? '',
@@ -444,7 +492,10 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
     setOffline(!navigator.onLine)
   }, [])
 
-  const closeSheet = useCallback(() => setSheetContext(null), [])
+  const closeSheet = useCallback(() => {
+    setSource(sourceOnCloseSheet)
+    setSheetContext(null)
+  }, [])
 
   // 保存後は「シートを閉じる → トースト → 状態別ピンへ反映」(spec §6.2・§7)。削除は
   // トーストを出さない(確定事項。§12-⑧-4)—— ピンそのものが消えるので通知の必要がない。
@@ -452,6 +503,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   // (transition の中で呼ぶ。WP-10 S9)。
   const handleSaved = useCallback(
     (mode: 'created' | 'updated' | 'deleted') => {
+      setSource(sourceOnCloseSheet)
       setSheetContext(null)
       if (mode !== 'deleted') {
         showToast(mode === 'created' ? 'save-created' : 'save-updated')
@@ -582,8 +634,10 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
         <div ref={sheetWrapperRef} style={{ display: 'contents' }}>
           <SaveSheet
             context={sheetContext}
+            initialSourceText={source.sheetSource}
             onClose={closeSheet}
             onSaved={handleSaved}
+            placesLibrary={places}
           />
         </div>
       )}
@@ -597,7 +651,13 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         account={account}
+        onAddToHome={installPrompt.canAdd ? () => installPrompt.add(false) : undefined}
+        onDialogChange={setAccountDialogOpen}
       />
+
+      {showHomeDialog && (
+        <HomeScreenDialog onAdd={installPrompt.add} onCancel={installPrompt.cancel} />
+      )}
     </div>
   )
 }

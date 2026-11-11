@@ -15,6 +15,8 @@ import appStoreQr from './_public/lp/app-store-qr.svg'
 import { SiteAnalytics } from './_public/site-analytics'
 import { LpNotice } from './_public/lp-notice'
 import { LpClock } from './_public/lp-clock'
+import { NEWS, LP_NEWS_COUNT, newsDateTime } from './_public/news'
+import { NewsSentence } from './_public/news-sentence'
 import './lp.css'
 
 export const metadata: Metadata = {
@@ -184,12 +186,17 @@ export default function Home() {
 <div className="fact"><dt>ログイン</dt><dd><span className="hd"><span className="nw">Apple/Google のアカウントで行います。</span><wbr /><span className="nw">hareMa は</span>パスワードを持たず、<wbr />ユーザー名を除き、<wbr />メールアドレスや氏名も、<wbr />データベースに保存しません。</span></dd></div>
 <div className="fact"><dt>データ</dt><dd className="hd">保存した店は、<wbr />ほかの利用者には公開されません。<span className="sent" style={{ display: 'inline-block', maxWidth: '100%' }}>退会すると、<wbr />アカウントと保存した店を削除します。</span></dd></div>
 <div className="fact"><dt>運営</dt><dd>hareMa 運営者。<wbr /><span className="sent"><span className="nw">お問い合わせは、</span><wbr /><span className="nw"><a className="x-ul" href="https://x.com/htoranosuke" target="_blank" rel="noopener">X(@htoranosuke)↗</a> で受け付けています。</span></span><span className="fact-links"><Link href="/terms">利用規約</Link><Link href="/privacy">プライバシーポリシー</Link></span></dd></div>
-<div className="fact"><dt>アプリ</dt><dd><span className="hd"><span className="nw">iPhone のアプリなら、</span><wbr /><span className="nw">ほかのアプリの共有から、</span><wbr /><span className="nw">切り替えずに保存できます。</span></span><span className="app-get"><AppIcon /><AppQr /><span className="app-get-text"><a className="x-ul" href={APP_STORE_URL} target="_blank" rel="noopener">App Store で見る ↗</a><span className="app-qr-note"><span className="nw">iPhone のカメラで読み取ると、</span><wbr /><span className="nw">App Store が開きます。</span></span></span></span></dd></div>
+<div className="fact"><dt>アプリ</dt><dd><span className="hd"><span className="nw">iPhone のアプリなら、</span><wbr /><span className="nw">ほかのアプリの共有から、</span><wbr /><span className="nw">切り替えずに保存できます。</span></span><span className="app-get"><AppIcon /><AppQr /><span className="app-get-text"><a className="x-ul" href={APP_STORE_URL} target="_blank" rel="noopener">App Store で見る ↗</a><span className="app-qr-note"><span className="nw">iPhone のカメラで読み取ると、</span><wbr /><span className="nw">App Store が開きます。</span></span></span></span><span className="hd app-android"><span className="nw">Android は、</span><wbr /><span className="nw">Chrome でホーム画面に追加すると、</span><wbr /><span className="nw">ほかのアプリの共有から保存できます。</span></span></dd></div>
 </dl>
 <div className="act">
 <a className="cta" href="/login">はじめる</a>
 <p className="act-note"><span className="nw">Apple または Google のアカウントで、</span><wbr /><span className="nw">ブラウザのまま始められます。</span></p>
 <p className="act-note">無料で使えます。</p>
+</div>
+<div>
+<h3 className="h3 hd sub">更新情報</h3>
+<ol className="nws-list" data-lp-feed="news">{NEWS.slice(0, LP_NEWS_COUNT).map((item) => <li className="nws-item" key={`${item.date}-${item.title}`}><p className="nws-meta"><time className="nws-date" dateTime={newsDateTime(item.date)}>{item.date}</time><span className="nws-tag">{item.target}</span></p><p className="nws-t hd"><span className="nws-ttl">{item.title}</span><NewsSentence text={item.text} /></p></li>)}</ol>
+<p className="nws-all"><Link className="x-ul" href="/news">更新情報をすべて見る</Link></p>
 </div>
 </div>
 </section>

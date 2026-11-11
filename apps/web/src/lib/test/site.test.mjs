@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { LP_ONLY_SOURCE } from '../lp-only.ts'
-import { PUBLIC_INDEXABLE_PATHS, SITE_ORIGIN } from '../site.ts'
+import { PUBLIC_ANALYTICS_PATHS, PUBLIC_INDEXABLE_PATHS, SITE_ORIGIN } from '../site.ts'
 
 // next.config の redirects と同じ形(path-to-regexp の `:path(...)`)を、先頭の `/` を付けて照らす。
 const lpOnlyRedirected = (p) => new RegExp(`^/${LP_ONLY_SOURCE.slice('/:path('.length, -1)}$`).test(p)
@@ -17,7 +17,10 @@ describe('検索エンジン向けの公開の道', () => {
     assert.equal(lpOnlyRedirected('/login'), true)
   })
   it('サイトマップに載せる道は、LP を先に出す間も送られない公開ページだけ', () => {
-    assert.deepEqual([...PUBLIC_INDEXABLE_PATHS], ['/', '/terms', '/privacy'])
+    assert.deepEqual([...PUBLIC_INDEXABLE_PATHS], ['/', '/terms', '/privacy', '/news'])
     for (const p of PUBLIC_INDEXABLE_PATHS) assert.equal(lpOnlyRedirected(p), false, p)
+  })
+  it('計測の道は索引の道をすべて含む', () => {
+    for (const p of PUBLIC_INDEXABLE_PATHS) assert.ok(PUBLIC_ANALYTICS_PATHS.includes(p), p)
   })
 })

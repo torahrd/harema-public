@@ -13,6 +13,8 @@ import {
   sourceUrlSchema,
   type SavePlaceInput,
 } from '@harema/shared/validations'
+import { EXTERNAL_ARROW } from '@/app/places/[id]/place-detail-copy'
+import { sourceChipUrl } from '@/lib/external-link'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import {
   deleteSavedPlace,
@@ -35,6 +37,8 @@ import {
   STATUS_LABELS,
   STATUS_REVERT_NOTE,
 } from './save-sheet-copy'
+import { PlaceDetailsDisclosure } from './place-details-disclosure'
+import { initialSheetFields } from './sheet-initial'
 import type { MapLaunchContext } from './types'
 import { useSheetViewport } from './use-sheet-viewport'
 import { LABEL_EN, LABEL_JA, META, heading } from '../text-styles'
@@ -85,6 +89,8 @@ const NOTE_STYLE: React.CSSProperties = {
 
 type SaveSheetProps = {
   context: MapLaunchContext
+  /** 共有から来た出典。新規のときだけ出典の欄に入れる(編集では DB の値を上書きしない)。 */
+  initialSourceText?: string | null
   /** 保存せずに閉じた。 */
   onClose: () => void
   /** 保存 / 更新 / 削除が通った。退場アニメの後に呼ばれる。遷移先は呼び出し元の担当
@@ -96,13 +102,18 @@ type SaveSheetProps = {
    * 呼ぶ。省略時(地図からの起動)は従来どおり `deleteSavedPlace` を呼び、`onSaved('deleted')`
    * 経由で呼び出し元が遷移を決める(AD-N1 是正・WP-10-irregular-ad-n1-2026-08-26 §3.2)。 */
   deleteRedirectsToSaved?: boolean
+  /** Places ライブラリ。**省略 = 「詳細情報」の行を出さない。** 地図の画面から開いた S1 だけが渡す(店舗詳細から
+   * 開く編集は渡さない)。行を押した時だけ営業時間・電話・website を取る(所有者の決定 2026-11-08・harema#121)。 */
+  placesLibrary?: google.maps.PlacesLibrary | null
 }
 
 export function SaveSheet({
   context,
+  initialSourceText,
   onClose,
   onSaved,
   deleteRedirectsToSaved,
+  placesLibrary,
 }: SaveSheetProps) {
   const router = useRouter()
 
@@ -141,12 +152,15 @@ export function SaveSheet({
   const fetchingTitleRef = useRef(false)
   /** paste は change の直前に来る。値が入った後で取得を発火するための橋渡し。 */
   const pastedRef = useRef(false)
+  /** 解決の結果を受ける effect から、後ろで定義する maybeFetchTitle を呼ぶための橋渡し。 */
+  const maybeFetchTitleRef = useRef<(raw: string) => Promise<void>>(async () => {})
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const focusedFieldRef = useRef<HTMLElement | null>(null)
 
   const mode = existingStatus === null ? 'create' : 'edit'
   const busy = resolving || saving || deleting
+  const chipUrl = sourceChipUrl(sourceText)
   const visible = entered && !leaving
   const revertBlocked =
     existingStatus !== null && existingStatus !== UNRATED_STATUS
@@ -196,14 +210,19 @@ export function SaveSheet({
           setSaveError(SAVE_FAILED)
           return
         }
+        const initial = initialSheetFields(result, initialSourceText, UNRATED_STATUS)
         if (result.mode === 'edit') {
-          setExistingStatus(result.status)
-          setStatus(result.status)
-          setMemo(result.memo)
-          setSourceText(result.sourceText)
-          setSourceTitle(result.sourceTitle)
+          setExistingStatus(initial.existingStatus)
+          setStatus(initial.status)
+          setMemo(initial.memo)
+          setSourceText(initial.sourceText)
+          setSourceTitle(initial.sourceTitle)
           // 保存済みのタイトルは、保存済みの出典のためのもの。blur で取り直さない。
           lastFetchedUrlRef.current = result.sourceText.trim() || null
+        } else if (initial.fetchTitleFor !== null) {
+          // 共有の出典を入れ、貼ったときと同じくタイトルを 1 回取りに行く(同じ URL は取りに行かない規則のまま)。
+          setSourceText(initial.sourceText)
+          void maybeFetchTitleRef.current(initial.fetchTitleFor)
         }
       })
       .catch(() => {
@@ -215,7 +234,7 @@ export function SaveSheet({
     return () => {
       cancelled = true
     }
-  }, [context.googlePlaceId, router])
+  }, [context.googlePlaceId, initialSourceText, router])
 
   // 区切り(下固定の上辺 1px・下端のフェード)はスクロールできるときだけ引く。中身は chip の
   // 出入りや編集で伸び縮みするので、領域と中身の両方を観測する。
@@ -330,6 +349,10 @@ export function SaveSheet({
       fetchingTitleRef.current = false
     }
   }
+
+  useEffect(() => {
+    maybeFetchTitleRef.current = maybeFetchTitle
+  })
 
   const handleSave = async () => {
     if (busy || closePending || !canSave) return
@@ -704,29 +727,76 @@ export function SaveSheet({
                     marginTop: 8,
                   }}
                 >
-                  <span
-                    style={{
-                      flex: 'none',
-                      ...LABEL_EN,
-                      color: 'var(--accent)',
-                      border: '1px solid var(--accent)',
-                      borderRadius: 'var(--radius-chip)',
-                      padding: '2px 5px',
-                    }}
-                  >
-                    OGP
-                  </span>
-                  {/* 外部由来の文字列。HTML としては解釈させない(テキストのまま描く)。 */}
-                  <span
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      ...META,
-                      color: 'var(--fg-1)',
-                    }}
-                  >
-                    {sourceTitle}
-                  </span>
+                  {chipUrl === null ? (
+                    <>
+                      <span
+                        style={{
+                          flex: 'none',
+                          ...LABEL_EN,
+                          color: 'var(--accent)',
+                          border: '1px solid var(--accent)',
+                          borderRadius: 'var(--radius-chip)',
+                          padding: '2px 5px',
+                        }}
+                      >
+                        OGP
+                      </span>
+                      {/* 外部由来の文字列。HTML としては解釈させない(テキストのまま描く)。 */}
+                      <span
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          ...META,
+                          color: 'var(--fg-1)',
+                        }}
+                      >
+                        {sourceTitle}
+                      </span>
+                    </>
+                  ) : (
+                    <a
+                      href={busy ? undefined : chipUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        color: 'inherit',
+                        textDecoration: 'none',
+                        cursor: busy ? 'default' : 'pointer',
+                        margin: '-8px 0 -8px -10px',
+                        padding: '8px 0 8px 10px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          flex: 'none',
+                          ...LABEL_EN,
+                          color: 'var(--accent)',
+                          border: '1px solid var(--accent)',
+                          borderRadius: 'var(--radius-chip)',
+                          padding: '2px 5px',
+                        }}
+                      >
+                        OGP
+                      </span>
+                      {/* 外部由来の文字列。HTML としては解釈させない(テキストのまま描く)。 */}
+                      <span
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          ...META,
+                          color: 'var(--fg-1)',
+                        }}
+                      >
+                        {sourceTitle}
+                      </span>
+                      <span style={{ flex: 'none', ...META, color: 'var(--fg-1)' }}>{EXTERNAL_ARROW}</span>
+                    </a>
+                  )}
                   {/* ✕ は chip だけを消す。出典の文字は 1 字も変えず、その URL では取り直さない。 */}
                   <button
                     type="button"
@@ -760,6 +830,15 @@ export function SaveSheet({
               ) : (
                 <p style={NOTE_STYLE}>{SOURCE_HELPER}</p>
               )}
+
+              {/* 詳細情報(営業時間・電話・website)。店舗詳細と同じ部品。出典の注記の後・流れる領域の末尾。 */}
+              {placesLibrary !== undefined ? (
+                <SheetPlaceDetails
+                  key={context.googlePlaceId}
+                  places={placesLibrary}
+                  googlePlaceId={context.googlePlaceId}
+                />
+              ) : null}
             </div>
           </div>
 
@@ -860,5 +939,28 @@ export function SaveSheet({
         />
       )}
     </>
+  )
+}
+
+/** 閉じた時の行の下の余白。下固定の CTA の上の間隔と足して、店舗詳細の「行の罫 → 編集する」(22px)とそろえる。 */
+const SHEET_DETAILS_END_CLOSED = 6
+/** 開いた時の行の下の余白。流れる領域の下端のぼかし(24px)の外に枠の下の縁を出す(Tora 2026-11-09 案 3)。 */
+const SHEET_DETAILS_END_OPEN = 'var(--sp-5)'
+
+/** 地図から開いた S1 の「詳細情報」。開いた時だけ下の余白を広げる。店の切り替えで key ごと作り直す。 */
+function SheetPlaceDetails({ places, googlePlaceId }: { places: google.maps.PlacesLibrary | null; googlePlaceId: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 15,
+        marginTop: 16,
+        paddingBottom: open ? SHEET_DETAILS_END_OPEN : SHEET_DETAILS_END_CLOSED,
+      }}
+    >
+      <PlaceDetailsDisclosure places={places} googlePlaceId={googlePlaceId} onExpandedChange={setOpen} />
+    </div>
   )
 }

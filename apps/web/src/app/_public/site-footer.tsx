@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-type PublicPage = 'terms' | 'privacy'
+type PublicPage = 'terms' | 'privacy' | 'news'
 const links = [
   { href: '/#about', text: 'このアプリについて', page: 'about' },
   { href: '/terms', text: '利用規約', page: 'terms' },

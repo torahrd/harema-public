@@ -9,6 +9,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { THEME_COLOR } from "./theme-color";
+import { INSTALL_CAPTURE_SCRIPT } from "@/lib/install-capture";
 import { OG_IMAGE, SITE_ORIGIN } from "@/lib/site";
 
 const cormorant = Cormorant_Garamond({
@@ -86,6 +87,8 @@ export default function RootLayout({
       className={`${cormorant.variable} ${spaceGrotesk.variable} ${notoSerifJp.variable} ${notoSansJp.variable} ${notoSans.variable} ${sourceCodePro.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* ホーム画面に追加する案内の事件の捕まえ(lib/install-capture.ts)。素の inline script で、Server Component が HTML にそのまま出すので、パーサが body の先頭で同期に実行する(Next の Script の beforeInteractive は Next の起動の直前まで遅れる)。 */}
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_CAPTURE_SCRIPT }} />
         <div className="edge-tint edge-tint-top" />
         <div className="edge-tint edge-tint-bottom" />
         {children}

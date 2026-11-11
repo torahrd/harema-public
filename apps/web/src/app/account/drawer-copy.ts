@@ -12,6 +12,8 @@ export const DRAWER_ARIA_LABEL = 'メニュー'
 // E-0 項目(順序確定・login-replace PLAN §0.3 の spec:232)。保存した店 → ユーザー名変更 → 退会 → ログアウト。
 export const ITEM_SAVED = '保存した店'
 export const ITEM_USERNAME = 'ユーザー名変更'
+// web だけの項目(Android の Chrome でまだ追加していない人にだけ「ユーザー名変更」の下に出す・所有者 2026-11-09)。mobile のメニューには無い。
+export const ITEM_ADD_HOME = 'ホーム画面に追加'
 export const ITEM_WITHDRAW = '退会'
 export const ITEM_LOGOUT = 'ログアウト'
 

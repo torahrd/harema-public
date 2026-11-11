@@ -29,6 +29,12 @@ export {
   type FetchSourceTitleResult,
 } from './mobile-api'
 export {
+  shareResolveRequestSchema,
+  shareResolveResponseSchema,
+  type ShareResolveRequest,
+  type ShareResolveResponse,
+} from './share-resolve'
+export {
   webClientEnvSchema,
   webAnalyticsEnvSchema,
   clientEnvSchema,

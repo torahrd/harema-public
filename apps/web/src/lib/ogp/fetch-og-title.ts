@@ -44,7 +44,7 @@ const USER_AGENT = 'hareMa/1.0 (+https://harema.app)'
  * DNS の解決結果を ip-guard に通す lookup。**1 つでも遮断対象が混ざっていたら接続しない** ——
  * 複数レコードのうち片方だけが private というケースで、選ばれ方に安全性を委ねないため。
  */
-const guardedLookup: LookupFunction = (hostname, options, callback) => {
+export const guardedLookup: LookupFunction = (hostname, options, callback) => {
   const allOptions: LookupAllOptions = { ...options, all: true }
   dnsLookup(hostname, allOptions, (error, addresses: LookupAddress[]) => {
     if (error) {

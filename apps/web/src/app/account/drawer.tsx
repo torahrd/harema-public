@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, unstable_rethrow } from 'next/navigation'
-import { useRef, useState, type TouchEvent as ReactTouchEvent } from 'react'
+import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react'
 import type { SignInProvider } from '@/lib/auth/core'
 import { ActionError } from '../_auth-ui/action-error'
 import { clearLpNotice, markLpNotice } from '@/lib/lp-notice'
@@ -10,6 +10,7 @@ import {
   DRAWER_ARIA_LABEL,
   DRAWER_HEADER,
   IRREVERSIBLE_NOTICE,
+  ITEM_ADD_HOME,
   ITEM_LOGOUT,
   LOGOUT_ERROR,
   ITEM_SAVED,
@@ -51,13 +52,22 @@ export function AccountDrawer({
   open,
   onClose,
   account,
+  onAddToHome,
+  onDialogChange,
 }: {
   open: boolean
   onClose: () => void
   account: AccountSnapshot
+  /** ホーム画面に追加する(`prompt()` を呼ぶ)。渡された時だけ項目を出す(Android の Chrome でまだ追加していない人)。 */
+  onAddToHome?: () => void
+  /** ユーザー名変更・退会のダイアログの開閉を親へ知らせる(開いている間はホーム画面の案内を出さない)。 */
+  onDialogChange?: (open: boolean) => void
 }) {
   const router = useRouter()
   const [dialog, setDialog] = useState<DialogKind>(null)
+  useEffect(() => {
+    onDialogChange?.(dialog !== null)
+  }, [dialog, onDialogChange])
   const [pendingLogout, setPendingLogout] = useState(false)
   const [logoutFailed, setLogoutFailed] = useState(false)
   const [swipe, setSwipe] = useState<SwipeState | null>(null)
@@ -227,6 +237,17 @@ export function AccountDrawer({
             {ITEM_USERNAME}
             <span className="qs-ar">{'→'}</span>
           </button>
+          {onAddToHome && (
+            <button
+              type="button"
+              disabled={pendingLogout}
+              onClick={() => closeAnd(onAddToHome)}
+              className="qs-it"
+            >
+              {ITEM_ADD_HOME}
+              <span className="qs-ar">{'→'}</span>
+            </button>
+          )}
 
           <div style={{ flex: 1 }} />
 

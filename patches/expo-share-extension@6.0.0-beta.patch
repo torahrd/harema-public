@@ -25,7 +25,7 @@ index c1052fbc6adf6695e09ccad0e2a31413b3ec3894..e07e53417e77975f69b5b6f139cf5fa9
      PRODUCT_BUNDLE_IDENTIFIER: `"${bundleIdentifier}"`,
      PRODUCT_NAME: `"${targetName}"`,
 diff --git a/plugin/swift/ShareExtensionViewController.swift b/plugin/swift/ShareExtensionViewController.swift
-index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..fc2c572b6f4c065ad8f7654f8d056089c28524f6 100644
+index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..e536de61084588e7945063fd4334cd14be67a5e6 100644
 --- a/plugin/swift/ShareExtensionViewController.swift
 +++ b/plugin/swift/ShareExtensionViewController.swift
 @@ -54,6 +54,10 @@ class ShareExtensionViewController: UIViewController {
@@ -139,3 +139,74 @@ index af0012f8f27e17ecadfef5a29850e8fadb8a6bf9..fc2c572b6f4c065ad8f7654f8d056089
        reactNativeFactoryDelegate = ReactNativeDelegate()
        reactNativeFactoryDelegate!.dependencyProvider = RCTAppDependencyProvider()
        reactNativeFactory = ShareExtensionReactNativeFactory(delegate: reactNativeFactoryDelegate!)
+@@ -281,6 +362,51 @@ class ShareExtensionViewController: UIViewController {
+     return UIColor(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
+   }
+   
++  // 共有の文の集め(hareMa の patch)。元の部品は本文(attributedContentText)・題(attributedTitle)と、
++  // url に当たる provider の文を読まない。Google マップは店名を本文や文の添付に入れる。
++  // 並びは inputItems と attachments の並びの順(完了の順にしない)。item ごとに 本文 → 添付の文 → 題。
++  private let maxSharedTextLength = 4000
++
++  private final class SharedTextSlots {
++    var values: [String?] = []
++  }
++
++  private func clippedSharedText(_ text: String) -> String? {
++    if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return nil }
++    let units = Array(text.utf16.prefix(maxSharedTextLength))
++    return String(decoding: units, as: UTF16.self)
++  }
++
++  private func collectSharedTexts(from extensionItems: [NSExtensionItem], group: DispatchGroup) -> SharedTextSlots {
++    let slots = SharedTextSlots()
++    for item in extensionItems {
++      if let content = item.attributedContentText?.string, let clipped = clippedSharedText(content) {
++        slots.values.append(clipped)
++      }
++      for provider in item.attachments ?? [] {
++        if provider.hasItemConformingToTypeIdentifier(UTType.text.identifier) {
++          let index = slots.values.count
++          slots.values.append(nil)
++          group.enter()
++          provider.loadItem(forTypeIdentifier: UTType.text.identifier, options: nil) { (textItem, error) in
++            DispatchQueue.main.async {
++              if let text = textItem as? String {
++                slots.values[index] = self.clippedSharedText(text)
++              } else if let attributed = textItem as? NSAttributedString {
++                slots.values[index] = self.clippedSharedText(attributed.string)
++              }
++              group.leave()
++            }
++          }
++        }
++      }
++      if let title = item.attributedTitle?.string, let clipped = clippedSharedText(title) {
++        slots.values.append(clipped)
++      }
++    }
++    return slots
++  }
++
+   private func getShareData(completion: @escaping ([String: Any]?) -> Void) {
+     guard let extensionItems = extensionContext?.inputItems as? [NSExtensionItem] else {
+       completion(nil)
+@@ -290,6 +416,7 @@ class ShareExtensionViewController: UIViewController {
+     var sharedItems: [String: Any] = [:]
+     
+     let group = DispatchGroup()
++    let sharedTexts = collectSharedTexts(from: extensionItems, group: group)
+     
+     let fileManager = FileManager.default
+     
+@@ -613,6 +740,10 @@ class ShareExtensionViewController: UIViewController {
+     }
+     
+     group.notify(queue: .main) {
++      let texts = sharedTexts.values.compactMap { $0 }
++      if !texts.isEmpty {
++        sharedItems["texts"] = texts
++      }
+       completion(sharedItems.isEmpty ? nil : sharedItems)
+     }
+   }

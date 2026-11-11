@@ -3,7 +3,7 @@ import { analyticsEnv } from '@/env/analytics'
 import { PUBLIC_ANALYTICS_PATHS } from '@/lib/site'
 
 /**
- * 公開ページ(LP・利用規約・プライバシーポリシー・Coming soon)だけに置く Google アナリティクス 4 の部品
+ * 公開ページ(LP・利用規約・プライバシーポリシー・更新情報・Coming soon)だけに置く Google アナリティクス 4 の部品
  * (所有者の決定 2026-11-03 12:13 JST)。ログインの後の画面の URL(店の識別子を含む `/places/...` など)を
  * Google へ送らない(プライバシーポリシー第 5 条 1 項)。そのための 2 段:
  * 1. 公開ページからログインへのリンクは素の `<a>` にして、文書ごと読み直す(タグの残った文書で

@@ -10,7 +10,9 @@
     "./constants": "./constants/index.ts",
     "./i18n": "./i18n/index.ts",
     "./current-location": "./current-location/index.ts",
-    "./search-scope": "./search-scope/index.ts"
+    "./search-scope": "./search-scope/index.ts",
+    "./share-url": "./share-url/index.ts",
+    "./share-parse": "./share-parse/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

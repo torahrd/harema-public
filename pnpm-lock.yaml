@@ -7,7 +7,7 @@ settings:
 packageExtensionsChecksum: sha256-L15hUdzOxX1LWRB3GSD+h4NcMKHABUwMYjMGPpPZ/IM=
 
 patchedDependencies:
-  expo-share-extension@6.0.0-beta: 1a8de929241b48df14ede400674f11a5de6480681caf4808dad9003b0c2a3db4
+  expo-share-extension@6.0.0-beta: cec43e1d0814f184b4b3d6216604d0f4dbf2c3352d4a0a318dc1866fc6bfa1bf
   react-native-maps@1.29.11: 90fc25a688a424ff4116388331c39374e94e00c291fc88ded36d29b5e34f7743
 
 importers:
@@ -8190,7 +8190,7 @@ snapshots:
 
   expo-server@58.0.6: {}
 
-  expo-share-extension@6.0.0-beta(patch_hash=1a8de929241b48df14ede400674f11a5de6480681caf4808dad9003b0c2a3db4)(expo@58.0.21)(react-native@0.88.1(@babel/core@7.29.0)(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@6.0.3):
+  expo-share-extension@6.0.0-beta(patch_hash=cec43e1d0814f184b4b3d6216604d0f4dbf2c3352d4a0a318dc1866fc6bfa1bf)(expo@58.0.21)(react-native@0.88.1(@babel/core@7.29.0)(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@6.0.3):
     dependencies:
       expo: 58.0.21(@babel/core@7.29.0)(@expo/dom-webview@58.0.2)(react-dom@19.2.4(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.0)(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
       react: 19.3.0

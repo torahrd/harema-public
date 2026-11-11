@@ -222,6 +222,8 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .app-badge picture,.lp .app-badge img{display:block;width:auto;height:40px}
 .lp .app-badge-s1{margin-top:14px}
 .lp .app-get{display:flex;align-items:center;gap:20px;margin-top:16px}
+/* Android の 1 文(所有者の決定 2026-11-09 12:07 JST)。App Store の塊の下・上の余白は .app-get と同じ 16px。 */
+.lp .app-android{display:block;margin-top:16px}
 .lp .app-icon{display:none;flex:none;width:80px;height:80px}
 .lp .app-icon img{display:block;width:80px;height:80px;border-radius:18px;box-shadow:0 0 0 1px var(--lp-rule)}
 .lp .app-qr{display:block;flex:none;width:96px;height:96px}
@@ -241,3 +243,15 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .x-ul{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
 /* 文ごとに行を始める(所有者の決定 2026-11-04 10:44 JST 案 4)。入らない文は後ろの文がひとかたまりで次の行へ移り、文の中は <wbr>(句読点の後)だけで折れる。 */
 .lp .sent{display:inline-block}
+
+/* 更新情報の段(所有者の決定 2026-11-09 案 A・案 2・harema#127)。.fact と同じ組み・日付は .dn・札は .lp-ntc と同じ角 */
+.lp .nws-list{margin-top:16px}
+.lp .nws-item{display:grid;grid-template-columns:160px minmax(0,1fr);column-gap:24px;padding:24px 0;border-top:1px solid var(--lp-rule)}
+.lp .nws-item:last-child{border-bottom:1px solid var(--lp-rule)}
+.lp .nws-meta{display:flex;align-items:center;gap:8px;height:28px}
+.lp .nws-date{font-family:var(--font-source-code-pro),'Source Code Pro',monospace;font-size:13px;line-height:20px;font-weight:500;letter-spacing:0;color:var(--lp-fg2);font-variant-numeric:tabular-nums}
+.lp .nws-tag{font-size:12px;line-height:18px;letter-spacing:.02em;padding:0 6px;border:1px solid var(--lp-rule);border-radius:2px;color:var(--lp-fg2)}
+.lp .nws-ttl{display:block;font-weight:700}
+.lp .nws-t .sent{display:block}
+.lp .nws-all{margin-top:16px}
+@media (max-width:600px){.lp .nws-item{grid-template-columns:minmax(0,1fr);row-gap:4px;padding:20px 0}}

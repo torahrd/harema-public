@@ -8,10 +8,10 @@
 export const SITE_ORIGIN = 'https://harema.app'
 
 /** 検索に載せる公開ページ。ログインの外で読めて、検索よけ(noindex)を付けていない道だけ。 */
-export const PUBLIC_INDEXABLE_PATHS = ['/', '/terms', '/privacy'] as const
+export const PUBLIC_INDEXABLE_PATHS = ['/', '/terms', '/privacy', '/news'] as const
 
 /** 解析のタグを動かす道(公開ページ)。この外では Google の公式の止め方で送信を止める。 */
-export const PUBLIC_ANALYTICS_PATHS = ['/', '/terms', '/privacy', '/coming-soon'] as const
+export const PUBLIC_ANALYTICS_PATHS = ['/', '/terms', '/privacy', '/news', '/coming-soon'] as const
 
 /**
  * リンクを貼ったときのカード(OGP・X のカード)の画像。所有者の決定 2026-11-03 12:58 JST(案 B「LP の最初の画面の縮図」)。
