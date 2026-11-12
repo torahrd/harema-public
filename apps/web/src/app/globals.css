@@ -1055,14 +1055,18 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
   .public-footer nav { margin-bottom: 0; }
 }
 /* 更新情報のページ /news(所有者の決定 2026-11-09 案 A・案 2・harema#127。/terms と同じ型) */
-.news-list { border-bottom: 1px solid var(--border); }
-.news-item { padding: 20px 0; border-top: 1px solid var(--border); }
+.news-list { border-left: 1px solid var(--border); }
+.news-item { position: relative; padding: 0 0 32px 20px; }
+.news-item:last-child { padding-bottom: 0; }
+.news-item::before { content: ""; position: absolute; left: 0; top: 10px; width: 12px; border-top: 1px solid var(--border); }
 .news-meta { display: flex; align-items: center; gap: 8px; margin: 0; }
 .news-date { font: 500 13px/20px var(--ff-mono); letter-spacing: 0; color: var(--fg-2); font-variant-numeric: tabular-nums; }
 .news-tag { font: 400 12px/18px var(--ff-sans); letter-spacing: .02em; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--radius-image); color: var(--fg-2); }
-.news-t { margin: 4px 0 0; font-size: 16px; line-height: 1.7; letter-spacing: .02em; color: var(--fg-1); word-break: keep-all; line-break: strict; }
+.news-t { margin: 4px 0 0; word-break: keep-all; line-break: strict; }
+.news-ttl { margin: 0; font-family: var(--ff-heading-jp); font-size: 18px; line-height: 28px; font-weight: 700; color: var(--fg-1); white-space: nowrap; }
+.news-d, .news-ul { margin: 6px 0 0; font-size: 14px; line-height: 1.7; letter-spacing: .02em; color: var(--fg-2); }
+.news-ul { list-style: disc; padding-left: 16px; }
+.news-ul li + li { margin-top: 2px; }
 .news-t .sent { display: block; }
-.news-ttl { display: block; font-family: var(--ff-heading-jp); font-weight: 700; }
-.news-t .nw, .news-ttl { white-space: nowrap; }
-@media (min-width: 768px) { .news-item { padding: 24px 0; } }
+.news-t .nw { white-space: nowrap; }
 /* WP-12.5: public pages — end */

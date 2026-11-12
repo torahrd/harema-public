@@ -3,30 +3,63 @@
  * 運用: 使う人に見える変更を公開したら、`NEWS` の先頭に 1 件足す(docs/release-runbook.md R7「更新情報」)。
  * 置き方の約束: 相対 import・`@/`・`server-only` を持たない(node の検査から直接読む)。
  */
+/** 対象の札。Android = Android の Chrome で使う web 版 */
+export type NewsTarget = 'Web' | 'iPhone' | 'Android'
+
 export type NewsItem = {
   /** JST の公開日 `YYYY.MM.DD` */
   date: string
-  target: 'Web' | 'iPhone'
+  /** 札。web の変更は ['Web', 'Android']、iPhone のアプリの変更は ['iPhone']、Android の Chrome だけの変更は ['Android'](所有者 2026-11-12) */
+  targets: readonly NewsTarget[]
   /** 太字の 1 行(機能の名前) */
   title: string
-  /** 説明の 1 文。句の切れ目は「、」の後だけ */
-  text: string
+  /** 説明の文(1 文ずつ)。2 文以上は箇条書きで出る(所有者 2026-11-12「複数内容なら箇条書きにすべき」)。同じ日・同じ対象の組の変更は 1 件にまとめる(所有者 2026-11-12)。「/」は折ってよい位置の印(画面には出ない)。行を折るための「、」は入れない(所有者 2026-11-12「句読点がおかしい」) */
+  texts: readonly string[]
 }
 
 /** 新しい順。 */
 export const NEWS: readonly NewsItem[] = [
-  { date: '2026.11.07', target: 'iPhone', title: 'iPhone のアプリを公開', text: 'ほかのアプリの共有から、切り替えずに保存できます。' },
-  { date: '2026.11.05', target: 'Web', title: '地図のピンから編集', text: 'ピンを押すと編集のシートが開き、お店の詳細は一覧から開けます。' },
-  { date: '2026.11.05', target: 'Web', title: '飲食店以外を検索結果に含める', text: '地図の検索中だけ、候補の上に出るスイッチです。' },
-  { date: '2026.11.04', target: 'Web', title: 'ブラウザ版を公開', text: 'harema.app で、ブラウザのまま始められます。' },
+  { date: '2026.11.12', targets: ['iPhone'], title: 'バージョン 1.0.1 を審査中', texts: [
+    'お店の名前の自動入力を追加します。',
+    '営業時間などの表示を追加します。',
+    '不具合を修正します。',
+  ] },
+  { date: '2026.11.12', targets: ['Web', 'Android'], title: '不具合の修正', texts: ['ページのタイトルを取得できない出典が/リンクにならない不具合を修正しました。'] },
+  { date: '2026.11.11', targets: ['Web', 'Android'], title: '機能の追加', texts: [
+    '地図のピンから開いた画面に/営業時間などの表示を追加しました。',
+    '出典の欄を押して/元のページを開く機能を追加しました。',
+    'トップページに/更新情報の欄を追加しました。',
+  ] },
+  { date: '2026.11.11', targets: ['Android'], title: 'Android 向けの機能の追加', texts: [
+    'ほかのアプリの共有から/お店を保存する機能を追加しました。',
+    'Chrome の「ホーム画面に追加」から/アプリと同様に開く機能を追加しました。',
+  ] },
+  { date: '2026.11.07', targets: ['iPhone'], title: 'iPhone のアプリを公開', texts: ['App Store で/ iPhone のアプリを公開しました。'] },
+  { date: '2026.11.07', targets: ['Web', 'Android'], title: 'App Store へのリンク', texts: ['トップページに/ App Store へのリンクを追加しました。'] },
+  { date: '2026.11.05', targets: ['Web', 'Android'], title: '機能の追加と不具合の修正', texts: [
+    '地図のピンを押して/編集の画面を開く機能を追加しました。',
+    '地図の検索に/飲食店以外を含める機能を追加しました。',
+    'メニューに/利用規約などのリンクを追加しました。',
+    '地図を読み込めない場合に/エラーになる不具合を修正しました。',
+    'ログイン済みでも/ログインを求める不具合を修正しました。',
+  ] },
+  { date: '2026.11.04', targets: ['Web', 'Android'], title: 'ブラウザ版を公開', texts: [
+    'harema.app で/ブラウザ版を公開しました。',
+    'ログインの画面で/同意のチェックを 1 つにまとめました。',
+  ] },
 ]
 
 /** LP に出す件数(先頭から)。 */
 export const LP_NEWS_COUNT = 3
 
-/** 説明の文を「、」の後で句に切る(句の中では折らない)。 */
+/** 説明の文を、折ってよい位置の印「/」で句に切る(印は画面に出ない。句の中では折らない)。 */
 export function newsPhrases(text: string): string[] {
-  return text.split(/(?<=、)/)
+  return text.split('/')
+}
+
+/** 印「/」を除いた、画面に出る文。 */
+export function newsPlain(text: string): string {
+  return text.replaceAll('/', '')
 }
 
 /** `YYYY.MM.DD` → `YYYY-MM-DD`(`<time dateTime>` 用)。 */

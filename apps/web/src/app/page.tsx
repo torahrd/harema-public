@@ -195,7 +195,7 @@ export default function Home() {
 </div>
 <div>
 <h3 className="h3 hd sub">更新情報</h3>
-<ol className="nws-list" data-lp-feed="news">{NEWS.slice(0, LP_NEWS_COUNT).map((item) => <li className="nws-item" key={`${item.date}-${item.title}`}><p className="nws-meta"><time className="nws-date" dateTime={newsDateTime(item.date)}>{item.date}</time><span className="nws-tag">{item.target}</span></p><p className="nws-t hd"><span className="nws-ttl">{item.title}</span><NewsSentence text={item.text} /></p></li>)}</ol>
+<ol className="nws-list" data-lp-feed="news">{NEWS.slice(0, LP_NEWS_COUNT).map((item) => <li className="nws-item" key={`${item.date}-${item.targets.join()}-${item.title}`}><p className="nws-meta"><time className="nws-date" dateTime={newsDateTime(item.date)}>{item.date}</time>{item.targets.map((t) => <span className="nws-tag" key={t}>{t}</span>)}</p><div className="nws-t hd"><p className="nws-ttl">{item.title}</p>{item.texts.length > 1 ? <ul className="nws-ul">{item.texts.map((text) => <li key={text}><NewsSentence text={text} /></li>)}</ul> : item.texts.map((text) => <p className="nws-d" key={text}><NewsSentence text={text} /></p>)}</div></li>)}</ol>
 <p className="nws-all"><Link className="x-ul" href="/news">更新情報をすべて見る</Link></p>
 </div>
 </div>

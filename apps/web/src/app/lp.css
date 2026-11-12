@@ -245,13 +245,17 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .sent{display:inline-block}
 
 /* 更新情報の段(所有者の決定 2026-11-09 案 A・案 2・harema#127)。.fact と同じ組み・日付は .dn・札は .lp-ntc と同じ角 */
-.lp .nws-list{margin-top:16px}
-.lp .nws-item{display:grid;grid-template-columns:160px minmax(0,1fr);column-gap:24px;padding:24px 0;border-top:1px solid var(--lp-rule)}
-.lp .nws-item:last-child{border-bottom:1px solid var(--lp-rule)}
+.lp .nws-list{margin-top:24px;border-left:1px solid var(--lp-rule)}
+.lp .nws-item{position:relative;display:grid;grid-template-columns:160px minmax(0,1fr);column-gap:24px;padding:0 0 32px 20px}
+.lp .nws-item:last-child{padding-bottom:0}
+.lp .nws-item::before{content:"";position:absolute;left:0;top:14px;width:12px;border-top:1px solid var(--lp-rule)}
 .lp .nws-meta{display:flex;align-items:center;gap:8px;height:28px}
 .lp .nws-date{font-family:var(--font-source-code-pro),'Source Code Pro',monospace;font-size:13px;line-height:20px;font-weight:500;letter-spacing:0;color:var(--lp-fg2);font-variant-numeric:tabular-nums}
 .lp .nws-tag{font-size:12px;line-height:18px;letter-spacing:.02em;padding:0 6px;border:1px solid var(--lp-rule);border-radius:2px;color:var(--lp-fg2)}
-.lp .nws-ttl{display:block;font-weight:700}
+.lp .nws-ttl{font-size:18px;line-height:28px;font-weight:700;white-space:nowrap}
+.lp .nws-d,.lp .nws-ul{margin-top:6px;font-size:14px;line-height:1.7;letter-spacing:.02em;color:var(--lp-fg2)}
+.lp .nws-ul{list-style:disc;padding-left:16px}
+.lp .nws-ul li+li{margin-top:2px}
 .lp .nws-t .sent{display:block}
 .lp .nws-all{margin-top:16px}
-@media (max-width:600px){.lp .nws-item{grid-template-columns:minmax(0,1fr);row-gap:4px;padding:20px 0}}
+@media (max-width:600px){.lp .nws-item{grid-template-columns:minmax(0,1fr);row-gap:4px}}
