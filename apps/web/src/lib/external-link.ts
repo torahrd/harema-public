@@ -13,3 +13,10 @@ export function sourceChipUrl(sourceText: string): string | null {
   const url = sourceText.trim()
   return isHttpUrl(url) ? url : null
 }
+
+/** 出典の URL を枠に出すときの文字。先頭の `https://` / `http://` を除く(表示だけ。開くのは元の文字)。ほかはそのまま返す。 */
+export function sourceLinkLabel(url: string): string {
+  if (url.startsWith('https://')) return url.slice('https://'.length)
+  if (url.startsWith('http://')) return url.slice('http://'.length)
+  return url
+}

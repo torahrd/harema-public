@@ -8,6 +8,7 @@ import { Agent as HttpsAgent, request as httpsRequest } from 'node:https'
 import { isIP } from 'node:net'
 import type { LookupFunction } from 'node:net'
 import { SOURCE_TITLE_MAX_LENGTH } from '@harema/shared/constants'
+import { isNoFetchHost } from './no-fetch-host'
 import { isBlockedAddress } from './ip-guard'
 
 /**
@@ -290,6 +291,8 @@ export async function fetchOgTitle(rawUrl: string): Promise<string | null> {
   if (!ALLOWED_PROTOCOLS.includes(url.protocol)) return null
   if (url.username !== '' || url.password !== '') return null
   if (isBlockedHostLiteral(url.hostname)) return null
+  // Instagram は取りに行かない(利用規約 4.2・robots.txt。spec §11.2「Instagram の URL はタイトルを取りに行かない」・harema#139)。
+  if (isNoFetchHost(url.hostname)) return null
 
   const body = await requestHtml(url)
   if (!body) return null

@@ -14,7 +14,7 @@ import {
   type SavePlaceInput,
 } from '@harema/shared/validations'
 import { EXTERNAL_ARROW } from '@/app/places/[id]/place-detail-copy'
-import { sourceChipUrl } from '@/lib/external-link'
+import { sourceChipUrl, sourceLinkLabel } from '@/lib/external-link'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import {
   deleteSavedPlace,
@@ -161,6 +161,7 @@ export function SaveSheet({
   const mode = existingStatus === null ? 'create' : 'edit'
   const busy = resolving || saving || deleting
   const chipUrl = sourceChipUrl(sourceText)
+  const linkLabel = chipUrl === null ? '' : sourceLinkLabel(chipUrl)
   const visible = entered && !leaving
   const revertBlocked =
     existingStatus !== null && existingStatus !== UNRATED_STATUS
@@ -825,6 +826,39 @@ export function SaveSheet({
                     </svg>
                   </button>
                 </div>
+              ) : chipUrl !== null && linkLabel.length > 0 ? (
+                <a
+                  href={busy ? undefined : chipUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-control)',
+                    padding: '8px 10px',
+                    marginTop: 8,
+                    color: 'inherit',
+                    textDecoration: 'none',
+                    cursor: busy ? 'default' : 'pointer',
+                  }}
+                >
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      ...META,
+                      color: 'var(--fg-1)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {linkLabel}
+                  </span>
+                  <span style={{ flex: 'none', ...META, color: 'var(--fg-1)' }}>{EXTERNAL_ARROW}</span>
+                </a>
               ) : titleUnreadable ? (
                 <p style={NOTE_STYLE}>{SOURCE_TITLE_UNREADABLE}</p>
               ) : (
