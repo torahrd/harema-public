@@ -9,6 +9,10 @@ import mapLight from './_public/lp/map-light.webp'
 import mapDark from './_public/lp/map-dark.webp'
 import mapR1Light from './_public/lp/map-r1-1b-light.webp'
 import mapR1Dark from './_public/lp/map-r1-1b-dark.webp'
+import sheetSaveLight from './_public/lp/sheet-save-light.webp'
+import sheetSaveDark from './_public/lp/sheet-save-dark.webp'
+import sheetRateLight from './_public/lp/sheet-rate-light.webp'
+import sheetRateDark from './_public/lp/sheet-rate-dark.webp'
 import appIcon from './_public/lp/app-icon.webp'
 import appStoreBadge from './_public/lp/app-store-badge-ja.svg'
 import appStoreQr from './_public/lp/app-store-qr.svg'
@@ -36,11 +40,13 @@ export const viewport: Viewport = {
   ],
 }
 
-// アプリの画面の実機の撮影(架空のデータ・1170x2532 の WebP)。OS の色の設定で light / dark を替える(next/image の getImageProps の形)。
+// アプリの画面(実物の地図に今のアプリの部品を重ねた合成。tools/lp-shots・架空のデータ・1170x2532 の WebP)。OS の色の設定で light / dark を替える(next/image の getImageProps の形)。
 // 画像は .phone-in の中で 390x844 に置いてから transform で縮めるので、最適化を通さず(unoptimized)静的な配信のままにする。
 const SHOTS = {
   'map-light': { light: mapLight, dark: mapDark },
   'map-r1-1b-light': { light: mapR1Light, dark: mapR1Dark },
+  'sheet-save-light': { light: sheetSaveLight, dark: sheetSaveDark },
+  'sheet-rate-light': { light: sheetRateLight, dark: sheetRateDark },
 } as const
 
 function Shot({ name, alt, eager = false }: { name: keyof typeof SHOTS; alt: string; eager?: boolean }) {
@@ -99,7 +105,7 @@ export default function Home() {
 <div className="s1-shot">
 <div className="phone"><div className="phone-in">
 <div className="app app-light">
-<Shot name="map-light" eager alt="hareMa の地図の画面。検索欄、店舗とマップの切り替え、保存した店のピン(行きたい 16・また行きたい 8)が地図に並ぶ。" />
+<Shot name="map-light" eager alt="hareMa の地図の画面。検索欄、保存した店のピン(行きたい 16・また行きたい 8)が地図に並ぶ。" />
 </div>
 </div></div>
 </div>
@@ -109,28 +115,8 @@ export default function Home() {
 <h2 className="h2 hd" id="w-h2-use">使い方は、3 つだけ。</h2>
 <div className="trio">
 <div className="phone"><div className="phone-in">
-<div className="app app-light" inert>
-<Shot name="map-light" alt="" />
-<div className="sh-scrim"></div>
-<div className="sh" role="dialog" aria-label="保存する">
-<div className="sh-top">
-<div className="sh-grab"></div>
-<div className="sh-name">喫茶 ことり</div>
-<div className="sh-addr">東京都台東区谷中 3 丁目</div>
-</div>
-<div className="sh-flow">
-<div className="sh-cap sh-cap-state">状態</div>
-<div className="sh-seg" role="group" aria-label="状態"><button type="button" className="on" aria-pressed="true">行きたい</button><button type="button" aria-pressed="false">また行きたい</button><button type="button" aria-pressed="false">もういい</button></div>
-<label className="sh-cap sh-cap-memo" htmlFor="w-memo">メモ</label>
-<textarea id="w-memo" className="sh-field sh-memo" placeholder="気になったこと、行きたい理由など（任意）"></textarea>
-<label className="sh-cap sh-cap-src" htmlFor="w-src">出典</label>
-<input id="w-src" className="sh-field" type="text" placeholder="URL またはテキスト（任意）" />
-<p className="sh-note">URL を貼ると、タイトルを自動で読み取ります（OGP）。</p>
-</div>
-<div className="sh-bottom">
-<button className="sh-cta" type="button">保存する <span className="arrow">→</span></button>
-</div>
-</div>
+<div className="app app-light">
+<Shot name="sheet-save-light" alt="" />
 </div>
 </div></div>
 <div className="phone"><div className="phone-in">
@@ -139,28 +125,8 @@ export default function Home() {
 </div>
 </div></div>
 <div className="phone"><div className="phone-in">
-<div className="app app-light" inert>
-<Shot name="map-light" alt="" />
-<div className="sh-scrim"></div>
-<div className="sh sh-edit" role="dialog" aria-label="更新する">
-<div className="sh-top">
-<div className="sh-grab"></div>
-<div className="sh-name">中華そば みやこ</div>
-<div className="sh-addr">東京都文京区本郷 4 丁目</div>
-</div>
-<div className="sh-flow">
-<div className="sh-seg" role="group" aria-label="状態"><button type="button" aria-pressed="false">行きたい</button><button type="button" className="on" aria-pressed="true">また行きたい</button><button type="button" aria-pressed="false">もういい</button></div>
-<label className="sh-cap sh-cap-memo" htmlFor="w-memo-edit">メモ</label>
-<textarea id="w-memo-edit" className="sh-field sh-memo" placeholder="気になったこと、行きたい理由など（任意）"></textarea>
-<label className="sh-cap sh-cap-src" htmlFor="w-src-edit">出典</label>
-<input id="w-src-edit" className="sh-field" type="text" placeholder="URL またはテキスト（任意）" />
-<p className="sh-note">URL を貼ると、タイトルを自動で読み取ります（OGP）。</p>
-</div>
-<div className="sh-bottom">
-<button className="sh-cta" type="button">更新する <span className="arrow">→</span></button>
-<button className="sh-del" type="button">削除する</button>
-</div>
-</div>
+<div className="app app-light">
+<Shot name="sheet-rate-light" alt="" />
 </div>
 </div></div>
 </div>

@@ -81,39 +81,12 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 }
 
 /* ---- app-screen.css(アプリの画面の部品。色は globals.css のトークンを読む = dark ではアプリの dark の値に替わる) ---- */
-.lp .app{--a-bg:var(--bg);--a-surface:var(--surface);--a-sunken:var(--bg-sunken);--a-fg1:var(--fg-1);--a-fg2:var(--fg-2);--a-fg3:var(--fg-3);--a-muted:var(--fg-muted);--a-border:var(--border);--a-border-subtle:var(--border-subtle);--a-border-strong:var(--border-strong);--a-accent:var(--accent);--a-akane:var(--akane-text);--a-shadow1:var(--shadow-1);--seg-shadow:0 1px 2px rgba(26,30,39,.16)}
+.lp .app{--a-bg:var(--bg);--a-fg1:var(--fg-1)}
 .lp .app{position:relative;display:block;width:390px;height:844px;overflow:hidden;background:var(--a-bg);color:var(--a-fg1);font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;font-size:16px;line-height:1.75;letter-spacing:0;font-weight:400;text-align:left;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere;line-break:strict}
 .lp .app *,.lp .app *::before,.lp .app *::after{box-sizing:border-box}
 .lp .app p{margin:0}
 .lp .app button{margin:0;font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;cursor:pointer}
 .lp .app-shot{position:absolute;left:0;top:0;display:block;width:390px;height:844px;max-width:none;margin:0;border:0}
-.lp .sh-scrim{position:absolute;left:0;top:0;right:0;bottom:0;background:var(--sheet-scrim);z-index:20}
-.lp .sh{position:absolute;left:0;right:0;bottom:0;z-index:21;display:flex;flex-direction:column;background:var(--a-surface);border-top:1px solid var(--a-border);border-radius:16px 16px 0 0;padding:10px 0 0;box-shadow:var(--sheet-shadow)}
-.lp .sh-top{padding:0 20px}
-.lp .sh-grab{width:40px;height:4px;border-radius:2px;background:var(--a-border-strong);margin:0 auto 16px}
-.lp .sh-name{font-family:var(--font-noto-serif-jp),'Noto Serif JP',serif;font-weight:700;font-size:19px;line-height:1.75;color:var(--a-fg1)}
-.lp .sh-addr{font-size:12px;line-height:1.75;color:var(--a-fg2);margin:4px 0 18px}
-.lp .sh-flow{padding:0 20px}
-.lp .sh-cap{display:block;font-family:var(--font-space-grotesk),'Space Grotesk',var(--font-noto-sans-jp),'Noto Sans JP',monospace;font-size:10px;line-height:1.75;letter-spacing:.16em;text-transform:uppercase;color:var(--a-fg2)}
-.lp .sh-cap-state{margin-bottom:8px}
-.lp .sh-cap-memo{margin:18px 0 8px}
-.lp .sh-cap-src{margin:16px 0 8px}
-.lp .sh-seg{display:flex;background:var(--a-sunken);border:1px solid var(--a-border);border-radius:6px;padding:3px;gap:3px}
-.lp .sh-seg button{flex:1;text-align:center;padding:9px 0;border:0;font-size:13px;line-height:1.75;color:var(--a-fg2);background:transparent}
-.lp .sh-seg button.on{font-weight:600;color:var(--a-fg1);background:var(--a-surface);border-radius:4px;box-shadow:var(--seg-shadow)}
-.lp .sh-field{display:block;width:100%;border:1px solid var(--a-border);border-radius:6px;padding:11px 12px;font-family:var(--font-noto-sans-jp),'Noto Sans JP',sans-serif;font-size:16px;line-height:1.5;color:var(--a-fg1);background:var(--a-surface);outline:none;margin:0}
-.lp .sh-field::placeholder{color:var(--a-fg3);opacity:1}
-.lp .sh-memo{min-height:66px;line-height:1.7;resize:none}
-.lp .sh-note{margin:7px 0 0;font-size:11px;line-height:1.75;color:var(--a-fg2)}
-.lp .sh-bottom{padding:18px 20px 26px}
-.lp .sh-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:18px 0;background:transparent;border:0;border-top:1px solid var(--a-accent);border-bottom:1px solid var(--a-accent);border-radius:0;font-weight:700;font-size:15px;line-height:1.75;letter-spacing:.04em;color:var(--a-accent);text-align:left}
-.lp .sh-cta .arrow{font-family:var(--font-space-grotesk),'Space Grotesk',monospace;font-weight:400;font-size:18px;line-height:1}
-.lp .sh-del{display:flex;width:100%;justify-content:center;margin-top:10px;padding:10px 16px;font-size:14px;line-height:1.75;font-weight:500;letter-spacing:.02em;background:transparent;color:var(--a-akane);border:1px solid var(--a-border-strong);border-radius:2px}
-.lp .sh-edit .sh-grab{margin-bottom:14px}
-.lp .sh-edit .sh-addr{margin-bottom:14px}
-.lp .sh-edit .sh-cap-memo{margin-top:16px}
-.lp .sh-edit .sh-memo{min-height:52px}
-.lp .sh-edit .sh-bottom{padding:14px 20px 24px}
 
 /* ---- bw.css(構造・寸法・和文の折れ) ---- */
 .lp.bw{letter-spacing:.02em;line-height:1.7}
@@ -259,3 +232,5 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .nws-t .sent{display:block}
 .lp .nws-all{margin-top:16px}
 @media (max-width:600px){.lp .nws-item{grid-template-columns:minmax(0,1fr);row-gap:4px}}
+/* PC 幅は札を日付の下の行に置く(所有者の決定 2026-11-13 案 B)。左の欄 160px に日付と札 2 つ(195px)が入らず語の途中で折れたため。札が増えたら次の行へ並ぶ。 */
+@media (min-width:601px){.lp .nws-meta{flex-wrap:wrap;align-content:flex-start;height:auto;padding:4px 0;row-gap:6px}.lp .nws-date,.lp .nws-tag{white-space:nowrap;flex:none}.lp .nws-date{width:100%}}

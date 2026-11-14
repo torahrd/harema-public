@@ -19,6 +19,7 @@ export type NewsItem = {
 
 /** 新しい順。 */
 export const NEWS: readonly NewsItem[] = [
+  { date: '2026.11.14', targets: ['Web', 'Android'], title: '不具合の修正', texts: ['パソコンなどの広い画面で/更新情報の日付が/崩れる不具合を修正しました。'] },
   { date: '2026.11.13', targets: ['iPhone'], title: 'バージョン 1.0.1 を公開', texts: [
     'Google マップと/一部のウェブサイトからの共有に/お店の名前の自動入力を追加しました。',
     '地図のピンから開いた画面に/営業時間などの表示を追加しました。',
