@@ -63,6 +63,8 @@ export function parseLegal(source) {
   for (let i = 0; i < body.length; i++) {
     const line = body[i]
     if (!line.trim()) continue
+    // 折れの印(U+200B)は前文(第 1 条より前)の描き方だけが読む。条の本文では画面に字として出るので置かない。
+    if (article && line.includes('\u200B')) fail(`zero-width break mark in article body: ${line}`)
     const header = line.match(/^## 第 (\d+) 条\((.+)\)$/)
     if (header) {
       article = { no: Number(header[1]), heading: clean(header[2]), paragraphs: [] }
@@ -168,6 +170,7 @@ function negativeControls(source) {
     { name: 'table-cell-changed', apply: edit(cell, (line) => line.replace(/^( *\|)[^|]*\|/, '$1 陰性対照 |')) },
     { name: 'table-indent-shifted', apply: edit(tableStart, (line) => `   ${line}`) },
     { name: 'note-indent-invalid', apply: edit(note, (line) => ` ${line}`) },
+    { name: 'break-mark-in-article', expect: 'zero-width break mark', apply: edit(sentence, (line) => `${line.slice(0, 4)}\u200B${line.slice(4)}`) },
     { name: 'internal-term-in-body', expect: 'internal terms', apply: edit(sentence, (line) => `${line}(管理記録 B の U19)`) },
     { name: 'plan-note-in-body', expect: 'internal terms', apply: edit(note, (line) => `${line}(PLAN.md §4.1・2026-11-05 00:41 JST)`) },
   ]

@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { jpLines } from '../_ui/jp-lines'
 import { splitLinks } from './linkify-core'
 import type { Block, LegalDocument, Paragraph } from './legal'
@@ -12,6 +13,8 @@ export function Linkify({ text }: { text: string }) {
 const UNIT = { display: 'inline-block', maxWidth: '100%' } as const
 /** 文と句に切る間、URL を 1 字の印に置き換える(URL の中の「?」「!」で切らないため)。私用領域の字で、本文には出ない。 */
 const URL_MARK = '\uE000'
+/** 句の中で折ってよい位置の印(ゼロ幅スペース U+200B)。前文の 1 句が 1 行に入らないときに、助詞を行頭に出さない位置を md に書く。画面には出さない。 */
+const BREAK = '\u200B'
 
 /**
  * 前文を、和文の折り方の決まり(所有者 2026-11-04:文ごとに行を始め、文の中は「、」「。」の後だけで折る。入る限り 1 行に詰める)
@@ -22,12 +25,23 @@ export function PhrasedLinkify({ text }: { text: string }) {
   const urls = parts.flatMap((part) => part.kind === 'url' ? [part.value] : [])
   const masked = parts.map((part) => part.kind === 'url' ? URL_MARK : part.value).join('')
   let next = 0
-  const sentences = jpLines(masked).map((phrases) => phrases.map((phrase) => phrase.split(URL_MARK).map((piece, i) => ({ url: i > 0 ? urls[next++] : undefined, piece }))))
+  // 句(「、」「。」まで)は今までどおり 1 つの塊。句が 1 行に入らない時だけ、印(BREAK)の位置で句の中を折る。
+  // 印で切った塊の末尾の空白は塊の外に出す(塊の中の行末の空白は描かれず、隣の塊と字が詰まるため)。
+  const sentences = jpLines(masked).map((phrases) => phrases.map((phrase) => {
+    const units = phrase.split(BREAK)
+    return units.map((unit, u) => {
+      const gap = u < units.length - 1 && unit.endsWith(' ')
+      return { gap, pieces: (gap ? unit.slice(0, -1) : unit).split(URL_MARK).map((piece, i) => ({ url: i > 0 ? urls[next++] : undefined, piece })) }
+    })
+  }))
+  const piecesOf = (pieces: { url: string | undefined; piece: string }[]) => pieces.map(({ url, piece }, i) => <span key={i}>{url !== undefined && <a href={url} target="_blank" rel="noopener">{url}</a>}{piece}</span>)
   return sentences.map((phrases, s) => (
     <span key={s} style={UNIT}>
-      {phrases.map((pieces, p) => (
+      {phrases.map((units, p) => (
         <span key={p} style={UNIT}>
-          {pieces.map(({ url, piece }, i) => <span key={i}>{url !== undefined && <a href={url} target="_blank" rel="noopener">{url}</a>}{piece}</span>)}
+          {units.length === 1
+            ? piecesOf(units[0]!.pieces)
+            : units.map(({ gap, pieces }, u) => <Fragment key={u}><span style={UNIT}>{piecesOf(pieces)}</span>{gap && ' '}</Fragment>)}
         </span>
       ))}
     </span>
