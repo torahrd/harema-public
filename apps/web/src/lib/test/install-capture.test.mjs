@@ -1,7 +1,9 @@
 // hydration より前の beforeinstallprompt を預ける捕まえの script(lib/install-capture.ts)。実行: `pnpm --filter web test`
 // script の文字列を、偽の window・navigator の中で実際に走らせて振る舞いを確かめる。
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { runInNewContext } from 'node:vm'
 import { describe, it } from 'node:test'
 import { INSTALL_CAPTURE_KEY, INSTALL_CAPTURE_SCRIPT } from '../install-capture.ts'
@@ -58,10 +60,20 @@ describe('事件の捕まえ', () => {
 describe('捕まえの配線', () => {
   const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8')
   it('HSC-7 root の layout が body の先頭に素の inline script として置く(next/script を使わない)', () => {
-    const layout = read('../../app/layout.tsx')
+    const layout = read('../../app/_shell/root-shell.tsx')
     assert.doesNotMatch(layout, /next\/script/)
     assert.match(layout, /<body[^>]*>\s*(\{\/\*[\s\S]*?\*\/\}\s*)?<script dangerouslySetInnerHTML=\{\{ __html: INSTALL_CAPTURE_SCRIPT \}\} \/>/)
     assert.doesNotMatch(layout, /<script[^>]*\ssrc=/)
+  })
+  it('HSC-7b app の下の layout は全部 RootShell を通し、自分で <html> を書かない', () => {
+    const dir = fileURLToPath(new URL('../../app/', import.meta.url))
+    const layouts = readdirSync(dir, { recursive: true, encoding: 'utf8' }).filter((f) => /(^|[\\/])layout\.tsx$/.test(f))
+    assert.ok(layouts.length > 0, 'layout.tsx が 1 つも見つからない')
+    for (const f of layouts) {
+      const src = readFileSync(join(dir, f), 'utf8')
+      assert.match(src, /<RootShell\b/, `${f} が RootShell を通していない`)
+      assert.doesNotMatch(src, /<html\b/, `${f} が <html> を自分で書いている`)
+    }
   })
   it('HSC-8 hook は mount の時に預けられた事件と appinstalled を先に読み、使ったら手放す', () => {
     const hook = read('../../app/map/use-install-prompt.ts')

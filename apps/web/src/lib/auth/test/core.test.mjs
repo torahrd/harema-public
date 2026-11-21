@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import { randomBytes } from 'node:crypto'
 import { describe, it } from 'node:test'
 import {
+  AGREEMENT_RECORD_TIMEOUT_MS,
   ID_TOKEN_MAX_LENGTH,
   SESSION_LIFETIME_SEC,
   acceptLogin,
@@ -571,6 +572,152 @@ describe('POST /auth/session の受付(LR-B6 の判定の核)', () => {
   it('next が危険なら /map', async () => {
     const body = JSON.stringify({ idToken: good(), refreshToken: 'rt', next: '//evil.example' })
     assert.equal((await acceptLogin(request({ bodyText: body }), deps)).next, '/map')
+  })
+
+  describe('T-6 同意の記録(agreed は目印・番号は DB が決める)', () => {
+    // route の `agreedMarkSchema`(z.literal(true))と同じ判定。core は shared を import しないので、依存として渡す
+    const parseAgreed = (value) => value === true
+    const withAgreed = (agreed, token) =>
+      request({ bodyText: JSON.stringify({ idToken: token ?? good(), refreshToken: 'rt-1', next: '/saved', agreed }) })
+    /** 記録の口のスパイ。呼ばれた回数と引数を残す。 */
+    const spy = (impl = async () => 'recorded') => {
+      const calls = []
+      return { calls, recordAgreement: (...args) => (calls.push(args), impl(...args)) }
+    }
+
+    it('(a) 目印つきの受付は、検証した ID トークンだけで記録の口を 1 回呼ぶ(番号も日時も渡さない)', async () => {
+      const { calls, recordAgreement } = spy()
+      const token = good()
+      const result = await acceptLogin(withAgreed(true, token), { ...deps, parseAgreed, recordAgreement })
+      assert.equal(result.ok, true)
+      assert.deepEqual(calls, [[token]])
+    })
+
+    it('(b) 記録の口が失敗を返しても・投げても、受付は成功のまま(cookie の値も返す)', async () => {
+      for (const impl of [
+        async () => 'failed',
+        async () => {
+          throw new Error('db down')
+        },
+        () => {
+          throw new Error('sync throw')
+        },
+      ]) {
+        const { calls, recordAgreement } = spy(impl)
+        const result = await acceptLogin(withAgreed(true), { ...deps, parseAgreed, recordAgreement })
+        assert.equal(result.ok, true)
+        assert.equal(openSession(result.value, keys, NOW).ok, true)
+        assert.equal(calls.length, 1)
+      }
+    })
+
+    it('(i) 受付の結果に同意の記録の種類(agreement)を載せる: recorded・already・skipped はそのまま、failed・投げた・上限・未知の値は failed', async () => {
+      const cases = [
+        ['recorded', 'recorded'],
+        ['already', 'already'],
+        ['skipped', 'skipped'],
+        ['failed', 'failed'],
+        [undefined, 'failed'],
+        ['unregistered', 'failed'],
+        ['ok', 'failed'],
+        [true, 'failed'],
+      ]
+      for (const [returned, expected] of cases) {
+        const { recordAgreement } = spy(async () => returned)
+        const result = await acceptLogin(withAgreed(true), { ...deps, parseAgreed, recordAgreement })
+        assert.equal(result.agreement, expected, String(returned))
+      }
+      const thrown = spy(async () => {
+        throw new Error('x')
+      })
+      assert.equal((await acceptLogin(withAgreed(true), { ...deps, parseAgreed, recordAgreement: thrown.recordAgreement })).agreement, 'failed')
+      const hang = spy(() => new Promise(() => {}))
+      assert.equal(
+        (await acceptLogin(withAgreed(true), { ...deps, parseAgreed, recordAgreement: hang.recordAgreement, agreementTimeoutMs: 30 })).agreement,
+        'failed',
+      )
+    })
+
+    it('(i) 記録の口を呼ばなかった時(目印が無い・口が無い)は agreement が skipped', async () => {
+      const { recordAgreement } = spy()
+      assert.equal((await acceptLogin(withAgreed(undefined), { ...deps, parseAgreed, recordAgreement })).agreement, 'skipped')
+      assert.equal((await acceptLogin(withAgreed(true), { ...deps })).agreement, 'skipped')
+    })
+
+    it('(i) 本文の locale は未検証のまま requestedLocale に載る(使う側が許可リストで確かめる)', async () => {
+      const body = (locale) => request({ bodyText: JSON.stringify({ idToken: good(), refreshToken: 'rt-1', locale }) })
+      assert.equal((await acceptLogin(body('en'), deps)).requestedLocale, 'en')
+      assert.equal((await acceptLogin(body(undefined), deps)).requestedLocale, undefined)
+    })
+
+    it('(c) 目印が無い・true でない時は記録の口を呼ばず、受付は成功', async () => {
+      for (const agreed of [undefined, null, false, 'true', 1, [], { terms: '2026.11.05', privacy: '2026.11.05' }, { terms: 1, privacy: 2 }]) {
+        const { calls, recordAgreement } = spy()
+        const result = await acceptLogin(withAgreed(agreed), { ...deps, parseAgreed, recordAgreement })
+        assert.equal(result.ok, true, JSON.stringify(agreed))
+        assert.equal(result.agreement, 'skipped', JSON.stringify(agreed))
+        assert.equal(calls.length, 0, JSON.stringify(agreed))
+      }
+    })
+
+    it('(c) 目印の確かめが投げても、記録の口は呼ばず受付は成功', async () => {
+      const { calls, recordAgreement } = spy()
+      const result = await acceptLogin(withAgreed(true), {
+        ...deps,
+        parseAgreed: () => {
+          throw new Error('parse')
+        },
+        recordAgreement,
+      })
+      assert.equal(result.ok, true)
+      assert.equal(calls.length, 0)
+    })
+
+    it('(c) 目印の確かめか記録の口のどちらかが渡されていなければ、何も呼ばない', async () => {
+      const { calls, recordAgreement } = spy()
+      assert.equal((await acceptLogin(withAgreed(true), { ...deps, recordAgreement })).ok, true)
+      assert.equal((await acceptLogin(withAgreed(true), { ...deps, parseAgreed })).ok, true)
+      assert.equal(calls.length, 0)
+    })
+
+    it('(d) ID トークンの検証が落ちた時は記録の口を呼ばない(拒否の理由を問わない)', async () => {
+      for (const [input, status] of [
+        [withAgreed(true, good({ aud: 'other' })), 401],
+        [withAgreed(true, signToken({ key: keyB, claims: baseClaims() })), 401],
+        [withAgreed(true, good({ auth_time: NOW - 6 * 60 })), 401],
+        [{ ...withAgreed(true), origin: 'https://evil.example' }, 403],
+        [{ ...withAgreed(true), contentType: 'text/plain' }, 403],
+      ]) {
+        const { calls, recordAgreement } = spy()
+        const result = await acceptLogin(input, { ...deps, parseAgreed, recordAgreement })
+        assert.equal(result.ok, false)
+        assert.equal(result.status, status)
+        assert.equal(calls.length, 0)
+      }
+    })
+
+    it('(d) cookie の値を作れなかった時(sealSession が投げて 413)は記録の口を呼ばない', async () => {
+      const { calls, recordAgreement } = spy()
+      const result = await acceptLogin(withAgreed(true), { ...deps, keys: [], parseAgreed, recordAgreement })
+      assert.equal(result.ok, false)
+      assert.equal(result.status, 413)
+      assert.equal(calls.length, 0)
+    })
+
+    it('(h) 記録の口が返らなくても、上限の後に受付は成功を返す(5 秒の既定は定数)', async () => {
+      const { calls, recordAgreement } = spy(() => new Promise(() => {}))
+      const started = Date.now()
+      const result = await acceptLogin(withAgreed(true), {
+        ...deps,
+        parseAgreed,
+        recordAgreement,
+        agreementTimeoutMs: 40,
+      })
+      assert.equal(result.ok, true)
+      assert.equal(calls.length, 1)
+      assert.ok(Date.now() - started < 2000, '上限の後すぐに返る')
+      assert.equal(AGREEMENT_RECORD_TIMEOUT_MS, 5000)
+    })
   })
 })
 

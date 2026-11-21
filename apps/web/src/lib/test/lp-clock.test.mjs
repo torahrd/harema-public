@@ -17,7 +17,8 @@ describe('LP の時刻の行', () => {
     assert.equal(clockLabel('09:41:07'), 'Tokyo · 09:41:07')
   })
   it('LP は段 1 の .s1-text の最初(h1 の前)に LpClock を置く', () => {
-    const page = read('../../app/page.tsx')
+    // LP の本体は PR4 で _public/home-view.tsx に移った((site)/page.tsx と en/page.tsx が言語を引数にして呼ぶ)。
+    const page = read('../../app/_public/home-view.tsx')
     assert.match(page, /<div className="s1-text">\s*<LpClock \/>\s*<h1/)
   })
   it('部品は p・aria-live なし・login 側に依存しない', () => {

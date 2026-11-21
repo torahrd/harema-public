@@ -63,7 +63,7 @@ export type MobilePlaceDetailsOutcome =
 export async function fetchMobilePlaceDetails(
   request: MobilePlaceDetailsRequest,
 ): Promise<MobilePlaceDetailsOutcome> {
-  const built = buildDetailsRequest(request.placeId, request.purpose, request.sessionToken)
+  const built = buildDetailsRequest(request.placeId, request.purpose, request.sessionToken, request.language)
   console.log('places.details.mobile_call')
   let response: Response
   try {

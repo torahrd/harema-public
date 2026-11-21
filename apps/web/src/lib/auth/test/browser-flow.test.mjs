@@ -17,13 +17,16 @@ const cancel = (code) => Object.assign(new Error(code), { code })
 /** 呼ばれた順と回数を残す依存一式。`overrides` で個別に差し替える。 */
 function makeDeps(overrides = {}) {
   const calls = []
+  const bodies = []
   const deps = {
     signIn: async (provider) => {
       calls.push(`signIn:${provider}`)
       return { idToken: 'idt', refreshToken: 'rt', accessToken: provider === 'apple' ? 'apple-access' : 'google-access' }
     },
+    agreed: true,
     postSession: async (body) => {
       calls.push(`postSession:${body.idToken}:${body.refreshToken}`)
+      bodies.push(body)
       return { status: 200, next: '/map' }
     },
     revokeApple: async (token) => {
@@ -38,7 +41,7 @@ function makeDeps(overrides = {}) {
     },
     ...overrides,
   }
-  return { deps, calls }
+  return { deps, calls, bodies }
 }
 
 describe('popup を閉じた・二重に開いた', () => {
@@ -72,6 +75,21 @@ describe('ログイン', () => {
       assert.deepEqual(calls, [`signIn:${provider}`, 'postSession:idt:rt', 'signOut'])
     })
   }
+
+  it('T-6(e) 正: 目印(agreed: true)を ID トークン・更新用の鍵と一緒に /auth/session の本文へ渡す(番号・日付は載せない)', async () => {
+    const { deps, bodies } = makeDeps()
+    await runSsoLogin('google', deps)
+    assert.deepEqual(bodies, [{ idToken: 'idt', refreshToken: 'rt', agreed: true }])
+  })
+
+  it('ログイン画面で言語を選んだ時だけ locale を本文に入れる(選んでいなければ本文に locale の鍵が無い)', async () => {
+    const chosen = makeDeps({ locale: 'en' })
+    await runSsoLogin('google', chosen.deps)
+    assert.equal(chosen.bodies[0].locale, 'en')
+    const none = makeDeps()
+    await runSsoLogin('google', none.deps)
+    assert.ok(!('locale' in none.bodies[0]))
+  })
 
   it('正: 受付が返した戻り先(/onboarding)に従う', async () => {
     const { deps } = makeDeps({ postSession: async () => ({ status: 200, next: '/onboarding' }) })

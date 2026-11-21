@@ -7,7 +7,7 @@ export function ActionError({
   lines,
   className,
 }: {
-  lines: readonly [string] | readonly [string, string]
+  lines: readonly string[]
   className?: string
 }) {
   return (

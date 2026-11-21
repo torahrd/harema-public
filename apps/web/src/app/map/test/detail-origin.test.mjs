@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
+import { ja } from '@harema/shared/i18n'
 import { detailBack, placeDetailHrefFromMap } from '../detail-origin.ts'
 
 const read = (rel) => readFileSync(new URL(rel, import.meta.url), 'utf8')
@@ -10,13 +11,15 @@ const UUID = '8f14e45f-ceea-4e67-a1b2-0123456789ab'
 
 describe('detailBack', () => {
   it('from=map だけ地図へ', () => {
-    assert.deepEqual(detailBack('map'), { href: '/map', label: '地図へ戻る' })
+    assert.deepEqual(detailBack('map'), { href: '/map', labelKey: 'savedList.backToMap' })
+    assert.equal(ja.web.savedList.backToMap, '地図へ戻る')
   })
 
   it('無い・ほかの値・配列は一覧へ', () => {
     for (const v of [undefined, '', 'MAP', '/map', 'saved', 'https://example.com', ['map'], ['map', 'map']]) {
-      assert.deepEqual(detailBack(v), { href: '/saved', label: '一覧へ戻る' }, String(v))
+      assert.deepEqual(detailBack(v), { href: '/saved', labelKey: 'placeDetail.backLabel' }, String(v))
     }
+    assert.equal(ja.web.placeDetail.backLabel, '一覧へ戻る')
   })
 
   it('地図のピンの行き先を読み直すと地図へ戻る', () => {
@@ -46,9 +49,9 @@ describe('配線(ソース照合)', () => {
     const screen = read('../../places/[id]/place-detail-screen.tsx')
     assert.equal(count(screen, 'href="/saved"'), 0)
     assert.equal(count(screen, 'aria-label={DETAIL_BACK_LABEL}'), 0)
-    assert.ok(count(screen, 'back.label') >= 1)
+    assert.ok(count(screen, 'back.labelKey') >= 1)
     assert.equal(count(screen, "router.replace('/saved')"), 1)
-    const page = read('../../places/[id]/page.tsx')
+    const page = read('../../(app)/places/[id]/page.tsx')
     assert.ok(count(page, 'detailBack(') >= 1)
   })
 })

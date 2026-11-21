@@ -1,6 +1,7 @@
 'use client'
 
 import { unstable_rethrow, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   MEMO_MAX_LENGTH,
@@ -23,20 +24,6 @@ import {
   resolveSavedPlace,
   savePlace,
 } from './save-actions'
-import {
-  CTA_LABELS,
-  DELETE_LABEL,
-  MEMO_LABEL,
-  MEMO_PLACEHOLDER,
-  SAVE_FAILED,
-  SOURCE_HELPER,
-  SOURCE_LABEL,
-  SOURCE_PLACEHOLDER,
-  SOURCE_TITLE_UNREADABLE,
-  STATUS_LABEL,
-  STATUS_LABELS,
-  STATUS_REVERT_NOTE,
-} from './save-sheet-copy'
 import { PlaceDetailsDisclosure } from './place-details-disclosure'
 import { initialSheetFields } from './sheet-initial'
 import type { MapLaunchContext } from './types'
@@ -116,6 +103,9 @@ export function SaveSheet({
   placesLibrary,
 }: SaveSheetProps) {
   const router = useRouter()
+  const t = useTranslations('web.saveSheet')
+  const common = useTranslations('web.common')
+  const statusNames = useTranslations('savedPlaceStatus')
 
   const [entered, setEntered] = useState(false)
   const [closePending, setClosePending] = useState(false)
@@ -136,7 +126,7 @@ export function SaveSheet({
   const [sourceTitle, setSourceTitle] = useState('')
   const [titleUnreadable, setTitleUnreadable] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState(false)
   /** D5(削除確認)が開いているか。 */
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   /** 削除のサーバ往復中。D5 のボタンとスクリムを塞ぎ、二重送信を防ぐ。 */
@@ -208,7 +198,7 @@ export function SaveSheet({
           }
           // 解決できなくても保存はできる(サーバが既存行の有無で判定し直し、競合は 23505 で
           // 失敗になる)。黙って新規として開かず、失敗したことは 1 行で示す。
-          setSaveError(SAVE_FAILED)
+          setSaveError(true)
           return
         }
         const initial = initialSheetFields(result, initialSourceText, UNRATED_STATUS)
@@ -227,7 +217,7 @@ export function SaveSheet({
         }
       })
       .catch(() => {
-        if (!cancelled) setSaveError(SAVE_FAILED)
+        if (!cancelled) setSaveError(true)
       })
       .finally(() => {
         if (!cancelled) setResolving(false)
@@ -301,13 +291,13 @@ export function SaveSheet({
   const applyMemo = (value: string) => {
     // コードポイントで止める(サロゲートペアを割らない)。UTF-16 の .length では切らない。
     setMemo([...value].slice(0, MEMO_MAX_LENGTH).join(''))
-    if (saveError) setSaveError(null)
+    if (saveError) setSaveError(false)
   }
 
   const applySourceText = (value: string): string => {
     const next = [...value].slice(0, SOURCE_TEXT_MAX_LENGTH).join('')
     setSourceText(next)
-    if (saveError) setSaveError(null)
+    if (saveError) setSaveError(false)
     // 取得済みタイトルはその URL のためのもの。出典が変わったら chip を落とし、取り直せる状態へ
     // 戻す(✕ で消したときは出典が変わらないので、その URL では取り直さないまま)。
     if (next.trim() !== lastFetchedUrlRef.current) {
@@ -358,7 +348,7 @@ export function SaveSheet({
   const handleSave = async () => {
     if (busy || closePending || !canSave) return
     setSaving(true)
-    setSaveError(null)
+    setSaveError(false)
     try {
       const result = await savePlace(input)
       if (result.ok) {
@@ -378,9 +368,9 @@ export function SaveSheet({
           setExistingStatus(again.status)
         }
       }
-      setSaveError(SAVE_FAILED)
+      setSaveError(true)
     } catch {
-      setSaveError(SAVE_FAILED)
+      setSaveError(true)
     } finally {
       // 例外でも失敗でも押し直せる状態へ戻す(握ると操作不能になる・spec §6.1)。成功したときは
       // シートが退場中なので、スピナーを残したまま畳む。
@@ -423,16 +413,16 @@ export function SaveSheet({
       }
       // 失敗は D5 を畳んでシート側の既存の失敗表示に合流させる(新しい面を作らない)。
       setDeleteConfirmOpen(false)
-      setSaveError(SAVE_FAILED)
+      setSaveError(true)
     } catch (error) {
       // AD-N1 是正(§3.2-2):`deleteSavedPlaceFromDetail` の成功は `redirect()` の throw として
       // 届く。これを通常の失敗として握り潰さない —— `unstable_rethrow` は Next のナビゲーション
       // / notFound 制御用の Error だけを再送出し、それ以外(本当の失敗)はここを素通りして下の
       // 既存の失敗表示に合流する(裁定 AD-IRR-B。欠くと成功した不可逆削除に対して
-      // `setSaveError(SAVE_FAILED)` が出る)。
+      // 失敗の表示が出る)。
       unstable_rethrow(error)
       setDeleteConfirmOpen(false)
-      setSaveError(SAVE_FAILED)
+      setSaveError(true)
     } finally {
       setDeleting(false)
     }
@@ -589,13 +579,13 @@ export function SaveSheet({
               {/* 「状態」ラベルは design C-1 にだけあり C-2 には無い。非対称をそのまま写す。 */}
               {mode === 'create' && (
                 <div style={{ ...CAPS_LABEL_STYLE, marginBottom: 8 }}>
-                  {STATUS_LABEL}
+                  {t('statusLabel')}
                 </div>
               )}
 
               <div
                 role="group"
-                aria-label={STATUS_LABEL}
+                aria-label={t('statusLabel')}
                 style={{
                   display: 'flex',
                   background: 'var(--bg-sunken)',
@@ -641,12 +631,12 @@ export function SaveSheet({
                             : { color: 'var(--fg-2)', background: 'transparent' }),
                       }}
                     >
-                      {STATUS_LABELS[value]}
+                      {statusNames(value)}
                     </button>
                   )
                 })}
               </div>
-              {revertBlocked && <p style={NOTE_STYLE}>{STATUS_REVERT_NOTE}</p>}
+              {revertBlocked && <p style={NOTE_STYLE}>{t('statusRevertNote')}</p>}
 
               <label
                 htmlFor="save-sheet-memo"
@@ -655,14 +645,14 @@ export function SaveSheet({
                   margin: mode === 'create' ? '18px 0 8px' : '16px 0 8px',
                 }}
               >
-                {MEMO_LABEL}
+                {t('memoLabel')}
               </label>
               <textarea
                 id="save-sheet-memo"
                 className="sheet-field"
                 value={memo}
                 disabled={busy}
-                placeholder={MEMO_PLACEHOLDER}
+                placeholder={t('memoPlaceholder')}
                 onFocus={(event) => {
                   handleFieldFocus(event)
                   setMemoFocused(true)
@@ -684,7 +674,7 @@ export function SaveSheet({
                 htmlFor="save-sheet-source"
                 style={{ ...CAPS_LABEL_STYLE, margin: '16px 0 8px' }}
               >
-                {SOURCE_LABEL}
+                {t('sourceLabel')}
               </label>
               <input
                 id="save-sheet-source"
@@ -694,7 +684,7 @@ export function SaveSheet({
                 autoComplete="off"
                 value={sourceText}
                 disabled={busy}
-                placeholder={SOURCE_PLACEHOLDER}
+                placeholder={t('sourcePlaceholder')}
                 onFocus={(event) => {
                   handleFieldFocus(event)
                   setSourceFocused(true)
@@ -801,7 +791,7 @@ export function SaveSheet({
                   {/* ✕ は chip だけを消す。出典の文字は 1 字も変えず、その URL では取り直さない。 */}
                   <button
                     type="button"
-                    aria-label="閉じる"
+                    aria-label={common('close')}
                     disabled={busy}
                     onClick={() => setSourceTitle('')}
                     style={{
@@ -860,9 +850,9 @@ export function SaveSheet({
                   <span style={{ flex: 'none', ...META, color: 'var(--fg-1)' }}>{EXTERNAL_ARROW}</span>
                 </a>
               ) : titleUnreadable ? (
-                <p style={NOTE_STYLE}>{SOURCE_TITLE_UNREADABLE}</p>
+                <p style={NOTE_STYLE}>{t('sourceTitleUnreadable')}</p>
               ) : (
-                <p style={NOTE_STYLE}>{SOURCE_HELPER}</p>
+                <p style={NOTE_STYLE}>{t('sourceHelper')}</p>
               )}
 
               {/* 詳細情報(営業時間・電話・website)。店舗詳細と同じ部品。出典の注記の後・流れる領域の末尾。 */}
@@ -918,7 +908,7 @@ export function SaveSheet({
                 color: 'var(--akane-text)',
               }}
             >
-              {saveError}
+              {common('actionError')}
             </p>
           )}
           <button
@@ -932,7 +922,7 @@ export function SaveSheet({
               ...(busy || !canSave ? { opacity: 0.5, cursor: 'default' } : {}),
             }}
           >
-            {CTA_LABELS[mode]}{' '}
+            {t(mode === 'create' ? 'ctaCreate' : 'ctaEdit')}{' '}
             {busy ? (
               <span className="spinner" aria-hidden="true" />
             ) : (
@@ -956,7 +946,7 @@ export function SaveSheet({
                 cursor: busy ? 'default' : 'pointer',
               }}
             >
-              {DELETE_LABEL}
+              {t('deleteLabel')}
             </button>
           )}
         </div>

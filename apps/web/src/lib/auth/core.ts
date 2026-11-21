@@ -654,7 +654,16 @@ export type LoginAcceptance = {
   session: SessionPayload
   /** ログインの後の戻り先(判定済み)。 */
   next: string
+  /**
+   * 同意の記録の結果。`recorded`・`already` は DB が今のバージョンへの同意を確かめた(言語の cookie を書いてよい)。
+   * `failed`(記録の失敗・遅れ・投げた)と `skipped`(目印が無い・口が無い・DB が記録の相手を見つけられなかった)は確かめられていない。
+   */
+  agreement: AgreementOutcome
+  /** 本文の `locale`(ログイン画面で選んだ言語)。未検証の値で、使う側が許可リストで確かめる。 */
+  requestedLocale: unknown
 }
+
+export type AgreementOutcome = 'recorded' | 'already' | 'failed' | 'skipped'
 
 export type LoginInput = {
   origin: string | null
@@ -668,12 +677,56 @@ export type LoginDeps = {
   keys: readonly SessionKey[]
   nowSec: number
   verifyIdToken: (token: string, maxAuthAgeSec: number) => Promise<VerifyResult>
+  /**
+   * 本文の `agreed` がログインの画面を経た目印(`true`)か。route が shared の Zod(`agreedMarkSchema`)で確かめた結果を返す
+   * (core は import を持たないので依存として受ける)。`recordAgreement` と両方が渡されたときだけ記録する。
+   * 同意した番号は本文に載らない。番号も日時も DB の `record_agreement()` が決める。
+   */
+  parseAgreed?: (value: unknown) => boolean
+  /**
+   * 検証済みの ID トークンで同意を記録する口(DB の `record_agreement()`・引数なし)。投げても・返らなくても受付は成功のまま
+   * (`agreementTimeoutMs` で打ち切る)。戻りは `recorded`・`already`・`skipped` だけを通し、ほかの値は `failed` に倒す。
+   */
+  recordAgreement?: (idToken: string) => Promise<unknown>
+  /** 記録を待つ上限(ミリ秒)。既定は `AGREEMENT_RECORD_TIMEOUT_MS`。検査だけが短くする。 */
+  agreementTimeoutMs?: number
+}
+
+/** 記録を待つ上限。応答が返らない DB のせいで、ログインの受付が Vercel の関数の上限まで返らないのを防ぐ。 */
+export const AGREEMENT_RECORD_TIMEOUT_MS = 5_000
+
+/**
+ * 記録を呼んで、結果の種類だけを返す。投げる・返らない・上限を越えるのは `failed`(ログインは止めない)。
+ * `recorded`・`already`・`skipped`(DB が記録の相手を見つけられなかった)と返った時だけそのまま通し、
+ * ほかの値(戻りの無い口を含む)は `failed` に倒す(確かめられていない)。
+ */
+async function recordAgreementBestEffort(
+  record: (idToken: string) => Promise<unknown>,
+  idToken: string,
+  timeoutMs: number,
+): Promise<AgreementOutcome> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<'failed'>((resolve) => {
+    timer = setTimeout(() => resolve('failed'), timeoutMs)
+  })
+  const call = Promise.resolve()
+    .then(() => record(idToken))
+    .then(
+      (outcome): AgreementOutcome =>
+        outcome === 'recorded' || outcome === 'already' || outcome === 'skipped' ? outcome : 'failed',
+      () => 'failed' as const,
+    )
+  try {
+    return await Promise.race([call, timeout])
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 /**
  * ブラウザが Firebase にログインした直後に渡す ID トークンと更新用の鍵を受け付ける。
  * Origin が `appUrl` の origin と一致・Content-Type が JSON・署名と iss・aud・期限が正しく・
- * auth_time が 5 分以内のときだけ cookie の値を返す。
+ * auth_time が 5 分以内のときだけ cookie の値を返す。cookie の値を作れた後に、`agreed` が目印(`true`)なら記録の口を呼ぶ。
  */
 export async function acceptLogin(input: LoginInput, deps: LoginDeps): Promise<LoginAcceptance | LoginRejection> {
   let appOrigin: string
@@ -695,7 +748,7 @@ export async function acceptLogin(input: LoginInput, deps: LoginDeps): Promise<L
     return { ok: false, status: 400, error: 'invalid_body' }
   }
   if (!isObject(body)) return { ok: false, status: 400, error: 'invalid_body' }
-  const { idToken, refreshToken, next } = body
+  const { idToken, refreshToken, next, agreed, locale } = body
   if (!isNonEmptyString(idToken, ID_TOKEN_MAX_LENGTH) || !isNonEmptyString(refreshToken, REFRESH_TOKEN_MAX_LENGTH)) {
     return { ok: false, status: 400, error: 'invalid_body' }
   }
@@ -718,7 +771,24 @@ export async function acceptLogin(input: LoginInput, deps: LoginDeps): Promise<L
   } catch {
     return { ok: false, status: 413, error: 'too_large' }
   }
-  return { ok: true, value, session, next: safeNextPath(next, deps.appUrl) }
+  // 同意の記録は、受付が通ると決まった後(cookie の値を作れた後)だけ。失敗はログインを止めない。
+  let agreement: AgreementOutcome = 'skipped'
+  if (deps.parseAgreed !== undefined && deps.recordAgreement !== undefined) {
+    let marked = false
+    try {
+      marked = deps.parseAgreed(agreed) === true
+    } catch {
+      marked = false
+    }
+    if (marked) {
+      agreement = await recordAgreementBestEffort(
+        deps.recordAgreement,
+        idToken,
+        deps.agreementTimeoutMs ?? AGREEMENT_RECORD_TIMEOUT_MS,
+      )
+    }
+  }
+  return { ok: true, value, session, next: safeNextPath(next, deps.appUrl), agreement, requestedLocale: locale }
 }
 
 // ── ログインの後の戻り先(LR-A10) ──────────────────────────────────────

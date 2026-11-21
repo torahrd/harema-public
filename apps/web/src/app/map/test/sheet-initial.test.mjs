@@ -114,7 +114,7 @@ describe('配線(ソース照合)', () => {
       '../../../lib/share-pending.ts',
       '../../../lib/share-target.ts',
       '../sheet-initial.ts',
-      '../../share/page.tsx',
+      '../../(site)/share/page.tsx',
       '../../share/share-receiver.tsx',
     ]) {
       const src = read(f)

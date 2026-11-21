@@ -12,9 +12,9 @@
 export const LP_ONLY_ENV_NAME = 'HAREMA_LP_ONLY'
 export const COMING_SOON_PATH = '/coming-soon'
 
-/** 送らない道。先頭の `$` は `/` そのもの(LP)。静的ファイルの拡張子は、`public/` の直下(`/` の無い名前)だけを通す(`/places/x.svg` のような動的な道は送る)。 */
+/** 送らない道。先頭の `$` は `/` そのもの(LP)。`en` から始まる 4 つは英語の公開ページ(PR4)。静的ファイルの拡張子は、`public/` の直下(`/` の無い名前)だけを通す(`/places/x.svg` のような動的な道は送る)。 */
 export const LP_ONLY_SOURCE =
-  '/:path((?!$|terms$|privacy$|news$|about$|coming-soon$|_next/|favicon\\.ico$|[^/]*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|webmanifest)$).*)'
+  '/:path((?!$|terms$|privacy$|news$|about$|coming-soon$|en$|en/terms$|en/privacy$|en/news$|_next/|favicon\\.ico$|[^/]*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|txt|xml|webmanifest)$).*)'
 
 export function isLpOnly(env: Record<string, string | undefined>): boolean {
   return env[LP_ONLY_ENV_NAME] === '1'

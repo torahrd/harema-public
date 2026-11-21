@@ -1,15 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { DIALOG_CANCEL } from '../account/drawer-copy'
+import { useTranslations } from 'next-intl'
 import { JpText } from '../_ui/jp-text'
-import {
-  HOME_DIALOG_ADD,
-  HOME_DIALOG_BODY_1,
-  HOME_DIALOG_BODY_2,
-  HOME_DIALOG_NEVER,
-  HOME_DIALOG_TITLE,
-} from './home-screen-copy'
 
 /**
  * ホーム画面に追加する案内のモーダル(地図を開いた時・Android の Chrome だけ)。
@@ -25,6 +18,8 @@ export function HomeScreenDialog({
   onAdd: (neverShowAgain: boolean) => void
   onCancel: (neverShowAgain: boolean) => void
 }) {
+  const t = useTranslations('web.homeScreen')
+  const common = useTranslations('web.common')
   const [never, setNever] = useState(false)
   return (
     <>
@@ -52,26 +47,26 @@ export function HomeScreenDialog({
         }}
       >
         <h3 id="home-screen-dialog-heading" className="qs-dlg-h" style={{ marginTop: 0 }}>
-          {HOME_DIALOG_TITLE}
+          {t('title')}
         </h3>
         <div id="home-screen-dialog-body">
           <p className="qs-dlg-b">
-            <JpText text={HOME_DIALOG_BODY_1} />
+            <JpText text={t('body1')} />
           </p>
           <p className="qs-dlg-b">
-            <JpText text={HOME_DIALOG_BODY_2} />
+            <JpText text={t('body2')} />
           </p>
         </div>
         <label className="qs-cr" style={{ marginTop: 8 }}>
           <input type="checkbox" checked={never} onChange={(event) => setNever(event.target.checked)} />
-          <span>{HOME_DIALOG_NEVER}</span>
+          <span>{t('never')}</span>
         </label>
         <div className="qs-dlg-col">
           <button type="button" className="qs-btn qs-btn-p" onClick={() => onAdd(never)}>
-            {HOME_DIALOG_ADD}
+            {t('add')}
           </button>
           <button type="button" className="qs-btn qs-btn-s" onClick={() => onCancel(never)}>
-            {DIALOG_CANCEL}
+            {common('cancel')}
           </button>
         </div>
       </div>

@@ -1,18 +1,13 @@
 'use client'
 
-import {
-  DELETE_CONFIRM_CANCEL,
-  DELETE_CONFIRM_TITLE,
-  DELETE_LABEL,
-  deleteConfirmBody,
-} from './save-sheet-copy'
+import { useTranslations } from 'next-intl'
 import { BODY, heading } from '../text-styles'
 import { JpText } from '../_ui/jp-text'
 
 /**
  * D5(design C-3 = WP-08-save-detail-flow.html / 面 6 = WP-10-place-detail.html)。見出しと
  * 2 ボタンは C-3 のまま不変、本文だけ店名の有無で分かれる(店名が空の POI は面 6 の版)。
- * 逐語は save-sheet-copy.ts の 1 箇所で読む(計画 §8.2)。
+ * 文言は辞書(web.saveSheet)の 1 箇所で読む(計画 §8.2)。
  *
  * S1(保存/編集シート・zIndex 20/21)の上に重ねるので、この対だけ更に上の層を使う。スクリムの
  * クリックはキャンセルへ倒す(S1 自身の背景タップ挙動と揃え、確定はボタン以外では起きない
@@ -30,6 +25,8 @@ export function DeleteConfirmDialog({
   onCancel: () => void
   onConfirm: () => void
 }) {
+  const t = useTranslations('web.saveSheet')
+  const common = useTranslations('web.common')
   return (
     <>
       <div
@@ -71,7 +68,7 @@ export function DeleteConfirmDialog({
             margin: '0 0 10px',
           }}
         >
-          {DELETE_CONFIRM_TITLE}
+          {t('deleteConfirmTitle')}
         </h3>
         <p
           id="delete-confirm-body"
@@ -81,7 +78,13 @@ export function DeleteConfirmDialog({
             margin: 0,
           }}
         >
-          <JpText text={deleteConfirmBody(displayName)} />
+          <JpText
+            text={
+              displayName.length > 0
+                ? t('deleteConfirmBody', { name: displayName })
+                : t('deleteConfirmBodyNoName')
+            }
+          />
         </p>
         <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
           <button
@@ -95,7 +98,7 @@ export function DeleteConfirmDialog({
               cursor: pending ? 'default' : 'pointer',
             }}
           >
-            {DELETE_CONFIRM_CANCEL}
+            {common('cancel')}
           </button>
           <button
             type="button"
@@ -110,7 +113,7 @@ export function DeleteConfirmDialog({
               cursor: pending ? 'default' : 'pointer',
             }}
           >
-            {DELETE_LABEL}
+            {t('deleteLabel')}
           </button>
         </div>
       </div>

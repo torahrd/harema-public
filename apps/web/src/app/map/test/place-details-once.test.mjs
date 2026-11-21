@@ -91,8 +91,8 @@ describe('PD 地図の S1 の詳細情報', () => {
     const sheet = src('../save-sheet.tsx')
     const row = sheet.indexOf('<SheetPlaceDetails')
     assert.ok(row >= 0)
-    assert.ok(row > sheet.indexOf('{SOURCE_HELPER}'), '行は出典の注記より後')
-    assert.ok(row < sheet.indexOf('{CTA_LABELS[mode]}'), '行は主の CTA より前')
+    assert.ok(row > sheet.indexOf("{t('sourceHelper')}"), '行は出典の注記より後')
+    assert.ok(row < sheet.indexOf("{t(mode === 'create' ? 'ctaCreate' : 'ctaEdit')}"), '行は主の CTA より前')
     assert.ok(sheet.slice(row - 200, row).includes('placesLibrary !== undefined'), '行は placesLibrary があるときだけ')
     assert.ok(sheet.includes('key={context.googlePlaceId}'))
 

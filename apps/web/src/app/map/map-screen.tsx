@@ -12,6 +12,7 @@ import {
   type MapMouseEvent,
 } from '@vis.gl/react-google-maps'
 import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import {
   DEFAULT_MAP_CENTER,
@@ -25,6 +26,7 @@ import { takePendingShare } from '@/lib/share-pending'
 import { AccountDrawer, type AccountSnapshot } from '../account/drawer'
 import { CurrentLocationButton } from './current-location-button'
 import { CurrentLocationMarker } from './current-location-marker'
+import { ConsentNoticeDialog } from './consent-notice-dialog'
 import { HomeScreenDialog } from './home-screen-dialog'
 import { LocationPermissionBanner } from './location-permission-banner'
 import { MapChrome } from './map-chrome'
@@ -76,17 +78,23 @@ type MapScreenProps = {
    * profiles から取り、ここは drawer へ渡すだけ(browser client は使わない)。
    */
   account: AccountSnapshot
+  /** 今のバージョンへの同意の記録が無い(「改定のお知らせ」を出す)。判定は page.tsx(DB の current_agreement())。 */
+  consentNoticeDue?: boolean
+  /** メニューの言語の切り替えの行を出すか(適用の日時より前は偽。page.tsx がサーバの時刻で決める)。 */
+  languageSwitch?: boolean
 }
 
-export function MapScreen({ savedPlaces, account }: MapScreenProps) {
+export function MapScreen({ savedPlaces, account, consentNoticeDue = false, languageSwitch = true }: MapScreenProps) {
+  // 地図の SDK の言語は表示言語に合わせる(地図の表記・店名の言語)。region は国の書式と順位の指定なので JP のまま。
+  const locale = useLocale()
   return (
-    <APIProvider apiKey={clientEnv.googleMapsApiKey} language="ja" region="JP">
-      <MapView savedPlaces={savedPlaces} account={account} />
+    <APIProvider apiKey={clientEnv.googleMapsApiKey} language={locale} region="JP">
+      <MapView savedPlaces={savedPlaces} account={account} consentNoticeDue={consentNoticeDue} languageSwitch={languageSwitch} />
     </APIProvider>
   )
 }
 
-function MapView({ savedPlaces, account }: MapScreenProps) {
+function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitch = true }: MapScreenProps) {
   const map = useMap(MAP_INSTANCE_ID)
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
@@ -126,6 +134,8 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   // ホーム画面に追加する案内(Android の Chrome だけ)。モーダルは位置情報の許可を求めている最中(idle)・
   // 共有の続きの検索・保存シート・メニューが開いている間は出さない(出す間隔と記録は lib/install-prompt.ts)。
   const installPrompt = useInstallPrompt()
+  // 改定のお知らせ(同意の取り直し)。出ている間は「ホーム画面に追加」の案内を出さない(同時に 2 つ出さない)。
+  const [consentOpen, setConsentOpen] = useState(consentNoticeDue)
   const [retryingLocation, setRetryingLocation] = useState(false)
   const retrySpinnerTimerRef = useRef<number | undefined>(undefined)
   // 連打ガード(in-flight)。解決前の再入を捨てる —— Place Details は 1 回ごとに課金される。
@@ -142,6 +152,7 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
   // S1 の起動コンテキスト。null = シートを出していない。
   const [sheetContext, setSheetContext] = useState<MapLaunchContext | null>(null)
   const showHomeDialog =
+    !consentOpen &&
     installPrompt.modalDue &&
     installModalTiming({
       locationPending: locationState === 'idle',
@@ -653,11 +664,14 @@ function MapView({ savedPlaces, account }: MapScreenProps) {
         account={account}
         onAddToHome={installPrompt.canAdd ? () => installPrompt.add(false) : undefined}
         onDialogChange={setAccountDialogOpen}
+        showLanguageSwitch={languageSwitch}
       />
 
       {showHomeDialog && (
         <HomeScreenDialog onAdd={installPrompt.add} onCancel={installPrompt.cancel} />
       )}
+
+      {consentOpen && <ConsentNoticeDialog onAgreed={() => setConsentOpen(false)} />}
     </div>
   )
 }

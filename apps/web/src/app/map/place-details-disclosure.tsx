@@ -1,16 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { getPlaceDetails } from '@/lib/places/details-cache'
-import {
-  DETAIL_ENTERPRISE_FETCH_FAIL,
-  DETAIL_PANEL_HOURS_CAPTION,
-  DETAIL_PANEL_MISSING,
-  DETAIL_PANEL_PHONE_CAPTION,
-  DETAIL_PANEL_WEBSITE_CAPTION,
-  DETAIL_ROW_LABEL,
-  EXTERNAL_ARROW,
-} from '@/app/places/[id]/place-detail-copy'
+import { DETAIL_PANEL_MISSING, EXTERNAL_ARROW } from '@/app/places/[id]/place-detail-copy'
 import { createEnterpriseOnce } from './place-details-once'
 import { isHttpUrl } from '@/lib/external-link'
 import { BODY, LABEL_JA, META, NUM } from '../text-styles'
@@ -47,6 +40,7 @@ type PlaceDetailsDisclosureProps = {
  * (折りたたみ中に届いた応答を捨てない AD-D1・StrictMode の再生で応答を捨て続けない CR-DIFF-002)。
  */
 export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange }: PlaceDetailsDisclosureProps) {
+  const t = useTranslations('web.placeDetail')
   const [once] = useState(createEnterpriseOnce)
   const [expanded, setExpanded] = useState(false)
   const [enterpriseData, setEnterpriseData] = useState<EnterpriseDetails | undefined>(undefined)
@@ -114,7 +108,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
           opacity: places === null ? 0.55 : 1,
         }}
       >
-        <span>{DETAIL_ROW_LABEL}</span>
+        <span>{t('rowLabel')}</span>
         <svg
           width="18"
           height="18"
@@ -141,7 +135,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
               color: 'var(--fg-2)',
             }}
           >
-            {DETAIL_ENTERPRISE_FETCH_FAIL}
+            {t('enterpriseFetchFail')}
           </div>
         ) : enterpriseData === undefined ? (
           // 取得中(design 面 5)。見出しは先に出し、値の位置だけ帯にする。
@@ -156,7 +150,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
             }}
           >
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_HOURS_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelHours')}</div>
               <div className="saved-skeleton-bar" style={{ width: '66%', height: 9 }} />
               <div
                 className="saved-skeleton-bar"
@@ -164,11 +158,11 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
               />
             </div>
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_PHONE_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelPhone')}</div>
               <div className="saved-skeleton-bar" style={{ width: '44%', height: 9 }} />
             </div>
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_WEBSITE_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelWebsite')}</div>
               <div className="saved-skeleton-bar" style={{ width: '72%', height: 9 }} />
             </div>
           </div>
@@ -187,7 +181,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
             }}
           >
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_HOURS_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelHours')}</div>
               {enterpriseData.weekdayDescriptions &&
               enterpriseData.weekdayDescriptions.length > 0 ? (
                 <div
@@ -205,7 +199,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
               )}
             </div>
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_PHONE_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelPhone')}</div>
               {enterpriseData.nationalPhoneNumber ? (
                 <div style={{ ...NUM, fontSize: 13, lineHeight: '20px', color: 'var(--fg-1)' }}>
                   {enterpriseData.nationalPhoneNumber}
@@ -215,7 +209,7 @@ export function PlaceDetailsDisclosure({ places, googlePlaceId, onExpandedChange
               )}
             </div>
             <div>
-              <div style={PANEL_CAPTION_STYLE}>{DETAIL_PANEL_WEBSITE_CAPTION}</div>
+              <div style={PANEL_CAPTION_STYLE}>{t('panelWebsite')}</div>
               {/* 長い URL は折り返さず末尾省略する(人間裁定 2026-08-28)。<a> をインライン
                   のまま置くと nowrap / overflow / text-overflow が効かない(第 5 巡裁定が
                   CSS 仕様から確定)ので display:'block' に載せる。href は取得値そのまま

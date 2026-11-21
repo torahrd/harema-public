@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { BODY, heading } from '../text-styles'
 
 /**
@@ -7,10 +8,9 @@ import { BODY, heading } from '../text-styles'
  * map-screen 側で disabled 造形になる。「再試行」と `online` イベントで復帰する。
  */
 
-const OFFLINE_TITLE = 'ネットワークに接続できません'
-const OFFLINE_BODY = '接続を確認して、もう一度お試しください。'
-
 export function OfflineOverlay({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations('web.map.offline')
+  const common = useTranslations('web.common')
   return (
     <>
       {/* 地図の減光(design は MapBg opacity .38。実地図は不透明なので bg 面を被せて近似する)。 */}
@@ -42,7 +42,7 @@ export function OfflineOverlay({ onRetry }: { onRetry: () => void }) {
         }}
       >
         <h3 style={{ ...heading(20), margin: '0 0 8px', color: 'var(--fg-1)' }}>
-          {OFFLINE_TITLE}
+          {t('title')}
         </h3>
         <p
           style={{
@@ -51,11 +51,11 @@ export function OfflineOverlay({ onRetry }: { onRetry: () => void }) {
             margin: 0,
           }}
         >
-          {OFFLINE_BODY}
+          {t('body')}
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 18 }}>
           <button type="button" className="btn" onClick={onRetry}>
-            再試行
+            {common('retry')}
           </button>
         </div>
       </div>

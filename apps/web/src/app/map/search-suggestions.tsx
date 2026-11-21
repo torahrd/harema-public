@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import {
   panelContent,
   suggestionRows,
@@ -21,9 +22,7 @@ import { BODY, META } from '../text-styles'
  * 辿り着けないため)。`onModeChange` が無い呼び出し(スイッチ無し)は行が無ければ何も描かない。
  */
 
-/** 文言(所有者 2026-11-05 02:50 / 02:38)。 */
-const SWITCH_LABEL = '飲食店以外を検索結果に含める'
-const LOCATION_NOTE = '※マップが移動します。保存はできません。'
+/** 文言(所有者 2026-11-05 02:50 / 02:38)は辞書(web.map.searchSwitch・locationNote)。 */
 
 /**
  * スイッチの色(所有者の決定 2026-11-05 03:00・design3/DESIGN.md「決定」)。色を書くのはここだけ。
@@ -106,6 +105,7 @@ function SwitchRow({
   withBorder: boolean
   onToggle: () => void
 }) {
+  const t = useTranslations('web.map')
   return (
     <button
       type="button"
@@ -135,7 +135,7 @@ function SwitchRow({
           whiteSpace: 'nowrap',
         }}
       >
-        {SWITCH_LABEL}
+        {t('searchSwitch')}
       </span>
       {/* 絵のスイッチ 51×31・角 16・つまみ 25(読み上げは上のボタンの role=switch が担う) */}
       <span
@@ -182,6 +182,7 @@ function SuggestionRow({
   note: boolean
   onSelect: () => void
 }) {
+  const t = useTranslations('web.map')
   return (
     <button
       type="button"
@@ -213,7 +214,7 @@ function SuggestionRow({
       )}
       {note && (
         <div style={{ ...META, color: 'var(--fg-muted)', marginTop: 2 }}>
-          <JpText text={LOCATION_NOTE} />
+          <JpText text={t('locationNote')} />
         </div>
       )}
     </button>

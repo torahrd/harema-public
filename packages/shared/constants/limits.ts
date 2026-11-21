@@ -21,3 +21,13 @@ export const GOOGLE_PLACE_ID_MAX_LENGTH = 512
  * 同じ値を使う。
  */
 export const SHARE_QUERY_MAX_LENGTH = 60
+
+/**
+ * リスト(`public.lists` / `public.list_places`・段 2a)の上限。
+ * 名前とアイコンの長さは DB CHECK(`char_length(name) between 1 and 30`・`char_length(icon) between 1 and 32`)の鏡像。
+ * リストの数の上限(`LIST_MAX_PER_USER`)は**仮の上限(所有者の決定ではない・料金の段で見直す)**。DB のトリガー
+ * (`private.enforce_list_limit`・SQLSTATE 54000)が同じ値を持つ。変えるときは新しい migration で関数を置き換え、この値も合わせる。
+ */
+export const LIST_NAME_MAX_LENGTH = 30
+export const LIST_ICON_MAX_LENGTH = 32
+export const LIST_MAX_PER_USER = 100

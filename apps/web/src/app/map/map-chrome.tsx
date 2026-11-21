@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 /**
  * 検索チュール(design MapChrome.dc.html / B-1・B-2・B-3 を ±0 移植)。検索バー(通常 /
@@ -8,8 +9,6 @@ import { useState } from 'react'
  * 「飲食店以外を検索結果に含める」のスイッチは検索中だけ候補の枠の一番上に出す(search-suggestions.tsx)。サジェストパネルは children で差し込む
  * (design の flex 列 gap:9 に同居させるため)。位置は上部・safe-area 追従。
  */
-
-const SEARCH_PLACEHOLDER = '店名・場所で検索'
 
 type MapChromeProps = {
   query: string
@@ -63,6 +62,8 @@ export function MapChrome({
   toastBelowBanner = false,
   children,
 }: MapChromeProps) {
+  const t = useTranslations('web.map')
+  const common = useTranslations('web.common')
   const anchorToBanner = toastBelowBanner && Boolean(bannerSlot)
   const toastLayer = toastSlot && (
     <div
@@ -179,8 +180,8 @@ export function MapChrome({
               inputMode="search"
               enterKeyHint="search"
               autoComplete="off"
-              placeholder={SEARCH_PLACEHOLDER}
-              aria-label={SEARCH_PLACEHOLDER}
+              placeholder={t('searchPlaceholder')}
+              aria-label={t('searchPlaceholder')}
               style={{
                 flex: 1,
                 minWidth: 0,
@@ -201,7 +202,7 @@ export function MapChrome({
               <button
                 type="button"
                 onClick={onClear}
-                aria-label="検索をクリア"
+                aria-label={t('searchClear')}
                 style={{
                   flex: 'none',
                   display: 'flex',
@@ -229,7 +230,7 @@ export function MapChrome({
           {/* ハンバーガー: アカウント右ドロワーを開く(WP-11・design E-0)。 */}
           <button
             type="button"
-            aria-label="メニュー"
+            aria-label={common('menu')}
             onClick={onMenuClick}
             style={{
               width: 44,

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { SOURCE_TEXT_MAX_LENGTH } from '../constants'
+import { localeSchema } from '../i18n/locale'
 import { codePointLength } from './char-length'
 import { googlePlaceIdSchema } from './saved-place'
 
@@ -42,6 +43,11 @@ export const mobileAutocompleteRequestSchema = z.object({
   sessionToken: z.string().regex(MOBILE_SESSION_TOKEN_PATTERN),
   /** 必須。送らないと Google はサーバの IP の位置で候補を寄せる。 */
   locationBias: mobileLocationBiasSchema,
+  /**
+   * 候補を返す言語(Google の `languageCode`)。許可リストの 2 値だけ。省略は `ja`
+   * (`language` を送らない古い iOS 1.0.1 のため)。検証していない値を Google に渡さない。
+   */
+  language: localeSchema.default('ja'),
 })
 
 export type MobileAutocompleteRequest = z.output<typeof mobileAutocompleteRequestSchema>
@@ -61,6 +67,8 @@ export const mobilePlaceDetailsRequestSchema = z
     placeId: googlePlaceIdSchema,
     purpose: z.enum(MOBILE_PLACE_DETAILS_PURPOSES),
     sessionToken: z.string().regex(MOBILE_SESSION_TOKEN_PATTERN).optional(),
+    /** 店名・住所の言語(Google の `languageCode`)。許可リストの 2 値だけ。省略は `ja`。 */
+    language: localeSchema.default('ja'),
   })
   .refine(
     // 札は候補のセッションを閉じる確定(select_*)のときだけ受ける。他の用途で来たら拒む

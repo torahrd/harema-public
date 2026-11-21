@@ -15,11 +15,16 @@
  *
  * クライアントが選べるのは「用途」だけ。field の mask はこの file の表が決める(クライアントは field を選べない)。
  */
+import type { Locale } from '@harema/shared/i18n'
 import type { MobileAutocompleteRequest, MobilePlaceDetailsPurpose, MobilePlaceDetailsResponse, MobileSuggestionGroups } from '@harema/shared/validations'
 
 export const PLACES_ORIGIN = 'https://places.googleapis.com'
 export const AUTOCOMPLETE_URL = `${PLACES_ORIGIN}/v1/places:autocomplete`
-export const PLACES_LANGUAGE_CODE = 'ja'
+/**
+ * `languageCode` は、検証した表示言語(`language`・許可リストの 2 値)だけを渡す。無い要求(古い iOS 1.0.1)は `ja`。
+ * `regionCode` は言語と切り離して `JP` に固定する(日本の店を探す製品。候補の順位にも効く)。
+ */
+export const PLACES_DEFAULT_LANGUAGE: Locale = 'ja'
 export const PLACES_REGION_CODE = 'JP'
 
 /** Autocomplete の応答の mask。 */
@@ -55,15 +60,20 @@ export type AutocompleteHttpRequest = {
   }
 }
 
-/** 検証済みの要求(`mobileAutocompleteRequestSchema` の出力)から Google への要求を組む。 */
-export function buildAutocompleteRequest(request: MobileAutocompleteRequest): AutocompleteHttpRequest {
+/**
+ * 検証済みの要求(`mobileAutocompleteRequestSchema` の出力)から Google への要求を組む。
+ * `language` が無ければ `ja`(スキーマの省略時の値と同じ。単体の呼び出しの備え)。
+ */
+export function buildAutocompleteRequest(
+  request: Omit<MobileAutocompleteRequest, 'language'> & { language?: Locale },
+): AutocompleteHttpRequest {
   const { south, west, north, east } = request.locationBias
   return {
     url: AUTOCOMPLETE_URL,
     fieldMask: AUTOCOMPLETE_FIELD_MASK,
     body: {
       input: request.input,
-      languageCode: PLACES_LANGUAGE_CODE,
+      languageCode: request.language ?? PLACES_DEFAULT_LANGUAGE,
       regionCode: PLACES_REGION_CODE,
       sessionToken: request.sessionToken,
       locationBias: {
@@ -86,11 +96,12 @@ export function buildDetailsRequest(
   placeId: string,
   purpose: MobilePlaceDetailsPurpose,
   sessionToken?: string,
+  language: Locale = PLACES_DEFAULT_LANGUAGE,
 ): DetailsHttpRequest {
   const fieldMask = Object.hasOwn(DETAILS_FIELD_MASKS, purpose) ? DETAILS_FIELD_MASKS[purpose] : undefined
   if (fieldMask === undefined) throw new Error('unknown purpose')
   const query = new URLSearchParams({
-    languageCode: PLACES_LANGUAGE_CODE,
+    languageCode: language,
     regionCode: PLACES_REGION_CODE,
   })
   if (sessionToken !== undefined && SESSION_PURPOSES.has(purpose)) query.set('sessionToken', sessionToken)

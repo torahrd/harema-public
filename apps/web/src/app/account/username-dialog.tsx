@@ -2,20 +2,12 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   hasForbiddenUsernameCharacter,
   usernameSchema,
 } from '@harema/shared/validations'
-import {
-  ACTION_ERROR,
-  CURRENT_LABEL,
-  DIALOG_CANCEL,
-  INVISIBLE_CHAR_ERROR,
-  USERNAME_DIALOG_TITLE,
-  USERNAME_NEW_LABEL,
-  USERNAME_PLACEHOLDER,
-  USERNAME_SUBMIT,
-} from './drawer-copy'
+import { asLines } from '@/i18n/lines'
 import { updateUsername } from './actions'
 import { BODY, LABEL_JA, META, heading } from '../text-styles'
 
@@ -36,6 +28,8 @@ export function UsernameDialog({
   onClose: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('web.drawer')
+  const common = useTranslations('web.common')
   const [value, setValue] = useState('')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,9 +53,9 @@ export function UsernameDialog({
         router.replace('/login')
         return
       }
-      setError(ACTION_ERROR)
+      setError(common('actionError'))
     } catch {
-      setError(ACTION_ERROR)
+      setError(common('actionError'))
     } finally {
       setPending(false)
     }
@@ -107,7 +101,7 @@ export function UsernameDialog({
             margin: '0 0 14px',
           }}
         >
-          {USERNAME_DIALOG_TITLE}
+          {t('usernameDialogTitle')}
         </h3>
         <div
           style={{
@@ -122,7 +116,7 @@ export function UsernameDialog({
               ...LABEL_JA,
             }}
           >
-            {CURRENT_LABEL}
+            {t('currentLabel')}
           </span>
           <span
             style={{
@@ -141,7 +135,7 @@ export function UsernameDialog({
             marginBottom: 8,
           }}
         >
-          {USERNAME_NEW_LABEL}
+          {t('usernameNewLabel')}
         </label>
         <input
           id="username-dialog-input"
@@ -166,7 +160,7 @@ export function UsernameDialog({
           type="text"
           autoComplete="off"
           enterKeyHint="done"
-          placeholder={USERNAME_PLACEHOLDER}
+          placeholder={t('usernamePlaceholder')}
           style={{
             width: '100%',
             boxSizing: 'border-box',
@@ -188,7 +182,7 @@ export function UsernameDialog({
               color: 'var(--akane-text)',
             }}
           >
-            {INVISIBLE_CHAR_ERROR.map((sentence) => (
+            {asLines(common.raw('invisibleCharError')).map((sentence) => (
               <span key={sentence} style={{ display: 'block' }}>
                 {sentence}
               </span>
@@ -219,7 +213,7 @@ export function UsernameDialog({
               cursor: pending ? 'default' : 'pointer',
             }}
           >
-            {DIALOG_CANCEL}
+            {common('cancel')}
           </button>
           <button
             type="button"
@@ -232,7 +226,7 @@ export function UsernameDialog({
               cursor: pending || !canSubmit ? 'default' : 'pointer',
             }}
           >
-            {USERNAME_SUBMIT}
+            {t('usernameSubmit')}
           </button>
         </div>
       </div>

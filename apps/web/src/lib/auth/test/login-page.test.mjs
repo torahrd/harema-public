@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
 
-const source = readFileSync(new URL('../../../app/login/page.tsx', import.meta.url), 'utf8')
+const source = readFileSync(new URL('../../../app/(app)/login/page.tsx', import.meta.url), 'utf8')
 // コメントを除いたコード部分だけを見る(注釈の語で通らないように)
 const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 

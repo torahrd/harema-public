@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
+
 /**
  * 「現在地に戻る」ボタン(右下・design B-1 / 無効時 B-4・B-5 の造形を逐語)。
  * 有効 = surface + 中央ドット、無効(位置拒否 / オフライン)= bg-sunken + opacity .55・中央ドットなし。
@@ -11,12 +13,13 @@ export function CurrentLocationButton({
   disabled: boolean
   onClick: () => void
 }) {
+  const t = useTranslations('web.map')
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label="現在地に戻る"
+      aria-label={t('currentLocation')}
       style={{
         position: 'absolute',
         right: 16,

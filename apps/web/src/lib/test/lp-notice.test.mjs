@@ -114,7 +114,8 @@ describe('LP の知らせの合図', () => {
     assert.match(src, /outcome\.kind === 'done'\) \{[^\n]*\n(?:[^\n]*\/\/[^\n]*\n)?\s*markLpNotice\('withdraw'\)\s*\n\s*router\.replace\('\/'\)/)
   })
   it('LP の知らせは頭の行の直後に置く', () => {
-    const src = read('../../app/page.tsx')
-    assert.match(src, /<\/header>\n<LpNotice \/>\n/)
+    // LP の本体は PR4 で _public/home-view.tsx に移った。知らせは日本語の LP だけが出す(英語の頁へは戻らない)。
+    const src = read('../../app/_public/home-view.tsx')
+    assert.match(src, /<\/header>\n\{locale === 'ja' && <LpNotice \/>\}\n/)
   })
 })

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { startTransition } from 'react'
-import { ERROR_COPY } from './error-copy'
+import { matchLocale, messages } from '@harema/shared/i18n'
 import './globals.css'
 
 /**
@@ -15,7 +15,8 @@ import './globals.css'
  * 宣言ごと無効になりブラウザ既定(iOS では明朝)に落ちる(app-qs)。
  * `.edge-tint` の 2 枚も置かない(最小版のため。外観の切り替えに伴うバーの色の追従はこの 1 枚では扱わない)。
  *
- * 文言は error.tsx と同じ定数から取る(eyebrow だけ持たない最小版)。
+ * 文言は error.tsx と同じ辞書(web.error.failed・web.common.retry)から取る(eyebrow だけ持たない最小版)。
+ * root layout ごと置き換わって next-intl の provider が無いので、辞書を直に引く。
  */
 
 const MAIN_STYLE: React.CSSProperties = {
@@ -60,23 +61,27 @@ export default function GlobalError({ reset }: { reset: () => void }) {
     })
   }
 
+  // 置き換わる前の <html lang> を引き継ぐ(許可リストの値だけ)。
+  const lang = typeof document === 'undefined' ? 'ja' : matchLocale([document.documentElement.lang])
+  const web = messages[lang].web
+
   return (
-    <html lang="ja" className="h-full antialiased">
+    <html lang={lang} suppressHydrationWarning className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <main style={MAIN_STYLE}>
           <div style={BODY_STYLE}>
             <h1 style={H1_STYLE}>
-              {ERROR_COPY.heading[0]}
+              {web.error.failed.heading[0]}
               <br />
-              {ERROR_COPY.heading[1]}
+              {web.error.failed.heading[1]}
             </h1>
             <p className="whisper" style={LEDE_STYLE}>
-              {ERROR_COPY.lede}
+              {web.error.failed.lede}
             </p>
           </div>
 
           <button type="button" className="btn-hairline" onClick={retry}>
-            {ERROR_COPY.action}
+            {web.common.retry}
           </button>
         </main>
       </body>

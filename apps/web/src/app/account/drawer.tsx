@@ -1,24 +1,15 @@
 'use client'
 
 import { useRouter, unstable_rethrow } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
+import { legalPath, matchLocale } from '@harema/shared/i18n'
 import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react'
 import type { SignInProvider } from '@/lib/auth/core'
 import { ActionError } from '../_auth-ui/action-error'
 import { clearLpNotice, markLpNotice } from '@/lib/lp-notice'
 import { signOut } from './actions'
-import {
-  DRAWER_ARIA_LABEL,
-  DRAWER_HEADER,
-  IRREVERSIBLE_NOTICE,
-  ITEM_ADD_HOME,
-  ITEM_LOGOUT,
-  LOGOUT_ERROR,
-  ITEM_SAVED,
-  ITEM_USERNAME,
-  ITEM_WITHDRAW,
-  LINK_PRIVACY,
-  LINK_TERMS,
-} from './drawer-copy'
+import { asLines } from '@/i18n/lines'
+import { GlobeIcon, LangSwitch } from '../_ui/lang-switch'
 import { UsernameDialog } from './username-dialog'
 import { WithdrawDialog } from './withdraw-dialog'
 
@@ -54,6 +45,7 @@ export function AccountDrawer({
   account,
   onAddToHome,
   onDialogChange,
+  showLanguageSwitch = true,
 }: {
   open: boolean
   onClose: () => void
@@ -62,13 +54,20 @@ export function AccountDrawer({
   onAddToHome?: () => void
   /** ユーザー名変更・退会のダイアログの開閉を親へ知らせる(開いている間はホーム画面の案内を出さない)。 */
   onDialogChange?: (open: boolean) => void
+  /** 言語の切り替えの行を出すか。適用の日時より前は偽(サーバの時刻で、地図の頁が決める)。 */
+  showLanguageSwitch?: boolean
 }) {
   const router = useRouter()
+  const t = useTranslations('web.drawer')
+  const locale = matchLocale([useLocale()])
+  const common = useTranslations('web.common')
   const [dialog, setDialog] = useState<DialogKind>(null)
   useEffect(() => {
     onDialogChange?.(dialog !== null)
   }, [dialog, onDialogChange])
   const [pendingLogout, setPendingLogout] = useState(false)
+  // 言語の切り替えの往復の間(終わると頁全体を読み直すので、その間はログアウトを押せなくする)
+  const [pendingLang, setPendingLang] = useState(false)
   const [logoutFailed, setLogoutFailed] = useState(false)
   const [swipe, setSwipe] = useState<SwipeState | null>(null)
   const startXRef = useRef<number | null>(null)
@@ -140,7 +139,7 @@ export function AccountDrawer({
   }
 
   const handleLogout = async () => {
-    if (pendingLogout) return
+    if (pendingLogout || pendingLang) return
     setPendingLogout(true)
     setLogoutFailed(false)
     // 成功はサーバが cookie を消して LP へ移す(actions.ts の redirect)。移った後では置けないので、印は呼ぶ前に置く。
@@ -199,12 +198,12 @@ export function AccountDrawer({
         }}
       >
         <div className="qs-dw-h">
-          <span className="qs-lab">{DRAWER_HEADER}</span>
+          <span className="qs-lab">MENU</span>
           {/* 閉じるボタン(FREEZE ② の「新」のヘッダ = MENU と矢印のボタン・スワイプとスクリムのタップでも閉じる)。 */}
           <button
             type="button"
             className="qs-ib"
-            aria-label="メニューを閉じる"
+            aria-label={t('closeLabel')}
             disabled={pendingLogout}
             onClick={onClose}
           >
@@ -215,7 +214,7 @@ export function AccountDrawer({
         </div>
 
         <nav
-          aria-label={DRAWER_ARIA_LABEL}
+          aria-label={common('menu')}
           aria-busy={pendingLogout}
           style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
         >
@@ -225,7 +224,7 @@ export function AccountDrawer({
             onClick={() => closeAnd(() => router.push('/saved'))}
             className="qs-it"
           >
-            {ITEM_SAVED}
+            {t('itemSaved')}
             <span className="qs-ar">{'→'}</span>
           </button>
           <button
@@ -234,7 +233,7 @@ export function AccountDrawer({
             onClick={() => closeAnd(() => setDialog('username'))}
             className="qs-it"
           >
-            {ITEM_USERNAME}
+            {t('itemUsername')}
             <span className="qs-ar">{'→'}</span>
           </button>
           {onAddToHome && (
@@ -244,16 +243,27 @@ export function AccountDrawer({
               onClick={() => closeAnd(onAddToHome)}
               className="qs-it"
             >
-              {ITEM_ADD_HOME}
+              {t('itemAddHome')}
               <span className="qs-ar">{'→'}</span>
             </button>
+          )}
+
+          {/* 言語の切り替え(harema#150 の案 B)。押した後は頁全体を読み直す(地図の SDK は言語を替えられない)。 */}
+          {showLanguageSwitch && (
+          <div className="qs-it qs-it-lang">
+            <span className="qs-it-lang-lab">
+              <GlobeIcon />
+              {common('language')}
+            </span>
+            <LangSwitch variant="row" reload disabled={pendingLogout} onPendingChange={setPendingLang} />
+          </div>
           )}
 
           <div style={{ flex: 1 }} />
 
           <p className="qs-nt">
             <span className="qs-bar" aria-hidden="true" />
-            {IRREVERSIBLE_NOTICE}
+            {t('irreversibleNotice')}
           </p>
           <button
             type="button"
@@ -261,31 +271,31 @@ export function AccountDrawer({
             onClick={() => closeAnd(() => setDialog('withdraw'))}
             className="qs-it"
           >
-            {ITEM_WITHDRAW}
+            {t('itemWithdraw')}
             <span className="qs-ar">{'→'}</span>
           </button>
           <button
             type="button"
-            disabled={pendingLogout}
+            disabled={pendingLogout || pendingLang}
             aria-busy={pendingLogout}
             onClick={handleLogout}
             className="qs-it"
           >
-            {ITEM_LOGOUT}
+            {t('itemLogout')}
             {pendingLogout ? (
               <span className="spinner" aria-hidden="true" />
             ) : (
               <span className="qs-ar">{'→'}</span>
             )}
           </button>
-          {logoutFailed && <ActionError lines={LOGOUT_ERROR} />}
+          {logoutFailed && <ActionError lines={asLines(t.raw('logoutError'))} />}
           {/* 規約とポリシー(harema#111・案 B)。新しいタブで開き、地図の位置を残す。 */}
           <div className="qs-dw-lk">
-            <a href="/terms" target="_blank" rel="noopener">
-              {LINK_TERMS}
+            <a href={legalPath(locale, 'terms')} target="_blank" rel="noopener">
+              {t('linkTerms')}
             </a>
-            <a href="/privacy" target="_blank" rel="noopener">
-              {LINK_PRIVACY}
+            <a href={legalPath(locale, 'privacy')} target="_blank" rel="noopener">
+              {t('linkPrivacy')}
             </a>
           </div>
         </nav>

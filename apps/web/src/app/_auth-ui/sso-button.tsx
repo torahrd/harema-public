@@ -1,15 +1,12 @@
+import { useTranslations } from 'next-intl'
 import type { SsoProvider } from '@/lib/auth/browser-flow'
 
 /**
  * Apple / Google のログインのボタン(login-replace の FREEZE: compare-v3 の「新」)。
  * 色・表記・寸法は事業者の定めが勝つ(FREEZE.md「注意」)ので、globals.css 7. の `.qs .sso` が事業者の配色を持つ。面の根の `.qs` の中で使う。
  * ロゴは Apple の黒地に白のマーク・Google の 4 色の G(明暗の外観は CSS で切り替える)。
+ * ラベルは辞書(web.sso)。事業者の標準の語(Continue with Apple / Google)に合わせる。
  */
-
-export const SSO_LABEL: Record<SsoProvider, string> = {
-  apple: 'Appleで続ける',
-  google: 'Google で続ける',
-}
 
 function AppleMark() {
   return (
@@ -68,6 +65,7 @@ export function SsoButton({
   /** クリックの直後に popup を開く操作なので、親は await を挟まずに SDK を呼ぶこと。 */
   onClick: () => void
 }) {
+  const t = useTranslations('web.sso')
   return (
     <button
       type="button"
@@ -78,7 +76,7 @@ export function SsoButton({
       onClick={onClick}
     >
       {provider === 'apple' ? <AppleMark /> : <GoogleMark />}
-      {SSO_LABEL[provider]}
+      {t(provider)}
       {busy && <span className="spinner" aria-hidden="true" />}
     </button>
   )

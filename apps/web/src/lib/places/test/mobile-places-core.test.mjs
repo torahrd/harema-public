@@ -302,3 +302,49 @@ describe('T-W6 応答の読み取り', () => {
     assert.equal(readDetailsResponse('select_food', { displayName: { text: 'x' } }, isFoodPlaceType), null)
   })
 })
+
+// T6・T7(i18n PR3): 検証した言語だけを Google の languageCode に渡す。regionCode は常に JP。`language` の無い要求(古い iOS 1.0.1)は ja。
+describe('T6 language(検証した言語だけを Google に渡す)', () => {
+  const base = { input: 'ramen', sessionToken: TOKEN36, locationBias: bias }
+  const detailsBase = { placeId: 'ChIJx', purpose: 'summary' }
+
+  it('Autocomplete: language=en → languageCode=en / ja → ja / 省略 → ja。regionCode は常に JP', () => {
+    for (const [language, expected] of [['en', 'en'], ['ja', 'ja'], [undefined, 'ja']]) {
+      const request = mobileAutocompleteRequestSchema.parse({ ...base, ...(language === undefined ? {} : { language }) })
+      const built = buildAutocompleteRequest(request)
+      assert.equal(built.body.languageCode, expected, String(language))
+      assert.equal(built.body.regionCode, 'JP')
+    }
+  })
+
+  it('Details: language=en → languageCode=en / 省略 → ja。regionCode は常に JP', () => {
+    for (const [language, expected] of [['en', 'en'], ['ja', 'ja'], [undefined, 'ja']]) {
+      const request = mobilePlaceDetailsRequestSchema.parse({ ...detailsBase, ...(language === undefined ? {} : { language }) })
+      const built = buildDetailsRequest(request.placeId, request.purpose, request.sessionToken, request.language)
+      const url = new URL(built.url)
+      assert.equal(url.searchParams.get('languageCode'), expected, String(language))
+      assert.equal(url.searchParams.get('regionCode'), 'JP')
+    }
+  })
+
+  it('核の関数は language を渡さなくても ja(単体の呼び出しの備え)', () => {
+    assert.equal(buildAutocompleteRequest(base).body.languageCode, 'ja')
+    assert.equal(new URL(buildDetailsRequest('ChIJx', 'summary').url).searchParams.get('languageCode'), 'ja')
+  })
+
+  it('Zod: 許可リスト(ja・en)以外は拒む(fr・差し込みの試し・数・空・大文字)', () => {
+    for (const language of ['fr', 'en; x', 'en&x=1', 'EN', '', 1, null, ['en']]) {
+      assert.equal(mobileAutocompleteRequestSchema.safeParse({ ...base, language }).success, false, JSON.stringify(language))
+      assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...detailsBase, language }).success, false, JSON.stringify(language))
+    }
+  })
+})
+
+describe('T7 古い iOS(language を送らない)と新しいサーバの組', () => {
+  it('language の無い要求は通り、ja が補われる', () => {
+    const a = mobileAutocompleteRequestSchema.parse({ input: 'ramen', sessionToken: TOKEN36, locationBias: bias })
+    assert.equal(a.language, 'ja')
+    const d = mobilePlaceDetailsRequestSchema.parse({ placeId: 'ChIJx', purpose: 'summary' })
+    assert.equal(d.language, 'ja')
+  })
+})

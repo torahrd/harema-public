@@ -2,31 +2,33 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
+import { ja } from '@harema/shared/i18n'
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8')
 const screen = read('../map-screen.tsx')
 const hook = read('../use-install-prompt.ts')
 const dialog = read('../home-screen-dialog.tsx')
-const copy = read('../home-screen-copy.ts')
 const drawer = read('../../account/drawer.tsx')
-const drawerCopy = read('../../account/drawer-copy.ts')
 const lib = read('../../../lib/install-prompt.ts')
 
 describe('ホーム画面に追加する案内の配線', () => {
   it('HSP-W1 文言は決定のとおり(一字も変えない)', () => {
-    assert.match(copy, /HOME_DIALOG_TITLE = 'ホーム画面に追加'/)
-    assert.match(copy, /HOME_DIALOG_BODY_1 = 'ホーム画面に追加すると、ほかのアプリの共有から保存できます。'/)
-    assert.match(copy, /HOME_DIALOG_BODY_2 = '右のメニューからも、あとで追加できます。'/)
-    assert.match(copy, /HOME_DIALOG_NEVER = 'もう表示しない'/)
-    assert.match(copy, /HOME_DIALOG_ADD = '追加する'/)
-    assert.match(drawerCopy, /ITEM_ADD_HOME = 'ホーム画面に追加'/)
-    assert.match(dialog, /DIALOG_CANCEL/)
+    // 文言は辞書(ja.web.homeScreen)の日本語が決定のとおり。
+    assert.deepEqual(ja.web.homeScreen, {
+      title: 'ホーム画面に追加',
+      body1: 'ホーム画面に追加すると、ほかのアプリの共有から保存できます。',
+      body2: '右のメニューからも、あとで追加できます。',
+      never: 'もう表示しない',
+      add: '追加する',
+    })
+    assert.equal(ja.web.drawer.itemAddHome, 'ホーム画面に追加')
+    assert.match(dialog, /common\('cancel'\)/)
   })
   it('HSP-W2 モーダルは既存の部品の class を使う(退会のダイアログ・同意の行・縦のボタン)', () => {
     for (const c of ['qs qs-dlg', 'qs qs-scrim', 'qs-dlg-h', 'qs-dlg-b', 'qs-cr', 'qs-dlg-col', 'qs-btn qs-btn-p', 'qs-btn qs-btn-s']) {
       assert.ok(dialog.includes(`"${c}"`), c)
     }
-    assert.match(dialog, /<JpText text=\{HOME_DIALOG_BODY_1\} \/>/)
+    assert.match(dialog, /<JpText text=\{t\('body1'\)\} \/>/)
     assert.match(dialog, /marginTop: 0 \}\}/)
     assert.match(dialog, /className="qs-cr" style=\{\{ marginTop: 8 \}\}/)
   })
@@ -53,9 +55,9 @@ describe('ホーム画面に追加する案内の配線', () => {
     assert.match(screen, /\{showHomeDialog && \(\s*<HomeScreenDialog onAdd=\{installPrompt\.add\} onCancel=\{installPrompt\.cancel\} \/>/)
   })
   it('HSP-W5 メニューの項目は「ユーザー名変更」の下で、渡された時だけ。mobile には足さない', () => {
-    const i = drawer.indexOf('{ITEM_USERNAME}')
-    const j = drawer.indexOf('{ITEM_ADD_HOME}')
-    const k = drawer.indexOf('{ITEM_WITHDRAW}')
+    const i = drawer.indexOf("{t('itemUsername')}")
+    const j = drawer.indexOf("{t('itemAddHome')}")
+    const k = drawer.indexOf("{t('itemWithdraw')}")
     assert.ok(i > 0 && j > i && k > j)
     assert.match(drawer, /\{onAddToHome && \(/)
     assert.match(screen, /onAddToHome=\{installPrompt\.canAdd \? \(\) => installPrompt\.add\(false\) : undefined\}/)

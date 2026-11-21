@@ -823,7 +823,24 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
   margin: 0 auto;
   padding: max(16px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom));
 }
-.qs-hd { display: flex; justify-content: space-between; align-items: center; min-height: 48px; flex: none; }
+.qs-hd { display: flex; justify-content: space-between; align-items: center; min-height: 48px; flex: none; position: relative; }
+.qs-hd-r { display: flex; align-items: center; gap: 20px; }
+/* 言語の切り替え(harema#150 の案 B)。切り替えの値は保存のシートの 3 状態の切り替え(map/save-sheet.tsx)と同じ。
+   字の左右の余白 12px だけ新しい(元は等分)。地球の印は 16px・線 1.5・印と切り替えの間 6px。 */
+.qs-lsw { display: flex; align-items: center; gap: 6px; flex: none; color: var(--qs-fg2); }
+.qs-lsw-seg { display: flex; gap: 3px; padding: 3px; background: var(--bg-sunken); border: 1px solid var(--border); border-radius: var(--radius-control); }
+.qs-lsw-seg :is(button, a, [aria-current]) { text-decoration: none; padding: 9px 12px; border: 0; border-radius: 4px; background: transparent; cursor: pointer; font-family: var(--ff-sans); font-size: 13px; line-height: 20px; letter-spacing: 0.02em; color: var(--fg-2); }
+.qs-lsw-seg :is(button[aria-pressed='true'], [aria-current='true']) { font-weight: 700; color: var(--fg-1); background: var(--surface); box-shadow: var(--segment-selected-shadow); }
+.qs-lsw-seg button:disabled { cursor: default; }
+/* 公開ページ(/・/news・/terms・/privacy とその英語版)の足の切り替え(足のリンクの並び <nav> の最後の項目。リンクの間と © までの間は足の今の値): 相手の言語の同じ頁へのリンク(<a>)と、今の言語の字(<span aria-current>)。値は上の 3 行と同じ。
+   地球の印の色(--qs-fg2 は .qs の中でしか定義が無い)は、足のリンクの字の色の変数を読む。 */
+.qs-lsw-seg [aria-current] { cursor: default; }
+.lp .lp-foot .qs-lsw { color: var(--lp-fg); }
+.public-footer .qs-lsw { color: var(--fg-2); }
+/* 幅 360 未満(頭に収まらない): 切り替えを 1 行下の「戻る」の行の右に下ろす(所有者の決定・harema#150 の案 1)。流れから外して頭の高さは今のまま。 */
+@media (max-width: 359.98px) {
+  .qs-hd .qs-lsw { position: absolute; top: 48px; right: 0; height: 48px; }
+}
 .qs-wm { font: 700 18px/24px var(--qs-sans); letter-spacing: -0.01em; color: var(--qs-fg); }
 .qs a.qs-lab { display: flex; align-items: center; min-height: 44px; text-decoration: none; }
 .qs-top48 { flex: none; height: 48px; display: flex; align-items: center; }
@@ -891,6 +908,10 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .qs-dw .qs-nt { margin-bottom: 8px; }
 .qs-dw .auth-err { padding: 8px 0 12px; }
 /* ログアウトの下の規約とポリシー(harema#111・案 B。LP の足元と同じ 13px の下線の文字。押せる高さ 44px) */
+/* メニューの言語の行: 行は .qs-it と同じ(高さ 56・上に罫)。左に地球の印と字、右に切り替え。 */
+.qs-it-lang { cursor: default; }
+.qs-it-lang-lab { display: flex; align-items: center; gap: 8px; flex: none; }
+.qs-lsw-row { color: inherit; }
 .qs-dw-lk { display: flex; gap: 20px; margin-top: 12px; flex: none; }
 .qs-dw-lk a { display: flex; align-items: center; min-height: 44px; font: 400 13px/1.7 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
@@ -1045,8 +1066,8 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .public-legal-body th, .public-legal-body td { border: 1px solid var(--border); padding: 8px; min-width: 100px; text-align: left; }
 .public-legal-body a { color: var(--brand); text-decoration: underline; overflow-wrap: anywhere; }
 .public-footer { max-width: 1100px; margin: auto; padding: 22px 24px; border-top: 1px solid var(--border); display: block; justify-content: space-between; gap: 20px; color: var(--fg-2); font-family: var(--ff-sans); font-size: 13px; line-height: 20px; letter-spacing: 0.02em; }
-.public-footer nav { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
-.public-footer a { color: inherit; text-decoration: none; }
+.public-footer nav { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
+.public-footer nav > a { color: inherit; text-decoration: none; }
 @media (min-width: 768px) {
   .public-content { padding: 8px 24px 56px; }
   .public-content h1 { font-size: 30px; }
@@ -1059,7 +1080,10 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .news-item { position: relative; padding: 0 0 32px 20px; }
 .news-item:last-child { padding-bottom: 0; }
 .news-item::before { content: ""; position: absolute; left: 0; top: 10px; width: 12px; border-top: 1px solid var(--border); }
-.news-meta { display: flex; align-items: center; gap: 8px; margin: 0; }
+/* 札は日付の下の行に置き、語の途中で折らない(LP のパソコン幅と同じ形。所有者の決定 2026-11-17 案 B。幅 320 で札 3 つが「We/b」と折れたため) */
+.news-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
+.news-date, .news-tag { white-space: nowrap; flex: none; }
+.news-date { width: 100%; }
 .news-date { font: 500 13px/20px var(--ff-mono); letter-spacing: 0; color: var(--fg-2); font-variant-numeric: tabular-nums; }
 .news-tag { font: 400 12px/18px var(--ff-sans); letter-spacing: .02em; padding: 0 6px; border: 1px solid var(--border); border-radius: var(--radius-image); color: var(--fg-2); }
 .news-t { margin: 4px 0 0; word-break: keep-all; line-break: strict; }

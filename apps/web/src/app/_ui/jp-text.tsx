@@ -6,11 +6,12 @@ const UNIT = { display: 'inline-block', maxWidth: '100%' } as const
 /**
  * 和文を決まりどおりに折って描く(`jpLines`)。文と句をそれぞれ inline-block にするので、
  * 折れ目は句読点の後だけになり、入りきらない文は次の行から始まる。
+ * 配列を渡すと、その並びを 1 文の句として描く(句読点でない所にも折れ目を置きたい文言の側が切る)。
  */
-export function JpText({ text }: { text: string }) {
+export function JpText({ text }: { text: string | readonly string[] }) {
   return (
     <>
-      {jpLines(text).map((phrases, s) => (
+      {(typeof text === 'string' ? jpLines(text) : [text]).map((phrases, s) => (
         <span key={s} style={UNIT}>
           {phrases.map((phrase, p) => (
             <span key={p} style={UNIT}>

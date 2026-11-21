@@ -17,7 +17,7 @@ describe('受け口の道', () => {
   it('WST-M4 受け口のページがある', () => {
     assert.equal(manifest().share_target.action, SHARE_TARGET_ACTION)
     assert.equal(SHARE_TARGET_ACTION, '/share')
-    assert.equal(existsSync(new URL('../../app/share/page.tsx', import.meta.url)), true)
+    assert.equal(existsSync(new URL('../../app/(site)/share/page.tsx', import.meta.url)), true)
   })
 })
 
@@ -79,7 +79,7 @@ describe('届いた値の分け方', () => {
 
 describe('受け口の配線(ソース照合)', () => {
   const receiver = read('../../app/share/share-receiver.tsx')
-  const page = read('../../app/share/page.tsx')
+  const page = read('../../app/(site)/share/page.tsx')
 
   it('WST-R1 受け口は端末に置いて地図へ', () => {
     assert.ok(receiver.includes('putPendingShare('))
@@ -100,7 +100,7 @@ describe('受け口の配線(ソース照合)', () => {
   it('WST-R3 HTML として差さない', () => {
     for (const rel of [
       '../../app/share/share-receiver.tsx',
-      '../../app/share/page.tsx',
+      '../../app/(site)/share/page.tsx',
       '../share-target.ts',
       '../share-pending.ts',
     ]) {

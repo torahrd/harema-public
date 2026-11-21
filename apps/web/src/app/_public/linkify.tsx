@@ -67,10 +67,11 @@ function ParagraphBody({ paragraph }: { paragraph: Paragraph }) {
   </>
 }
 
-export function LegalBody({ document, name }: { document: LegalDocument; name: 'terms' | 'privacy' }) {
+export function LegalBody({ document, name, lang = 'ja' }: { document: LegalDocument; name: 'terms' | 'privacy'; lang?: 'ja' | 'en' }) {
   return <div className="public-legal-body" data-legal-body={name}>
-    {document.preamble.map((sentence, n) => <div key={n} data-legal-seg={`pre${n + 1}`}><p data-legal-leaf="t"><PhrasedLinkify text={sentence} /></p></div>)}
-    {document.articles.map((article) => <section key={article.no} data-legal-seg={`a${article.no}`}><h2 data-legal-leaf="h">第 {article.no} 条({article.heading})</h2>{article.paragraphs.map((paragraph, n) => paragraph.no
+    {/* 前文の折り方(PhrasedLinkify)は和文の決まり。英語は語の間で折れるので通さない。 */}
+    {document.preamble.map((sentence, n) => <div key={n} data-legal-seg={`pre${n + 1}`}><p data-legal-leaf="t">{lang === 'en' ? <Linkify text={sentence} /> : <PhrasedLinkify text={sentence} />}</p></div>)}
+    {document.articles.map((article) => <section key={article.no} data-legal-seg={`a${article.no}`}><h2 data-legal-leaf="h">{lang === 'en' ? <>Article {article.no} ({article.heading})</> : <>第 {article.no} 条({article.heading})</>}</h2>{article.paragraphs.map((paragraph, n) => paragraph.no
       ? (n > 0 && article.paragraphs[n - 1]?.no ? null : <ol key={n}>{article.paragraphs.slice(n).filter((entry, j, all) => entry.no && all.slice(0, j).every((prior) => prior.no)).map((entry, offset) => <li key={offset} data-legal-seg={`p${n + offset + 1}`} value={entry.no}><ParagraphBody paragraph={entry} /></li>)}</ol>)
       : <div key={n} data-legal-seg={`p${n + 1}`}><ParagraphBody paragraph={paragraph} /></div>)}</section>)}
   </div>

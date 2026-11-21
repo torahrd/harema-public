@@ -12,9 +12,13 @@ export function prepareLogin(): void {
   prepareSso()
 }
 
-export function loginWithSso(provider: SsoProvider): Promise<LoginOutcome> {
+export function loginWithSso(provider: SsoProvider, locale?: string): Promise<LoginOutcome> {
   return runSsoLogin(provider, {
     signIn: signInWithSso,
+    // 2 つの同意に結びつけた、ログインの画面を経た目印(受付が検証済みの ID トークンで DB に記録する。番号は DB が決める)
+    agreed: true,
+    // ログイン画面で言語を選んだ時だけ渡す(cookie はサーバが同意の記録の後に書く。ここでは書かない)
+    ...(locale !== undefined ? { locale } : {}),
     postSession: async (body) => {
       const response = await fetch('/auth/session', {
         method: 'POST',

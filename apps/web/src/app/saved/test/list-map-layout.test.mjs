@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, it } from 'node:test'
+import { ja } from '@harema/shared/i18n'
 import {
   ADDRESS_GAP,
   ADDRESS_SLOT_HEIGHT,
@@ -109,14 +110,14 @@ describe('ソースの確かめ', () => {
     assert.match(src, /top: rowElement\.offsetTop \+ 1,/)
   })
   it('一覧の select は /map と同じ座標の列だけを足す', () => {
-    const src = read('page.tsx')
+    const src = read('../(app)/saved/page.tsx')
     const m = src.match(/\.from\('saved_places'\)\s*\.select\(\s*'([^']*)'/)
     assert.equal(m?.[1], 'id, status, created_at, places(google_place_id, latitude, longitude, cached_at)')
     assert.equal(src.match(/\.eq\('user_id'/g)?.length ?? 0, 0)
     assert.ok((src.match(/refreshStalePlaces/g)?.length ?? 0) >= 1)
   })
   it('一覧の画面の 30 日の取り直しは もういい の行だけ(行きたい・また行きたいは地図画面の担当)', () => {
-    const src = read('page.tsx')
+    const src = read('../(app)/saved/page.tsx')
     const start = src.indexOf('after(')
     const end = src.indexOf('const savedRows')
     assert.ok(start >= 0 && end > start)
@@ -150,8 +151,10 @@ describe('ソースの確かめ', () => {
       }
     }
     walk(appDir)
-    assert.equal(hits.length, 1)
-    assert.ok(hits[0].endsWith('map/maps-load-fail-card.tsx'))
+    // 文は辞書(ja.web.map.mapsLoadFail)の 1 か所にあり、アプリのソースには文字そのものを置かない。カードは鍵で読む。
+    assert.equal(ja.web.map.mapsLoadFail.title, '地図を表示できませんでした')
+    assert.equal(hits.length, 0)
+    assert.match(readFileSync(join(appDir, 'map/maps-load-fail-card.tsx'), 'utf8'), /useTranslations\('web\.map\.mapsLoadFail'\)/)
     assert.match(readFileSync(join(appDir, 'map/map-screen.tsx'), 'utf8'), /import \{ MapsLoadFailCard \}/)
     assert.match(read('saved-list-map.tsx'), /import \{ MapsLoadFailCard \}/)
   })

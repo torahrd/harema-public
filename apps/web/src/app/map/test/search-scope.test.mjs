@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
+import { ja } from '@harema/shared/i18n'
 import { classifySuggestions } from '../classify-suggestions.ts'
 
 const read = (name) => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8')
@@ -31,8 +32,8 @@ describe('SW-1 検索欄の下に切り替えが無い(map-chrome)', () => {
     assert.ok(!/\bmode\b/.test(chrome))
     assert.ok(!chrome.includes('onModeChange'))
     assert.ok(!chrome.includes('SearchMode'))
-    assert.ok(chrome.includes('aria-label="検索をクリア"'))
-    assert.ok(chrome.includes('aria-label="メニュー"'))
+    assert.ok(chrome.includes("aria-label={t('searchClear')}"))
+    assert.ok(chrome.includes("aria-label={common('menu')}"))
   })
 })
 
@@ -64,9 +65,9 @@ describe('SW-4 行と注記', () => {
     assert.ok(suggestions.includes('suggestionRows(mode, suggestions)'))
     assert.ok(!suggestions.includes('GroupHeader'))
     assert.equal(count(suggestions, "note={bucket === 'location'}"), 1)
-    assert.equal(count(suggestions, 'LOCATION_NOTE'), 2) // 定義 1 + 描く 1(note の条件の中)
+    assert.equal(count(suggestions, "t('locationNote')"), 1) // 描く 1(note の条件の中)
     const render = suggestions.indexOf('{note && (')
-    assert.ok(render >= 0 && suggestions.indexOf('<JpText text={LOCATION_NOTE} />') > render)
+    assert.ok(render >= 0 && suggestions.indexOf("<JpText text={t('locationNote')} />") > render)
   })
 })
 
@@ -131,12 +132,15 @@ describe('SW-6 分類と順(純粋)', () => {
 
 describe('SW-7 文言と色', () => {
   const mapSources = ['map-screen.tsx', 'map-chrome.tsx', 'search-suggestions.tsx', 'use-autocomplete-suggestions.ts']
-  it('文言は web の map の中でそれぞれ 1 か所の定数', () => {
+  it('文言は辞書(ja.web.map)の日本語が決定のとおりで、web の map の中では鍵でそれぞれ 1 か所から読む', () => {
     const all = mapSources.map((n) => stripComments(read(n))).join('\n')
-    assert.equal(count(all, LABEL), 1)
-    assert.equal(count(all, NOTE), 1)
-    assert.ok(suggestions.includes(`const SWITCH_LABEL = '${LABEL}'`))
-    assert.ok(suggestions.includes(`const LOCATION_NOTE = '${NOTE}'`))
+    assert.equal(ja.web.map.searchSwitch, LABEL)
+    assert.equal(ja.web.map.locationNote, NOTE)
+    // 文字そのものは map のソースに残さない(辞書が唯一の置き場)。
+    assert.equal(count(all, LABEL), 0)
+    assert.equal(count(all, NOTE), 0)
+    assert.equal(count(all, "t('searchSwitch')"), 1)
+    assert.equal(count(all, "t('locationNote')"), 1)
   })
   it('色の定数に --fg-1・--surface・--switch-off-border・--switch-thumb-shadow', () => {
     const block = suggestions.slice(suggestions.indexOf('const SWITCH_COLORS'), suggestions.indexOf('} as const'))

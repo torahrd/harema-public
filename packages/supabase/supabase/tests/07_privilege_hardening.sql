@@ -13,7 +13,7 @@
 -- ローカルが緑でも本番が直っている証拠にはならない(ローカルと本番は pg_default_acl の出発点が違う)。
 -- 本番の証拠は docs/verification/ の本番 SQL の実行結果だけ。
 begin;
-select plan(47);
+select plan(51);
 
 create temporary view v_public_rel as
 select c.oid, c.relname, c.relkind,
@@ -44,8 +44,20 @@ select is((select count(*)::int from v_rel_acl where relname = 'user_agreements'
 select is((select count(*)::int from v_rel_acl where relname = 'places'          and grantee_name = 'anon'), 0, 'places に anon の ACL エントリが無い');
 select is((select count(*)::int from v_rel_acl where relname = 'saved_places'    and grantee_name = 'anon'), 0, 'saved_places に anon の ACL エントリが無い');
 select is((select count(*)::int from v_rel_acl where relname = 'ogp_fetch_attempts' and grantee_name = 'anon'), 0, 'ogp_fetch_attempts に anon の ACL エントリが無い');
+select is((select count(*)::int from v_rel_acl where relname = 'lists'          and grantee_name = 'anon'), 0, 'lists に anon の ACL エントリが無い');
+select is((select count(*)::int from v_rel_acl where relname = 'list_places'    and grantee_name = 'anon'), 0, 'list_places に anon の ACL エントリが無い');
 
 -- ===== §2 authenticated の権限集合が migration 8 の契約と完全一致 =====
+select is(
+  (select array_agg(privilege_type order by privilege_type) from v_rel_acl where relname = 'lists' and grantee_name = 'authenticated'),
+  array['DELETE', 'INSERT', 'SELECT', 'UPDATE'],
+  'lists の authenticated は SELECT / INSERT / UPDATE / DELETE のみ(TRUNCATE などは無い・リスト)'
+);
+select is(
+  (select array_agg(privilege_type order by privilege_type) from v_rel_acl where relname = 'list_places' and grantee_name = 'authenticated'),
+  array['DELETE', 'INSERT', 'SELECT'],
+  'list_places の authenticated は SELECT / INSERT / DELETE のみ(UPDATE・TRUNCATE などは無い・リスト)'
+);
 select is(
   (select array_agg(privilege_type order by privilege_type) from v_rel_acl where relname = 'profiles' and grantee_name = 'authenticated'),
   array['SELECT', 'UPDATE'],
@@ -213,10 +225,10 @@ select is(
   'anon が EXECUTE できる public の関数は 0 件(set_updated_at を含む)'
 );
 -- 棚卸しの網羅性:public にオブジェクトが増えたら、上の 2 つと §1〜§5 の期待集合を更新させる。
-select is((select count(*)::int from v_public_rel), 5, 'public のリレーションは 5 件(増減したら本テストの期待値を更新する)');
+select is((select count(*)::int from v_public_rel), 7, 'public のリレーションは 7 件(増減したら本テストの期待値を更新する)');
 select is(
   (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace and n.nspname = 'public'),
-  13, 'public の関数は 13 件(増減したら本テストの期待値を更新する)'
+  15, 'public の関数は 15 件(増減したら本テストの期待値を更新する)'
 );
 
 -- ===== §7 pg_default_acl(将来オブジェクトの既定)—— per-schema 行と global 行の両方を見る =====

@@ -34,6 +34,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      list_places: {
+        Row: {
+          created_at: string
+          list_id: string
+          saved_place_id: string
+        }
+        Insert: {
+          created_at?: string
+          list_id: string
+          saved_place_id: string
+        }
+        Update: {
+          created_at?: string
+          list_id?: string
+          saved_place_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_places_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_places_saved_place_id_fkey"
+            columns: ["saved_place_id"]
+            isOneToOne: false
+            referencedRelation: "saved_places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lists: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lists_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ogp_fetch_attempts: {
         Row: {
           completed_at: string | null
@@ -159,18 +227,27 @@ export type Database = {
       user_agreements: {
         Row: {
           agreed_at: string
+          agreed_privacy_version: number | null
+          agreed_terms_version: number | null
           created_at: string
           user_id: string
+          version_agreed_at: string | null
         }
         Insert: {
           agreed_at?: string
+          agreed_privacy_version?: number | null
+          agreed_terms_version?: number | null
           created_at?: string
           user_id: string
+          version_agreed_at?: string | null
         }
         Update: {
           agreed_at?: string
+          agreed_privacy_version?: number | null
+          agreed_terms_version?: number | null
           created_at?: string
           user_id?: string
+          version_agreed_at?: string | null
         }
         Relationships: []
       }
@@ -200,8 +277,16 @@ export type Database = {
         Returns: undefined
       }
       complete_onboarding: { Args: { p_username: string }; Returns: undefined }
+      current_agreement: {
+        Args: never
+        Returns: {
+          agreed: boolean
+          notice_due: boolean
+        }[]
+      }
       finish_withdrawal: { Args: never; Returns: undefined }
       ogp_fetch_window: { Args: never; Returns: string }
+      record_agreement: { Args: never; Returns: string }
       revoke_this_session: { Args: never; Returns: undefined }
       session_is_valid: { Args: never; Returns: boolean }
       upsert_place: {

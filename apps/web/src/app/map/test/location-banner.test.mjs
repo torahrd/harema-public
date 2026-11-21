@@ -8,7 +8,7 @@ const banner = readFileSync(new URL('../location-permission-banner.tsx', import.
 
 describe('位置情報オフの帯', () => {
   it('「。」の後で必ず行を変え、2 文目は句ごとの塊で並べる', () => {
-    assert.match(banner, /\[\[LOCATION_DENIED_MESSAGE\[0\]\], LOCATION_DENIED_MESSAGE\.slice\(1\)\]\.map\(/)
+    assert.match(banner, /\[denied\.slice\(0, 1\), denied\.slice\(1\)\]\.map\(/)
     assert.match(banner, /<span key=\{sentence\.join\(''\)\} style=\{\{ display: 'block' \}\}>/)
   })
   it('字は META のまま(書体・大きさを足さない)', () => {

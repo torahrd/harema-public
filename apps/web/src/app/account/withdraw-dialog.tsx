@@ -2,19 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import type { SignInProvider } from '@/lib/auth/core'
 import type { SsoProvider } from '@/lib/auth/browser-flow'
 import { markLpNotice } from '@/lib/lp-notice'
 import { ActionError } from '../_auth-ui/action-error'
 import { SsoButton } from '../_auth-ui/sso-button'
-import {
-  DIALOG_CANCEL,
-  IRREVERSIBLE_NOTICE,
-  WITHDRAW_DIALOG_BODY_LINES,
-  WITHDRAW_DIALOG_TITLE,
-  WITHDRAW_ERROR,
-  withdrawReauthText,
-} from './drawer-copy'
+import { asLines } from '@/i18n/lines'
 import { JpText } from '../_ui/jp-text'
 import { prepareWithdraw, reauthenticateAndWithdraw } from './withdraw-client'
 
@@ -40,6 +34,8 @@ export function WithdrawDialog({
   onCancel: () => void
 }) {
   const router = useRouter()
+  const t = useTranslations('web.drawer')
+  const common = useTranslations('web.common')
   const [pendingProvider, setPendingProvider] = useState<SsoProvider | null>(null)
   const [failed, setFailed] = useState(false)
   const pending = pendingProvider !== null
@@ -48,7 +44,11 @@ export function WithdrawDialog({
     prepareWithdraw()
   }, [])
   const providers: readonly SsoProvider[] = provider === null ? ['apple', 'google'] : [provider]
-  const reauthText = withdrawReauthText(provider)
+  // 本人の確認の 1 文。事業者が分からない(ID トークンに載っていない)ときは名を省く。
+  const reauthText =
+    provider === null
+      ? t('withdrawReauthUnknown')
+      : t('withdrawReauth', { name: provider === 'apple' ? 'Apple' : 'Google' })
 
   const onReauth = (target: SsoProvider) => {
     if (pending) return
@@ -109,14 +109,14 @@ export function WithdrawDialog({
       >
         <p className="qs-nt">
           <span className="qs-bar" aria-hidden="true" />
-          {IRREVERSIBLE_NOTICE}
+          {t('irreversibleNotice')}
         </p>
         <h3 id="withdraw-dialog-heading" className="qs-dlg-h">
-          {WITHDRAW_DIALOG_TITLE}
+          {t('withdrawTitle')}
         </h3>
         <div id="withdraw-dialog-body">
           <p className="qs-dlg-b">
-            <JpText text={WITHDRAW_DIALOG_BODY_LINES.join('')} />
+            <JpText text={asLines(t.raw('withdrawBody')).join('')} />
           </p>
           <p className="qs-dlg-b" data-withdraw-reauth-note>
             <JpText text={reauthText} />
@@ -138,10 +138,10 @@ export function WithdrawDialog({
             disabled={pending}
             onClick={onCancel}
           >
-            {DIALOG_CANCEL}
+            {common('cancel')}
           </button>
         </div>
-        {failed && <ActionError lines={WITHDRAW_ERROR} />}
+        {failed && <ActionError lines={asLines(common.raw('errorTryLater'))} />}
       </div>
     </>
   )

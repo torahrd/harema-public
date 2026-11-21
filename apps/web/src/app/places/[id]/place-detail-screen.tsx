@@ -8,9 +8,9 @@ import {
 } from '@vis.gl/react-google-maps'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { googleMapsHref, type SavedPlaceStatus } from '@harema/shared/constants'
-import { ja } from '@harema/shared/i18n'
 import { FullViewportShell } from '@/app/full-viewport-shell'
 import type { DetailBack } from '@/app/map/detail-origin'
 import { MapToast } from '@/app/map/map-toast'
@@ -22,17 +22,7 @@ import type { PlaceDisplay } from '@/app/saved/types'
 import { clientEnv } from '@/env/client'
 import { isHttpUrl } from '@/lib/external-link'
 import { getPlaceDetails } from '@/lib/places/details-cache'
-import {
-  DETAIL_EDIT_ARROW,
-  DETAIL_EDIT_LABEL,
-  DETAIL_FETCH_FAIL_LINE_1,
-  DETAIL_FETCH_FAIL_LINE_2,
-  DETAIL_MAPS_LABEL,
-  DETAIL_MEMO_CAPTION,
-  DETAIL_SOURCE_CAPTION,
-  DETAIL_STATUS_CAPTION,
-  EXTERNAL_ARROW,
-} from './place-detail-copy'
+import { DETAIL_EDIT_ARROW, EXTERNAL_ARROW } from './place-detail-copy'
 import { BODY, LABEL_JA, META, heading } from '../../text-styles'
 
 /** サーバ(page.tsx)から渡す、この画面が要る値だけ(saved_places.id は渡さない —— このスライスの
@@ -68,14 +58,19 @@ const TOAST_VISIBLE_MS = 4000
  * Places ライブラリの解決だけで、地図インスタンスの生成契機は無い)。
  */
 export function PlaceDetailScreen({ data, back }: PlaceDetailScreenProps) {
+  // 地図の SDK の言語は表示言語に合わせる(店名・住所・営業時間の言語)。region は国の書式と順位の指定なので JP のまま。
+  const locale = useLocale()
   return (
-    <APIProvider apiKey={clientEnv.googleMapsApiKey} language="ja" region="JP">
+    <APIProvider apiKey={clientEnv.googleMapsApiKey} language={locale} region="JP">
       <PlaceDetailView data={data} back={back} />
     </APIProvider>
   )
 }
 
 function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
+  const t = useTranslations('web.placeDetail')
+  const tWeb = useTranslations('web')
+  const statusNames = useTranslations('savedPlaceStatus')
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
   const [display, setDisplay] = useState<PlaceDisplay | undefined>(undefined)
@@ -133,7 +128,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   )
   const sourceLabel =
     data.sourceTitle && data.sourceTitle.length > 0 ? data.sourceTitle : data.sourceText
-  const statusLabel = ja.savedPlaceStatus[data.status]
+  const statusLabel = statusNames(data.status)
   const badge = badgeAppearance(data.status)
 
   // 「編集する」が開く先(design D-1 注記「編集は S1 シートへ」)。S1(save-sheet.tsx)は
@@ -220,7 +215,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
       >
         <Link
           href={back.href}
-          aria-label={back.label}
+          aria-label={tWeb(back.labelKey)}
           style={{
             flex: 'none',
             width: 36,
@@ -302,11 +297,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
                   color: 'var(--fg-2)',
                 }}
               >
-                {DETAIL_FETCH_FAIL_LINE_1.map((part) => (
-                  <span key={part} style={{ display: 'block' }}>
-                    {part}
-                  </span>
-                ))}
+                <span style={{ display: 'block' }}>{t('fetchFail1')}</span>
               </div>
               <div
                 style={{
@@ -315,7 +306,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
                   marginTop: 5,
                 }}
               >
-                {DETAIL_FETCH_FAIL_LINE_2}
+                {t('fetchFail2')}
               </div>
             </div>
           ) : (
@@ -341,7 +332,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
           )}
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={CAPTION_STYLE}>{DETAIL_STATUS_CAPTION}</span>
+            <span style={CAPTION_STYLE}>{t('statusCaption')}</span>
             <span
               className={badge.badgeClassName}
               style={{
@@ -375,7 +366,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
 
           {hasMemo && (
             <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 15 }}>
-              <div style={{ ...CAPTION_STYLE, marginBottom: 7 }}>{DETAIL_MEMO_CAPTION}</div>
+              <div style={{ ...CAPTION_STYLE, marginBottom: 7 }}>{t('memoCaption')}</div>
               <div
                 style={{
                   ...BODY,
@@ -389,7 +380,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
 
           {hasSource && (
             <div>
-              <div style={{ ...CAPTION_STYLE, marginBottom: 7 }}>{DETAIL_SOURCE_CAPTION}</div>
+              <div style={{ ...CAPTION_STYLE, marginBottom: 7 }}>{t('sourceCaption')}</div>
               {/* source_text は「自由記述または URL」(schema-contract.md:146)なので、http(s)
                   のときだけリンク化する(C-S11)。矢印はリンク化できたときだけ添える —— 外へ
                   遷移しない文字列に「外部へ開く」の記号を付けない。 */}
@@ -433,7 +424,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
               className="btn-hairline"
               onClick={() => setEditOpen(true)}
             >
-              {DETAIL_EDIT_LABEL}
+              {t('editLabel')}
               <span className="arrow">{DETAIL_EDIT_ARROW}</span>
             </button>
           </div>
@@ -453,7 +444,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
                 textDecoration: 'none',
               }}
             >
-              {DETAIL_MAPS_LABEL} <span>{EXTERNAL_ARROW}</span>
+              {t('mapsLabel')} <span>{EXTERNAL_ARROW}</span>
             </a>
           ) : !effectiveFailed ? (
             <div
@@ -477,7 +468,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
                 opacity: 0.55,
               }}
             >
-              {DETAIL_MAPS_LABEL}
+              {t('mapsLabel')}
             </div>
           ) : null}
 

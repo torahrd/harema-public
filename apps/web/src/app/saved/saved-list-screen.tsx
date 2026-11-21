@@ -7,12 +7,12 @@ import {
   useMapsLibrary,
 } from '@vis.gl/react-google-maps'
 import Link from 'next/link'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   SAVED_PLACE_STATUSES,
   type SavedPlaceStatus,
 } from '@harema/shared/constants'
-import { ja } from '@harema/shared/i18n'
 import { FullViewportShell } from '@/app/full-viewport-shell'
 import { clientEnv } from '@/env/client'
 import { getPlaceDetails } from '@/lib/places/details-cache'
@@ -26,12 +26,6 @@ import {
   ROW_PADDING_Y,
   listRegionHeight,
 } from './list-map-layout'
-import {
-  BACK_TO_MAP_LABEL,
-  PLACE_DETAILS_UNAVAILABLE,
-  SAVED_LIST_EMPTY,
-  SAVED_LIST_TITLE,
-} from './saved-list-copy'
 import { SavedListMap } from './saved-list-map'
 import type { PlaceDisplay, SavedListCounts, SavedListRow } from './types'
 import { BODY, META, NUM, heading } from '../text-styles'
@@ -48,14 +42,18 @@ type SavedListScreenProps = {
  * 戻るたびを含む)に Map loads が 1 回(タブを替えても作り直さない)。
  */
 export function SavedListScreen({ rows, counts, initialStatus }: SavedListScreenProps) {
+  // 地図の SDK の言語は表示言語に合わせる。region は国の書式と順位の指定なので JP のまま。
+  const locale = useLocale()
   return (
-    <APIProvider apiKey={clientEnv.googleMapsApiKey} language="ja" region="JP">
+    <APIProvider apiKey={clientEnv.googleMapsApiKey} language={locale} region="JP">
       <SavedListView rows={rows} counts={counts} initialStatus={initialStatus} />
     </APIProvider>
   )
 }
 
 function SavedListView({ rows, counts, initialStatus }: SavedListScreenProps) {
+  const t = useTranslations('web.savedList')
+  const statusNames = useTranslations('savedPlaceStatus')
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
   const [status, setStatus] = useState<SavedPlaceStatus>(initialStatus)
@@ -170,7 +168,7 @@ function SavedListView({ rows, counts, initialStatus }: SavedListScreenProps) {
       >
         <Link
           href="/map"
-          aria-label={BACK_TO_MAP_LABEL}
+          aria-label={t('backToMap')}
           style={{
             flex: 'none',
             width: 36,
@@ -203,7 +201,7 @@ function SavedListView({ rows, counts, initialStatus }: SavedListScreenProps) {
             color: 'var(--fg-1)',
           }}
         >
-          {SAVED_LIST_TITLE}
+          {t('title')}
         </span>
       </header>
 
@@ -245,7 +243,7 @@ function SavedListView({ rows, counts, initialStatus }: SavedListScreenProps) {
                   color: active ? 'var(--fg-1)' : 'var(--fg-2)',
                 }}
               >
-                {ja.savedPlaceStatus[tabStatus]}
+                {statusNames(tabStatus)}
               </span>
               <span
                 style={{
@@ -303,7 +301,7 @@ function SavedListView({ rows, counts, initialStatus }: SavedListScreenProps) {
               color: 'var(--fg-2)',
             }}
           >
-            {SAVED_LIST_EMPTY}
+            {t('empty')}
           </span>
         ) : (
           <>
@@ -351,6 +349,7 @@ type SavedRowProps = {
  * `rootMargin` を足すと、見ていない行まで課金する。
  */
 function SavedRow({ id, number, selected, googlePlaceId, display, failed, onVisible }: SavedRowProps) {
+  const t = useTranslations('web.savedList')
   const elementRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
@@ -436,7 +435,7 @@ function SavedRow({ id, number, selected, googlePlaceId, display, failed, onVisi
                 color: 'var(--fg-1)',
               }}
             >
-              {display === undefined ? PLACE_DETAILS_UNAVAILABLE : display.displayName}
+              {display === undefined ? t('detailsUnavailable') : display.displayName}
             </div>
             <div
               style={{

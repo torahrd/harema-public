@@ -70,7 +70,7 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .fact-links{display:flex;flex-wrap:wrap;column-gap:24px;margin-top:4px}
 .lp .lp-foot{border-top:1px solid var(--lp-rule);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:24px;padding-bottom:40px}
 .lp .lp-foot nav{display:flex;flex-wrap:wrap;column-gap:24px}
-.lp .lp-foot a{display:block;padding:12px 0;font-size:13px}
+.lp .lp-foot nav > a{display:block;padding:12px 0;font-size:13px}
 @media (max-width:600px){
   .lp .lp-in{padding-left:24px;padding-right:24px}
   .lp .lp-head{height:64px}
@@ -78,6 +78,7 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
   .lp .cta{width:100%;min-width:0}
   .lp .fact{grid-template-columns:minmax(0,1fr);row-gap:4px;padding:20px 0}
   .lp .lp-foot{flex-direction:column;align-items:flex-start;gap:0}
+  .lp .lp-foot nav > .qs-lsw{margin-bottom:12px}
 }
 
 /* ---- app-screen.css(アプリの画面の部品。色は globals.css のトークンを読む = dark ではアプリの dark の値に替わる) ---- */
@@ -222,7 +223,10 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .nws-item{position:relative;display:grid;grid-template-columns:160px minmax(0,1fr);column-gap:24px;padding:0 0 32px 20px}
 .lp .nws-item:last-child{padding-bottom:0}
 .lp .nws-item::before{content:"";position:absolute;left:0;top:14px;width:12px;border-top:1px solid var(--lp-rule)}
-.lp .nws-meta{display:flex;align-items:center;gap:8px;height:28px}
+/* 日付と札の行: 札は日付の下の行に置き、語の途中で折らない(所有者の決定 2026-11-13 案 B(パソコン幅)・2026-11-17 案 B(スマホ幅も同じ)) */
+.lp .nws-meta{display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:6px 8px;height:auto;padding:4px 0}
+.lp .nws-date,.lp .nws-tag{white-space:nowrap;flex:none}
+.lp .nws-date{width:100%}
 .lp .nws-date{font-family:var(--font-source-code-pro),'Source Code Pro',monospace;font-size:13px;line-height:20px;font-weight:500;letter-spacing:0;color:var(--lp-fg2);font-variant-numeric:tabular-nums}
 .lp .nws-tag{font-size:12px;line-height:18px;letter-spacing:.02em;padding:0 6px;border:1px solid var(--lp-rule);border-radius:2px;color:var(--lp-fg2)}
 .lp .nws-ttl{font-size:18px;line-height:28px;font-weight:700;white-space:nowrap}
@@ -232,5 +236,3 @@ body:has(.lp.qf) .edge-tint { background: var(--lp-bg); }
 .lp .nws-t .sent{display:block}
 .lp .nws-all{margin-top:16px}
 @media (max-width:600px){.lp .nws-item{grid-template-columns:minmax(0,1fr);row-gap:4px}}
-/* PC 幅は札を日付の下の行に置く(所有者の決定 2026-11-13 案 B)。左の欄 160px に日付と札 2 つ(195px)が入らず語の途中で折れたため。札が増えたら次の行へ並ぶ。 */
-@media (min-width:601px){.lp .nws-meta{flex-wrap:wrap;align-content:flex-start;height:auto;padding:4px 0;row-gap:6px}.lp .nws-date,.lp .nws-tag{white-space:nowrap;flex:none}.lp .nws-date{width:100%}}

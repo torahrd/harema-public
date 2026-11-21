@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
 import { USERNAME_MAX_LENGTH } from '@harema/shared/constants'
 import {
@@ -9,6 +10,7 @@ import {
   usernameSchema,
 } from '@harema/shared/validations'
 import { abortOnboarding, completeOnboarding } from './actions'
+import { asLines } from '@/i18n/lines'
 import { ActionError } from '../_auth-ui/action-error'
 
 /**
@@ -18,21 +20,10 @@ import { ActionError } from '../_auth-ui/action-error'
  * 朱(vermilion)は印だけに使い、字には使わない(失敗は × の印 + 墨の字の ActionError)。
  */
 
-// design の M1 error 文言(逐語)。不可視・制御・方向制御文字を検出したときだけ出す。
-// 文ごとに 1 ブロック。WebKit は文の途中("含まれています。除い / て、")で折るので、折り位置を
-// 版面に委ねずここで決める。列が狭い(320px)ときだけ、第1文が内部でもう一度折れる。
-const INVISIBLE_CHAR_ERROR = [
-  '見えない文字（制御文字）が含まれています。',
-  '除いて、もう一度お試しください。',
-] as const
-// 登録の失敗パス。主ボタンの下に × の印と 1 文で示す。
-const ACTION_ERROR = 'うまくいきませんでした。もう一度お試しください。'
-// 中止の失敗(login-replace の FREEZE: compare-v3 の ⑤)。中止のボタンの下に 2 文を出す。
-const ABORT_ERROR = ['中止できませんでした。', '少し待って、もう一度お試しください。'] as const
-// 登録の中止(プライバシーポリシー第 3 条 4 項)の文言と注記。所有者の決定(harema#7・2026-11-02・案 A):
+// 文言は辞書(web.onboarding・web.common)。不可視・制御・方向制御文字の誤り(design の M1 error 文言)は文ごとに 1 ブロック。
+// WebKit は文の途中("含まれています。除い / て、")で折るので、折り位置は版面に委ねず文ごとに分ける。列が狭い(320px)ときだけ、第1文が内部でもう一度折れる。
+// 登録の中止(プライバシーポリシー第 3 条 4 項)の文言と注記は所有者の決定(harema#7・2026-11-02・案 A):
 // 同意はログイン画面で済むので「同意せずに」を外し、規約とポリシーの「登録の中止」と同じ語にした。注記は今のまま。
-const ABORT_LABEL = '登録を中止する'
-const ABORT_NOTE = '中止すると登録は行われません。'
 
 /**
  * 先頭の空白を落とす。補足文言「前後の空白は除かれます」の前半を入力時点で実行する扱いで、空白だけを
@@ -46,6 +37,8 @@ function stripLeadingSpaces(value: string): string {
 
 export function OnboardingForm() {
   const router = useRouter()
+  const t = useTranslations('web.onboarding')
+  const common = useTranslations('web.common')
   const [username, setUsername] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [aborting, setAborting] = useState(false)
@@ -106,9 +99,9 @@ export function OnboardingForm() {
         router.replace('/login')
         return
       }
-      setActionError(ACTION_ERROR)
+      setActionError(common('actionError'))
     } catch {
-      setActionError(ACTION_ERROR)
+      setActionError(common('actionError'))
     } finally {
       setSubmitting(false)
     }
@@ -152,10 +145,13 @@ export function OnboardingForm() {
     <main className="qs qs-page">
       <div className="qs-lg">
         <p className="qs-lab">WELCOME · USERNAME</p>
-        <h1 className="qs-h1">ユーザー名の入力</h1>
+        <h1 className="qs-h1">{t('heading')}</h1>
         <p className="qs-lede">
-          <span className="qs-ln">あなたにだけ見える名前です。</span>
-          <span className="qs-ln">あとから、いつでも変えられます。</span>
+          {asLines(t.raw('lede')).map((line) => (
+            <span key={line} className="qs-ln">
+              {line}
+            </span>
+          ))}
         </p>
 
         <div className="qs-fg">
@@ -185,17 +181,17 @@ export function OnboardingForm() {
               type="text"
               autoComplete="off"
               enterKeyHint="done"
-              placeholder="例: そら"
+              placeholder={t('placeholder')}
               aria-invalid={hasForbidden || undefined}
             />
             <span className="qs-count" style={{ color: counterColor }}>
               {count}/{USERNAME_MAX_LENGTH}
             </span>
           </div>
-          {hasForbidden && <ActionError lines={INVISIBLE_CHAR_ERROR} className="qs-fg-err" />}
+          {hasForbidden && <ActionError lines={asLines(common.raw('invisibleCharError'))} className="qs-fg-err" />}
         </div>
 
-        <p className="qs-help">1〜15字。日本語・英数・記号・絵文字が使えます。前後の空白は除かれます。</p>
+        <p className="qs-help">{t('help')}</p>
 
         <button
           type="button"
@@ -204,7 +200,7 @@ export function OnboardingForm() {
           disabled={!canProceed || busy}
           aria-busy={submitting}
         >
-          登録する
+          {t('submit')}
           {submitting && <span className="spinner" aria-hidden="true" />}
         </button>
 
@@ -219,11 +215,11 @@ export function OnboardingForm() {
             disabled={busy}
             aria-busy={aborting}
           >
-            {ABORT_LABEL}
+            {t('abortLabel')}
             {aborting && <span className="spinner" aria-hidden="true" />}
           </button>
-          {abortFailed && <ActionError lines={ABORT_ERROR} />}
-          <p className="qs-abort-note">{ABORT_NOTE}</p>
+          {abortFailed && <ActionError lines={asLines(t.raw('abortError'))} />}
+          <p className="qs-abort-note">{t('abortNote')}</p>
         </div>
       </div>
     </main>

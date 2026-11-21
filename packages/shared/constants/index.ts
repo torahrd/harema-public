@@ -1,5 +1,8 @@
 export {
   GOOGLE_PLACE_ID_MAX_LENGTH,
+  LIST_ICON_MAX_LENGTH,
+  LIST_MAX_PER_USER,
+  LIST_NAME_MAX_LENGTH,
   MEMO_MAX_LENGTH,
   SHARE_QUERY_MAX_LENGTH,
   SOURCE_TEXT_MAX_LENGTH,
@@ -29,3 +32,10 @@ export {
   classifyPlaceTypes,
 } from './place-types'
 export { googleMapsHref } from './google-maps-link'
+export {
+  LEGAL_EFFECTIVE_AT,
+  LEGAL_NOTICE_EFFECTIVE_ON,
+  LEGAL_REVISIONS,
+  isLegalEffective,
+  type LegalRevision,
+} from './legal-versions'

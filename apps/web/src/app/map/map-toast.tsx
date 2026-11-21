@@ -1,6 +1,6 @@
 'use client'
 
-import { SAVE_SUCCESS_TOAST } from './save-sheet-copy'
+import { useTranslations } from 'next-intl'
 import type { MapToastVariant, SearchErrorVariant } from './types'
 import { META } from '../text-styles'
 import { JpText } from '../_ui/jp-text'
@@ -20,24 +20,9 @@ import { JpText } from '../_ui/jp-text'
  * 開いていない間に位置情報バナーが出ていれば、バナー下端 +9px。所有者 2026-11-02 D13 案 C)
  * (design「定位置は 9px = チュームの縦リズムと同値」)。表示/タイマーは map-screen が持つ。
  */
-const MESSAGES: Record<SearchErrorVariant, { body: string; tail: string }> = {
-  // A · AUTOCOMPLETE · 候補の取得失敗
-  suggestions: {
-    body: '候補を探せませんでした。',
-    tail: '少し待って、もう一度検索してください。',
-  },
-  // B · FETCHFIELDS · 詳細の取得失敗
-  details: {
-    body: 'この場所を開けませんでした。',
-    tail: '少し待って、もう一度お選びください。',
-  },
-}
-
-/** 保存成功の 1 行(裁定文言)。失敗と違い、次の一手が無いので尾を持たない。 */
-const SUCCESS_MESSAGES: Record<'save-created' | 'save-updated', string> = {
-  'save-created': SAVE_SUCCESS_TOAST.created,
-  'save-updated': SAVE_SUCCESS_TOAST.updated,
-}
+// 文言は辞書(web.map.toast・web.saveSheet)。
+// A · AUTOCOMPLETE(suggestions)= 候補の取得失敗 / B · FETCHFIELDS(details)= 詳細の取得失敗。
+// 保存成功の 1 行(裁定文言)は失敗と違い、次の一手が無いので尾を持たない。
 
 function isSearchError(variant: MapToastVariant): variant is SearchErrorVariant {
   return variant === 'suggestions' || variant === 'details'
@@ -52,8 +37,14 @@ export function MapToast({
   visible: boolean
   onDismiss: () => void
 }) {
-  const error = isSearchError(variant) ? MESSAGES[variant] : null
-  const successMessage = isSearchError(variant) ? null : SUCCESS_MESSAGES[variant]
+  const t = useTranslations('web.map.toast')
+  const sheet = useTranslations('web.saveSheet')
+  const error = isSearchError(variant)
+    ? { body: t(`${variant}Body`), tail: t(`${variant}Tail`) }
+    : null
+  const successMessage = isSearchError(variant)
+    ? null
+    : sheet(variant === 'save-created' ? 'toastCreated' : 'toastUpdated')
 
   return (
     <div

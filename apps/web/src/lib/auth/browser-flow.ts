@@ -51,7 +51,18 @@ export type LoginDeps = {
   /** popup で入る。利用者の操作(クリック)の直後に、await を挟まずに呼ばれる。失敗は throw。 */
   signIn: (provider: SsoProvider) => Promise<SsoCredential>
   /** `POST /auth/session`。通信の失敗は throw。 */
-  postSession: (body: { idToken: string; refreshToken: string }) => Promise<{ status: number; next: unknown }>
+  postSession: (body: {
+    idToken: string
+    refreshToken: string
+    /** 2 つの同意に結びつけた、ログインの画面を経た目印(`true`)。同意した番号は DB が決める。 */
+    agreed: true
+    /** ログイン画面で選んだ言語(`?lang=`。選んでいなければ無い)。サーバが許可リストで確かめ、同意の記録に成功した時だけ cookie に書く。 */
+    locale?: string
+  }) => Promise<{ status: number; next: unknown }>
+  /** ログインの画面を経た目印。 */
+  agreed: true
+  /** ログイン画面で選んだ言語。選んでいなければ undefined(本文に入れない)。 */
+  locale?: string
   /** SDK の `signOut`(メモリ上の状態を消す)。 */
   signOut: () => Promise<void>
 }
@@ -72,6 +83,8 @@ export async function runSsoLogin(provider: SsoProvider, deps: LoginDeps): Promi
     const response = await deps.postSession({
       idToken: credential.idToken,
       refreshToken: credential.refreshToken,
+      agreed: deps.agreed,
+      ...(deps.locale !== undefined ? { locale: deps.locale } : {}),
     })
     if (response.status !== 200) return { kind: 'failed' }
     return { kind: 'done', next: clientNextPath(response.next) }

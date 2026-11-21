@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { BODY, heading } from '../text-styles'
 
 /**
@@ -7,13 +8,11 @@ import { BODY, heading } from '../text-styles'
  * handoff `:42`)。文言は承認済み design の逐語(計画 §8.2)。「再試行」は Maps JS の bootstrap
  * script を読み直す唯一の手段としてページを再読込する —— このライブラリは失敗した読み込みを
  * ソフトに再試行する公開 API を持たない(`useApiLoadingStatus` / `useApiIsLoaded` のみ公開)。
- * 地図画面と一覧の地図(saved/saved-list-map.tsx)が同じカードを使う。
+ * 地図画面と一覧の地図(saved/saved-list-map.tsx)が同じカードを使う。文言は辞書(web.map.mapsLoadFail)。
  */
-const MAPS_LOAD_FAIL_TITLE = '地図を表示できませんでした'
-const MAPS_LOAD_FAIL_BODY = '少し待って、もう一度読み込んでください。'
-const MAPS_LOAD_FAIL_RETRY = '再試行'
-
 export function MapsLoadFailCard() {
+  const t = useTranslations('web.map.mapsLoadFail')
+  const common = useTranslations('web.common')
   return (
     // 位置・寸法・影は既存のオフライン面カード(offline-overlay.tsx)と同一(design 自身が
     // 「chrome の扱いはオフライン面 B-4 に揃え」と指示する。handoff `:42`)。
@@ -35,7 +34,7 @@ export function MapsLoadFailCard() {
       }}
     >
       <h3 style={{ ...heading(20), margin: '0 0 8px', color: 'var(--fg-1)' }}>
-        {MAPS_LOAD_FAIL_TITLE}
+        {t('title')}
       </h3>
       <p
         style={{
@@ -44,11 +43,11 @@ export function MapsLoadFailCard() {
           margin: 0,
         }}
       >
-        {MAPS_LOAD_FAIL_BODY}
+        {t('body')}
       </p>
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: 18 }}>
         <button type="button" className="btn" onClick={() => window.location.reload()}>
-          {MAPS_LOAD_FAIL_RETRY}
+          {common('retry')}
         </button>
       </div>
     </div>

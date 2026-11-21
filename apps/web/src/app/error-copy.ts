@@ -1,27 +1,8 @@
 /**
- * 404 / 500 面の逐語文言(spec §5 の 3 ファイルが共有する。Tora 裁定 2026-08-06)。
- *
- * 文言は §5 STOP の対象なので実装側では決めない。ここに 1 箇所化してあるのは、
- * `error.tsx` と `global-error.tsx` の文言が**構造的に**一致するようにするため —— 2 枚に
- * 直書きすると、片方だけ直された瞬間に「同じ失敗の 2 つの言い方」が本番に並ぶ。
- *
- * 話法は既存に合わせてある:骨格「〜ませんでした。」(map-toast.tsx。「いま、」は付けない)と
- * 「〜、もう一度お試しください。」(offline-overlay.tsx)。eyebrow は `<文脈> · <状態>`。
+ * 404 / 500 面の、言語によらない eyebrow(`<文脈> · <状態>`)。見出し・本文・ボタンの文言は辞書
+ * (`@harema/shared/i18n` の `web.error`・`web.common.retry`)が正で、`error.tsx` と `global-error.tsx` が
+ * 同じ辞書から読む(片方だけ直されて「同じ失敗の 2 つの言い方」が並ばないようにする。Tora 裁定 2026-08-06)。
+ * `global-error.tsx` は eyebrow を持たない。
  */
-
-export const NOT_FOUND_COPY = {
-  eyebrow: 'NOT FOUND · 404',
-  /** 見出しは 2 行で組む(Tora 裁定 2026-08-07。2026-11-04 のコメントでも「ページが見つかりません」)。句読点が無く 1 行に入らないので、折り位置をここで決める。 */
-  heading: ['ページが', '見つかりません'],
-  lede: 'アドレスが変わったか、なくなった可能性があります。',
-  action: 'トップへ戻る',
-} as const
-
-/** `global-error.tsx` は eyebrow を持たず、それ以外を `error.tsx` と共有する。 */
-export const ERROR_COPY = {
-  eyebrow: 'ERROR · 500',
-  /** 見出しは所有者 2026-11-04 のコメントの文「画面を開けませんでした。」。1 行に入らないので 2 行で組む。 */
-  heading: ['画面を', '開けませんでした。'],
-  lede: '少し待って、もう一度お試しください。',
-  action: '再試行',
-} as const
+export const NOT_FOUND_EYEBROW = 'NOT FOUND · 404'
+export const ERROR_EYEBROW = 'ERROR · 500'

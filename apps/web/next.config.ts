@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 // build 時に env を検証する(判断2・WP-05)。client.ts は module scope で
 // clientEnvSchema.safeParse を eager 実行し、必須の NEXT_PUBLIC_* が欠けていれば
@@ -15,10 +16,12 @@ import { lpOnlyRedirects } from "./src/lib/lp-only";
 
 assertNoOverridesOnVercel(process.env);
 
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
 const nextConfig: NextConfig = {
   async redirects() {
     return lpOnlyRedirects(process.env);
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
