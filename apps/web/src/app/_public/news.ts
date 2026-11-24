@@ -21,6 +21,16 @@ export type NewsItem = {
 
 /** 新しい順。 */
 export const NEWS: readonly NewsItem[] = [
+  { date: '2026.11.25', targets: ['iPhone'], title: 'バージョン 2.0.0 を公開', texts: [
+    'iPhone の言語を英語にすると/アプリも英語で表示するようにしました。',
+    'メニューに/言語の行を追加し/ iPhone の設定を開けるようにしました。',
+    '利用規約やプライバシーポリシーを/改定したときに/お知らせを表示して/同意をお願いするようにしました。',
+  ],
+    en: { title: 'Version 2.0.0 released', texts: [
+      'When your iPhone is set to English, the app is now shown in English.',
+      'The menu now has a language row that lets you open your iPhone’s Settings.',
+      'When the Terms of Use or the Privacy Policy is revised, the app now shows a notice and asks for your consent.',
+    ] } },
   { date: '2026.11.22', targets: ['Web', 'Android'], title: '機能の追加', texts: [
     'アプリの表示を/英語に切り替えられるようにしました。',
     'トップページ・更新情報・利用規約・/プライバシーポリシーに/英語のページを追加しました。',
