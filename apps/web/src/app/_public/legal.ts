@@ -551,7 +551,7 @@ export const terms: LegalDocument = {
         {
           "no": 1,
           "sentences": [
-            "運営者からの連絡は、本サービス上の掲示で行います。ただし、第 2 項の窓口で受け付けた問い合わせや請求への回答は、その窓口の X アカウント宛のダイレクトメッセージで行うことがあります。第 8 条・第 14 条に掲示の定めがある場合は、その定めに従います。"
+            "運営者からの連絡は、本サービス上の掲示で行います。ただし、第 2 項の窓口で受け付けた問い合わせや請求への回答は、その窓口のメールで行うことがあります。第 8 条・第 14 条に掲示の定めがある場合は、その定めに従います。"
           ],
           "items": [],
           "blocks": []
@@ -559,7 +559,7 @@ export const terms: LegalDocument = {
         {
           "no": 2,
           "sentences": [
-            "運営者への連絡は、X アカウント https://x.com/htoranosuke 宛のダイレクトメッセージで受け付けます。問い合わせフォームと問い合わせ専用メールアドレスはありません。"
+            "運営者への連絡は、メール(harema.app.support@gmail.com)で受け付けます。問い合わせフォームはありません。"
           ],
           "items": [],
           "blocks": []
@@ -594,6 +594,14 @@ export const privacy: LegalDocument = {
   "title": "プライバシーポリシー",
   "revisedOn": "2026.11.22",
   "preamble": [
+    "改定のお知らせ(2026.11.25 掲示)",
+    "2026.11.29 午前 0 時(日本標準時)から、本ポリシーの​第 1 条と第 3 条を​次のとおり改定します。保存した店を​リストに分けられるようにするため、リストと、リストに入れた店を、保存する情報に加えます。",
+    "第 1 条(4)に、次の 2 つの項目を加えます。",
+    "リスト —— 保存した店を​分けるために​本人が作るリストの、リストごとの識別子、アカウントの識別子、名前(30 文字まで)、アイコン(任意で 1 字)、作成・更新日時です。",
+    "リストに入れた店 —— ​どのリストに​どの保存した店を​入れたかの対応と、入れた日時です。",
+    "第 3 条 3 項の、退会のときに削除する情報に、リストと、リストに入れた店を加えます。",
+    "第 3 条 5 項の最後に、次の文を加えます。",
+    "リストは、本人が作成・変更・削除でき、保存した店を​リストに入れたり外したりできます。リストを削除しても、保存した店は削除しません。保存した店を削除すると、その店をリストからも外します。",
     "hareMa(以下「本サービス」)の運営者は、利用者の情報を次のとおり取り扱います。本ポリシーは利用規約の一部です。利用規約は https://harema.app/terms です。ログインでは、Apple・Google・Firebase と通信します。本ポリシーは、この通信や、公開ページの閲覧に伴う情報にも適用します。本ポリシーは、harema.app の web と、スマートフォンのアプリの両方に適用します。web とアプリで取り扱いが異なるところは、「web では」「iOS アプリでは」と書きます。"
   ],
   "articles": [
@@ -1615,7 +1623,7 @@ export const privacy: LegalDocument = {
             {
               "no": 1,
               "sentences": [
-                "受付 —— 第 13 条 1 項の X アカウント宛のダイレクトメッセージで受け付けます。"
+                "受付 —— 第 13 条 1 項のメールで受け付けます。"
               ],
               "blocks": []
             },
@@ -1629,7 +1637,7 @@ export const privacy: LegalDocument = {
             {
               "no": 3,
               "sentences": [
-                "回答 —— 本人確認後、法令に従い遅滞なく対応します。開示は、電磁的記録の提供(請求を受け付けた X アカウント宛のダイレクトメッセージでの送付を含みます)、書面の交付その他運営者の定める方法のうち、請求者が指定した方法で行い、指定の方法による開示が困難な場合は、その旨をお知らせしたうえで書面の交付により行います。開示以外の請求への回答は、原則として、請求を受け付けた X アカウント宛のダイレクトメッセージで行います。応じられない場合は、その旨と理由を説明します。"
+                "回答 —— 本人確認後、法令に従い遅滞なく対応します。開示は、電磁的記録の提供(請求を受け付けたメールでの送付を含みます)、書面の交付その他運営者の定める方法のうち、請求者が指定した方法で行い、指定の方法による開示が困難な場合は、その旨をお知らせしたうえで書面の交付により行います。開示以外の請求への回答は、原則として、請求を受け付けたメールで行います。応じられない場合は、その旨と理由を説明します。"
               ],
               "blocks": []
             },
@@ -1758,7 +1766,7 @@ export const privacy: LegalDocument = {
         {
           "no": 1,
           "sentences": [
-            "問い合わせ、苦情、開示等の請求は、X アカウント https://x.com/htoranosuke 宛のダイレクトメッセージで受け付けます。問い合わせフォームと問い合わせ専用メールアドレスはありません。個人情報は公開投稿に書かないでください。"
+            "問い合わせ、苦情、開示等の請求は、メール(harema.app.support@gmail.com)で受け付けます。このメールは、個人情報の取り扱いの担当者の連絡先を兼ねます。問い合わせフォームはありません。個人情報は公開投稿に書かないでください。"
           ],
           "items": [],
           "blocks": []
@@ -2325,7 +2333,7 @@ export const termsEn: LegalDocument = {
         {
           "no": 1,
           "sentences": [
-            "Communications from the Operator are made by posting a notice on the Service. However, replies to inquiries or requests received at the contact point in paragraph 2 may be sent by direct message to the X account of that contact point. Where Article 8 or Article 14 contains provisions on posting a notice, those provisions apply."
+            "Communications from the Operator are made by posting a notice on the Service. However, replies to inquiries or requests received at the contact point in paragraph 2 may be sent by email from that contact point. Where Article 8 or Article 14 contains provisions on posting a notice, those provisions apply."
           ],
           "items": [],
           "blocks": []
@@ -2333,7 +2341,7 @@ export const termsEn: LegalDocument = {
         {
           "no": 2,
           "sentences": [
-            "Contact with the Operator is accepted by direct message to the X account (https://x.com/htoranosuke). There is no inquiry form and no dedicated inquiry email address."
+            "Contact with the Operator is accepted by email (harema.app.support@gmail.com). There is no inquiry form."
           ],
           "items": [],
           "blocks": []
@@ -2369,6 +2377,14 @@ export const privacyEn: LegalDocument = {
   "revisedOn": "2026.11.22",
   "preamble": [
     "This is an English translation for reference. The Japanese version is the official version, and if there is any inconsistency between the two, the Japanese version prevails.",
+    "Notice of revision (posted 2026.11.25)",
+    "From 0:00 a.m. on 2026.11.29 (Japan Standard Time), Articles 1 and 3 of this Policy will be revised as follows. To let users sort saved places into lists, lists and the places in them will be added to the information stored.",
+    "The following two items will be added to Article 1 (4).",
+    "Lists —— For each list that a user creates to sort saved places: an identifier for the list, the account identifier, the name (up to 30 characters), the icon (optional; one character), and the creation and update date and time.",
+    "Places in lists —— Which saved place has been added to which list, and the date and time it was added.",
+    "Lists and the places in them will be added to the information deleted when a user deletes their account, in Article 3, paragraph 3.",
+    "The following sentences will be added at the end of Article 3, paragraph 5.",
+    "Users can create, change, and delete lists, and add saved places to lists or remove them. Deleting a list does not delete the saved places in it. Deleting a saved place also removes it from its lists.",
     "The Operator of hareMa (the “Service”) handles users’ information as follows. This Policy is part of the Terms of Use. See the Terms of Use (https://harema.app/en/terms). When users log in, the Service communicates with Apple, Google, and Firebase. This Policy also applies to this communication and to information that arises when public pages are viewed. This Policy applies to both the web version at harema.app and the smartphone app. Where handling differs between the web and the app, this Policy says “on the web” or “in the iOS app”."
   ],
   "articles": [
@@ -3390,7 +3406,7 @@ export const privacyEn: LegalDocument = {
             {
               "no": 1,
               "sentences": [
-                "Receipt —— Requests are accepted by direct message to the X account in Article 13, paragraph 1."
+                "Receipt —— Requests are accepted by email at the address in Article 13, paragraph 1."
               ],
               "blocks": []
             },
@@ -3404,7 +3420,7 @@ export const privacyEn: LegalDocument = {
             {
               "no": 3,
               "sentences": [
-                "Response —— After identity verification, the Operator responds without delay in accordance with laws and regulations. Disclosure is made by the method the requester specifies from among provision of electronic records (including sending by direct message to the X account at which the request was received), delivery of documents, and other methods the Operator sets, and if disclosure by the specified method is difficult, the Operator will say so and make disclosure by delivery of documents. Responses to requests other than disclosure are, as a rule, made by direct message to the X account at which the request was received. If the Operator cannot comply, it will explain that and the reason."
+                "Response —— After identity verification, the Operator responds without delay in accordance with laws and regulations. Disclosure is made by the method the requester specifies from among provision of electronic records (including sending by email to the address from which the request was received), delivery of documents, and other methods the Operator sets, and if disclosure by the specified method is difficult, the Operator will say so and make disclosure by delivery of documents. Responses to requests other than disclosure are, as a rule, made by email to the address from which the request was received. If the Operator cannot comply, it will explain that and the reason."
               ],
               "blocks": []
             },
@@ -3533,7 +3549,7 @@ export const privacyEn: LegalDocument = {
         {
           "no": 1,
           "sentences": [
-            "Inquiries, complaints, and requests for disclosure and the like are accepted by direct message to the X account (https://x.com/htoranosuke). There is no inquiry form and no dedicated inquiry email address. Personal information should not be written in public posts."
+            "Inquiries, complaints, and requests for disclosure and the like are accepted by email (harema.app.support@gmail.com). This email address also serves as the contact for the person in charge of handling personal information. There is no inquiry form. Personal information should not be written in public posts."
           ],
           "items": [],
           "blocks": []

@@ -7,7 +7,7 @@ export const ja = {
     about: 'このアプリについて',
     login: 'ログイン',
     footerLabel: 'フッター',
-    contactX: 'X でお問い合わせ ↗',
+    contactMail: 'お問い合わせ',
     terms: '利用規約',
     privacy: 'プライバシーポリシー',
     backToTop: 'トップへ戻る',
@@ -47,7 +47,7 @@ export const ja = {
     facts: {
       login: { name: 'ログイン', text: '⟦Apple/Google のアカウントで行います。⟧|⟦hareMa は⟧パスワードを持たず、|ユーザー名を除き、|メールアドレスや氏名も、|データベースに保存しません。' },
       data: { name: 'データ', text: '保存した店は、|ほかの利用者には公開されません。⟨退会すると、|アカウントと保存した店を削除します。⟩' },
-      operator: { name: '運営', text: 'hareMa 運営者。|⟪⟦お問い合わせは、⟧|⟦{x} で受け付けています。⟧⟫', xLabel: 'X(@htoranosuke)↗' },
+      operator: { name: '運営', text: 'hareMa 運営者。|⟪⟦お問い合わせは、⟧|⟦{mail}⟧|⟦で受け付けています。⟧⟫|⟪⟦最新情報は、⟧|⟦運営者の {x} で出します。⟧⟫', mailLabel: 'harema.app.support@gmail.com', xLabel: 'X(@htoranosuke)↗' },
       app: {
         name: 'アプリ',
         text: '⟦iPhone のアプリなら、⟧|⟦ほかのアプリの共有から、⟧|⟦切り替えずに保存できます。⟧',

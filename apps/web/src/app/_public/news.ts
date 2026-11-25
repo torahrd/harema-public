@@ -21,6 +21,18 @@ export type NewsItem = {
 
 /** 新しい順。 */
 export const NEWS: readonly NewsItem[] = [
+  { date: '2026.11.25', targets: ['Web', 'Android', 'iPhone'], title: 'プライバシーポリシーなどの改定', texts: [
+    '2026.11.29 午前 0 時(日本標準時)から/プライバシーポリシーを改定します。',
+    '保存した店をリストに/分けられるようにするため、/リストと、リストに入れた店を/保存する情報に追加します。',
+    '改定の内容は/プライバシーポリシーのページの冒頭に/掲載しています。',
+    '問い合わせの窓口を/X のダイレクトメッセージから/メールに変えました。',
+  ],
+    en: { title: 'Privacy Policy and Terms update', texts: [
+      'The Privacy Policy will be revised from 0:00 a.m. on 2026.11.29 (Japan Standard Time).',
+      'To let you sort saved places into lists, we are adding lists and the places in them to the information we store.',
+      'The details of the revision are posted at the top of the Privacy Policy page.',
+      'We changed the contact point for inquiries from X direct messages to email.',
+    ] } },
   { date: '2026.11.25', targets: ['iPhone'], title: 'バージョン 2.0.0 を公開', texts: [
     'iPhone の言語を英語にすると/アプリも英語で表示するようにしました。',
     'メニューに/言語の行を追加し/ iPhone の設定を開けるようにしました。',

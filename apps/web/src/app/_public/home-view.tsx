@@ -22,6 +22,7 @@ import { LangLinks } from '@/app/_public/lang-links'
 import { NEWS, LP_NEWS_COUNT, newsDateTime, newsText } from '@/app/_public/news'
 import { NewsSentence } from '@/app/_public/news-sentence'
 import { Rich } from '@/app/_public/rich'
+import { CONTACT_MAILTO, OPERATOR_X_URL } from '@/app/_public/content'
 import { publicCopy, type PublicLocale } from '@/app/_public/copy'
 import '@/app/lp.css'
 
@@ -46,7 +47,6 @@ function Shot({ name, alt, eager = false }: { name: keyof typeof SHOTS; alt: str
 // 英語の頁のバッジは、Apple の英語版の決まりの原文を読めていないので、日本語版のまま(替えるのは原文を読んでから。PR4 の M3)。
 // QR はアプリのページの URL を符号にした物(PC の幅だけ。スマホの画面の QR はその端末で読めない)。
 const APP_STORE_URL = 'https://apps.apple.com/jp/app/harema/id6830447181'
-const CONTACT_X_URL = 'https://x.com/htoranosuke'
 
 function AppStoreBadge({ className, alt, locale }: { className: string; alt: string; locale: PublicLocale }) {
   const width = locale === 'en' ? 120 : 109
@@ -74,7 +74,8 @@ export function HomeView({ locale }: { locale: PublicLocale }) {
   const c = publicCopy(locale)
   const h = c.home
   const home = locale === 'en' ? '/en' : '/'
-  const xLink = (label: string) => <a className="x-ul" href={CONTACT_X_URL} target="_blank" rel="noopener">{label}</a>
+  const xLink = (label: string) => <a className="x-ul" href={OPERATOR_X_URL} target="_blank" rel="noopener">{label}</a>
+  const mailLink = (label: string) => <a className="x-ul" href={CONTACT_MAILTO}>{label}</a>
   const act = (
     <div className="act">
       <Link className="cta" href="/login" prefetch={false}>{h.cta}</Link>
@@ -149,7 +150,7 @@ export function HomeView({ locale }: { locale: PublicLocale }) {
 <dl className="facts">
 <div className="fact"><dt>{h.facts.login.name}</dt><dd><span className="hd"><Rich text={h.facts.login.text} /></span></dd></div>
 <div className="fact"><dt>{h.facts.data.name}</dt><dd className="hd"><Rich text={h.facts.data.text} /></dd></div>
-<div className="fact"><dt>{h.facts.operator.name}</dt><dd><Rich text={h.facts.operator.text} slots={{ x: xLink(h.facts.operator.xLabel) }} /><span className="fact-links"><Link href={locale === 'en' ? '/en/terms' : '/terms'}>{c.nav.terms}</Link><Link href={locale === 'en' ? '/en/privacy' : '/privacy'}>{c.nav.privacy}</Link></span></dd></div>
+<div className="fact"><dt>{h.facts.operator.name}</dt><dd><Rich text={h.facts.operator.text} slots={{ mail: mailLink(h.facts.operator.mailLabel), x: xLink(h.facts.operator.xLabel) }} /><span className="fact-links"><Link href={locale === 'en' ? '/en/terms' : '/terms'}>{c.nav.terms}</Link><Link href={locale === 'en' ? '/en/privacy' : '/privacy'}>{c.nav.privacy}</Link></span></dd></div>
 <div className="fact"><dt>{h.facts.app.name}</dt><dd><span className="hd"><Rich text={h.facts.app.text} /></span><span className="app-get"><AppIcon /><AppQr /><span className="app-get-text"><a className="x-ul" href={APP_STORE_URL} target="_blank" rel="noopener">{h.facts.app.storeLink}</a><span className="app-qr-note"><Rich text={h.facts.app.qrNote} /></span></span></span><span className="hd app-android"><Rich text={h.facts.app.android} /></span></dd></div>
 </dl>
 {act}
@@ -163,7 +164,7 @@ export function HomeView({ locale }: { locale: PublicLocale }) {
 </main>
 
 <footer className="lp-foot lp-in">
-<nav aria-label={c.nav.footerLabel}><a href={CONTACT_X_URL} target="_blank" rel="noopener">{c.nav.contactX}</a><Link href={locale === 'en' ? '/en/terms' : '/terms'}>{c.nav.terms}</Link><Link href={locale === 'en' ? '/en/privacy' : '/privacy'}>{c.nav.privacy}</Link><LangLinks locale={locale} path={home} /></nav>
+<nav aria-label={c.nav.footerLabel}><a href={CONTACT_MAILTO}>{c.nav.contactMail}</a><Link href={locale === 'en' ? '/en/terms' : '/terms'}>{c.nav.terms}</Link><Link href={locale === 'en' ? '/en/privacy' : '/privacy'}>{c.nav.privacy}</Link><LangLinks locale={locale} path={home} /></nav>
 <span className="lp-copy">© hareMa</span>
 <p className="lp-credit"><Rich text={h.credit} /></p>
 </footer>

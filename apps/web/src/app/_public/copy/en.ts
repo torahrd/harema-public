@@ -10,7 +10,7 @@ export const en = {
     about: 'About',
     login: 'Log in',
     footerLabel: 'Footer',
-    contactX: 'Contact us on X ↗',
+    contactMail: 'Contact us',
     terms: 'Terms of Use',
     privacy: 'Privacy Policy',
     backToTop: 'Back to home',
@@ -45,7 +45,7 @@ export const en = {
     facts: {
       login: { name: 'Log in', text: 'You log in with an Apple or Google account. hareMa does not keep passwords, and apart from your username, does not store your email address or name in its database.' },
       data: { name: 'Data', text: 'Places you save are not shown to other users. When you delete your account, your account and saved places are deleted.' },
-      operator: { name: 'Operator', text: 'The hareMa operator. Inquiries are accepted on {x}.', xLabel: 'X (@htoranosuke) ↗' },
+      operator: { name: 'Operator', text: 'The hareMa operator. Inquiries are accepted by email at {mail}. News is posted on the operator’s {x}.', mailLabel: 'harema.app.support@gmail.com', xLabel: 'X (@htoranosuke) ↗' },
       app: {
         name: 'App',
         text: 'With the iPhone app, you can save from the share menu of other apps without switching apps.',
