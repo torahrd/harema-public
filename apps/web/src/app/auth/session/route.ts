@@ -19,7 +19,7 @@ const BODY_LIMIT = 8192
  * ブラウザが Firebase にログインした直後に ID トークンと更新用の鍵を渡す口(形 C)。
  * Origin が `NEXT_PUBLIC_APP_URL` と一致・JSON の Content-Type・署名と iss・aud・期限が正しく・
  * auth_time が 5 分以内のときだけ、暗号化した cookie を張る。判定は core の `acceptLogin`。
- * 本文の `agreed` は、ログインの画面を経た目印(`true` だけ)。目印が在れば、cookie の値を作れた後に、DB の `record_agreement()` を引数なしで呼ぶ(番号も日時も DB が決める。失敗・遅れはログインを止めない)。
+ * 本文の `agreed` は、ログインの画面を経た目印(`true` だけ)。目印が在れば、cookie の値を作れた後に、DB の `agree_current()` を引数なしで呼ぶ(番号も日時も DB が決める。失敗・遅れはログインを止めない)。
  * 本文の `locale` は、ログイン画面で選んだ言語(任意)。言語の cookie は同意の記録に成功した時だけ書く。
  * 全ての応答に `Cache-Control: no-store`。拒否の応答に `Set-Cookie` は載せない。
  */

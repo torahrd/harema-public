@@ -2,7 +2,7 @@
 -- (private.legal_revisions・user_agreements と pending_registrations の 3 列・record_agreement()・complete_onboarding の番号・削除)。
 -- 判定とお知らせ・時刻の門は 15_agreement_current.sql。
 begin;
-select plan(68);
+select plan(81);
 
 create function public.zz_claims(p_sub text, p_age interval default interval '1 minute')
 returns text
@@ -30,15 +30,17 @@ select ok(
   'V1: legal_revisions はどの役割にも表の権限が無い'
 );
 select is(
-  (select array_agg(doc || ':' || version || ':' || to_char(revised_on, 'YYYY.MM.DD') || ':' || to_char(effective_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') || ':' || notice::text order by doc, version) from private.legal_revisions),
+  (select array_agg(doc || ':' || version || ':' || to_char(revised_on, 'YYYY.MM.DD') || ':' || to_char(effective_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') || ':' || notice::text order by doc, version) from private.legal_revisions where not (doc = 'privacy' and version >= 4)),
   array['privacy:1:2026.11.05:2026-11-04T15:00:00Z:false', 'privacy:2:2026.11.20:2026-11-19T15:00:00Z:true', 'privacy:3:2026.11.22:2026-11-21T15:00:00Z:true', 'terms:1:2026.11.05:2026-11-04T15:00:00Z:false'],
-  'V1: 一覧は 規約 1・ポリシー 1・ポリシー 2(適用 2026-11-19T15:00:00Z・notice)・ポリシー 3(適用 2026-11-21T15:00:00Z・notice)'
+  'V1: 一覧は 規約 1・ポリシー 1・ポリシー 2(適用 2026-11-19T15:00:00Z・notice)・ポリシー 3(適用 2026-11-21T15:00:00Z・notice)(4 回目以降の行は数えない = 25 本目の後の migration が足す行に左右されない)'
 );
 -- 時刻によらない形にする: 本物のポリシー 3 の適用の日時(2026-11-22 0 時 JST)をまたいで走らせても結果が変わらないよう、
 -- 以後の節は「今の番号はポリシー 2」を前提にする。ポリシー 3 の適用の日時を遠い先へ置く(V8 で、適用の前後を試す所だけ 1 時間前へ動かす)。
 update private.legal_revisions set effective_at = now() + interval '10 years' where doc = 'privacy' and version = 3;
-select throws_ok($$insert into private.legal_revisions values ('other', 1, date '2026-01-01', now(), false)$$, '23514', null, 'V1: doc は terms / privacy だけ');
-select throws_ok($$insert into private.legal_revisions values ('terms', 0, date '2026-01-01', now(), false)$$, '23514', null, 'V1: version は 1 以上');
+-- 4 回目以降の改定(25 本目の後の migration が足す行)は消してから始める(V10 は自分で行を入れる。以後の節は、今の番号が 4 回目の行に左右されない)。
+delete from private.legal_revisions where doc = 'privacy' and version >= 4;
+select throws_ok($$insert into private.legal_revisions (doc, version, revised_on, effective_at, notice) values ('other', 1, date '2026-01-01', now(), false)$$, '23514', null, 'V1: doc は terms / privacy だけ');
+select throws_ok($$insert into private.legal_revisions (doc, version, revised_on, effective_at, notice) values ('terms', 0, date '2026-01-01', now(), false)$$, '23514', null, 'V1: version は 1 以上');
 
 -- ===== V2: user_agreements の 3 列(additive・既存の行は null) =====
 select is(
@@ -341,6 +343,58 @@ select public.begin_withdrawal();
 select public.finish_withdrawal();
 set local role postgres;
 select is((select count(*)::int from private.pending_registrations where sub = 'av-wf'), 0, 'V9b: 番号の入った同意前の行が finish_withdrawal で消える');
+
+-- ===== V10: 旧い record_agreement の上限(25 本目。文をビルドに持たない 4 回目の改定へ、旧いクライアントが同意を記録しない) =====
+-- この時点で、ポリシー 3(適用済み・notice・builtin_text 真)が今の番号。4 回目(builtin_text 偽)と規約 2(notice なし)を適用済みで足す。
+insert into private.legal_revisions (doc, version, revised_on, effective_at, notice, builtin_text, notice_ja, notice_en)
+values ('privacy', 4, date '2026-11-29', now() - interval '30 minutes', true, false, array['ja'], array['en']);
+insert into private.legal_revisions (doc, version, revised_on, effective_at, notice)
+values ('terms', 2, date '2026-11-29', now() - interval '30 minutes', false);
+insert into public.profiles (id, username) values ('av-n0', 'n0'), ('av-n2', 'n2'), ('av-n3', 'n3'), ('av-n4', 'n4');
+insert into public.user_agreements (user_id) values ('av-n0');
+insert into public.user_agreements (user_id, agreed_terms_version, agreed_privacy_version, version_agreed_at)
+values ('av-n2', 1, 2, now()), ('av-n3', 1, 3, now()), ('av-n4', 2, 4, now());
+insert into private.pending_registrations (sub) values ('av-n5');
+set local role authenticated;
+select public.zz_claims('av-n0');
+select is(public.record_agreement(), 'recorded', 'V10: 番号なしの人の旧い記録は recorded');
+set local role postgres;
+select is(
+  (select agreed_terms_version || ':' || agreed_privacy_version from public.user_agreements where user_id = 'av-n0'),
+  '2:3', 'V10: 番号なしの人の旧い記録は、ポリシーを 3 で止める(4 回目に旧いクライアントは同意しない)。上限の無い規約は今の番号 2');
+set local role authenticated;
+select public.zz_claims('av-n0');
+select is(public.record_agreement(), 'recorded', 'V10: 番号なしの人の 2 回目の旧い記録は、3 を越えて 4 を書く');
+set local role postgres;
+select is(
+  (select agreed_terms_version || ':' || agreed_privacy_version from public.user_agreements where user_id = 'av-n0'),
+  '2:4', 'V10: 2 回目で 4');
+set local role authenticated;
+select public.zz_claims('av-n0');
+select is(public.record_agreement(), 'already', 'V10: 3 回目は already');
+select public.zz_claims('av-n2');
+select is(public.record_agreement(), 'recorded', 'V10: 番号 2 の人の旧い記録は recorded');
+set local role postgres;
+select is(
+  (select agreed_terms_version || ':' || agreed_privacy_version from public.user_agreements where user_id = 'av-n2'),
+  '2:3', 'V10: 番号 2 の人の旧い記録は 3 で止まる(規約は上限が無く今の番号 2)');
+set local role authenticated;
+select public.zz_claims('av-n3');
+select is(public.record_agreement(), 'recorded', 'V10: 番号 3 の人の旧い記録は recorded');
+set local role postgres;
+select is(
+  (select agreed_terms_version || ':' || agreed_privacy_version from public.user_agreements where user_id = 'av-n3'),
+  '2:4', 'V10: 番号 3 の人の旧い記録は 4(3 回目に同意済みの人は、2.0.0 のログインで 4 回目が記録されても正しい)');
+set local role authenticated;
+select public.zz_claims('av-n4');
+select is(public.record_agreement(), 'already', 'V10: 4 に同意済みの人は already');
+select public.zz_claims('av-n5');
+select is(public.record_agreement(), 'recorded', 'V10: 登録の前(同意前の行)の人の旧い記録は recorded');
+set local role postgres;
+select is(
+  (select agreed_terms_version || ':' || agreed_privacy_version from private.pending_registrations where sub = 'av-n5'),
+  '2:4', 'V10: 登録の前の人は今の番号(2・4)を書く');
+select is((select count(*)::int from public.user_agreements where user_id = 'av-n5'), 0, 'V10: 登録の前の記録は user_agreements に行を作らない');
 
 select * from finish();
 rollback;

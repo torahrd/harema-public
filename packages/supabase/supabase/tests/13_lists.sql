@@ -3,8 +3,12 @@
 -- 書き換えと削除の検査は WHERE なしの文で行う(WHERE で id を指す形だと、select の policy が先に行を隠し、
 -- 書き換え・削除の policy を壊しても 0 行のまま通りうる)。結果は postgres に戻って見る。
 -- 退会は finish_withdrawal(自分で印を打つ lst-wd)と private.withdrawal_confirm(u1)の 2 つの経路を見る。
+-- 門(25 本目の restrictive policy・private.lists_ok)の準備: ポリシー 4 の行を適用済みにして、u1・u2・退会の検査の人(lst-wd)の同意を番号 4 にする。
+-- 門そのものの検査は 17_lists_gate.sql。ここは、門が開いている人にとってリストの契約が変わらないことを見る。
+-- 上限(節 23)は 27 本目(20261127000001_list_limit_3.sql)で 100 から 3 に置き換わった(所有者の決定 2026-11-26 00:04 JST・harema#152)。
+-- 名前の上限は 28 本目(20261128000001_list_name_15.sql)で 30 から 15 に置き換わった(所有者の決定 2026-11-26 00:56 JST・harema#152)。
 begin;
-select plan(51);
+select plan(54);
 
 -- 検査用の補助(この transaction の中だけ。rollback で消える)。有効なログインの claim を設定する。
 create function public.zz_claims(p_sub text, p_age interval default interval '1 minute')
@@ -20,6 +24,29 @@ as $f$
   )::text, true)
 $f$;
 grant execute on function public.zz_claims(text, interval) to public;
+
+-- 検査用の補助(この transaction の中だけ)。呼び手の役割のまま 1 行を足し、上限で落ちた時の DETAIL を返す(落ちなければ 'no error')。
+create function public.zz_limit_detail(p_user text)
+returns text
+language plpgsql
+as $f$
+declare d text;
+begin
+  insert into public.lists (user_id, name) values (p_user, 'detail-probe');
+  return 'no error';
+exception when others then
+  get stacked diagnostics d = pg_exception_detail;
+  return d;
+end
+$f$;
+grant execute on function public.zz_limit_detail(text) to public;
+
+insert into private.legal_revisions (doc, version, revised_on, effective_at, notice, builtin_text, notice_ja, notice_en)
+values ('privacy', 4, date '2026-11-29', now() - interval '1 hour', true, false, array['n'], array['n'])
+on conflict (doc, version) do update set effective_at = excluded.effective_at;
+update public.user_agreements
+   set agreed_terms_version = 1, agreed_privacy_version = 4, version_agreed_at = now()
+ where user_id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222');
 
 -- ===== 1. 列と型 =====
 select is(
@@ -61,8 +88,9 @@ select is(
 );
 select is(
   (select count(*)::int from pg_policies
-    where schemaname = 'public' and tablename in ('lists', 'list_places') and roles = '{authenticated}'::name[]),
-  7, 'policy は 7 本で、全部が authenticated 向け'
+    where schemaname = 'public' and tablename in ('lists', 'list_places') and roles = '{authenticated}'::name[]
+      and permissive = 'PERMISSIVE'),
+  7, 'permissive の policy は 7 本で、全部が authenticated 向け(restrictive の門 2 本は 17_lists_gate.sql)'
 );
 
 -- ===== 15. anon と service_role の権限の行は 2 表とも 0 件(aclexplode・PUBLIC を含む) =====
@@ -101,9 +129,19 @@ select throws_ok(
   '23514', null, '空の名前は拒む'
 );
 select throws_ok(
-  $$insert into public.lists (user_id, name) values ('11111111-1111-1111-1111-111111111111', repeat('a', 31))$$,
-  '23514', null, '31 文字は拒む'
+  $$insert into public.lists (user_id, name) values ('11111111-1111-1111-1111-111111111111', repeat('あ', 16))$$,
+  '23514', null, '全角 16 文字は拒む(バイトでなく文字で数える)'
 );
+select lives_ok(
+  $$update public.lists set name = repeat('あ', 15) where id = 'c0000000-0000-0000-0000-000000000001'$$,
+  '全角 15 文字までは通る(バイトでなく文字で数える)'
+);
+select is(
+  (select char_length(name) from public.lists where id = 'c0000000-0000-0000-0000-000000000001'),
+  15,
+  '全角 15 文字の名前が保存された(char_length 15)'
+);
+update public.lists set name = 'ラーメン' where id = 'c0000000-0000-0000-0000-000000000001';
 select throws_ok(
   $$insert into public.lists (user_id, name, icon) values ('11111111-1111-1111-1111-111111111111', 'x', repeat('a', 33))$$,
   '23514', null, 'アイコン 33 文字は拒む'
@@ -182,9 +220,10 @@ select throws_ok($$select 1 from public.lists$$, '42501', null, 'anon は lists 
 -- ===== 18. profiles の無い sub はリストを作れない =====
 set local role authenticated;
 select public.zz_claims('lst-noprofile');
+-- 同意の記録(user_agreements)は profiles への外部キーで作れないので、この sub は門(42501)で止まる。外部キーそのものは上の 2・3 で見る。
 select throws_ok(
   $$insert into public.lists (user_id, name) values ('lst-noprofile', 'x')$$,
-  '23503', null, 'profiles の無い sub はリストを作れない'
+  '42501', null, 'profiles の無い sub はリストを作れない(同意の記録も無いので門で止まる)'
 );
 
 -- ===== 20. 店を消すと対応が消える・リストを消すと対応が消えて店は残る(u1 の authenticated として) =====
@@ -214,31 +253,35 @@ select is(
   1, 'リストを消しても店は残る'
 );
 
--- ===== 23. 1 人のリストの数の上限(100・トリガー private.enforce_list_limit) =====
+-- ===== 23. 1 人のリストの数の上限(3・トリガー private.enforce_list_limit) =====
 -- この時点で u1 のリストは 1 つ(渋谷)。先に、上限の下から始まって途中で越える 1 文が丸ごと落ちることを見る(同じ文の先の行を数える)。
 
 select throws_ok(
   $$insert into public.lists (user_id, name)
-    select '11111111-1111-1111-1111-111111111111', 'burst' || g from generate_series(1, 100) g$$,
-  '54000', 'list_limit_exceeded', '上限の下から始まる 1 文でも、途中で上限を越える行で落ちる(1 個 + 100 行)'
+    select '11111111-1111-1111-1111-111111111111', 'burst' || g from generate_series(1, 3) g$$,
+  '54000', 'list_limit_exceeded', '上限の下から始まる 1 文でも、途中で上限を越える行で落ちる(1 個 + 3 行・4 個目の行で越える)'
 );
 select is(
   (select count(*)::int from public.lists where user_id = '11111111-1111-1111-1111-111111111111'),
   1, '落ちた文の行は 1 つも残らない'
 );
--- 99 個足して 100 個目まで入る。
+-- 2 個足して 3 個目まで入る。
 select lives_ok(
   $$insert into public.lists (user_id, name)
-    select '11111111-1111-1111-1111-111111111111', 'bulk' || g from generate_series(1, 99) g$$,
-  '100 個目までは入る'
+    select '11111111-1111-1111-1111-111111111111', 'bulk' || g from generate_series(1, 2) g$$,
+  '3 個目までは入る'
 );
 select is(
   (select count(*)::int from public.lists where user_id = '11111111-1111-1111-1111-111111111111'),
-  100, 'u1 のリストはちょうど 100 個'
+  3, 'u1 のリストはちょうど 3 個'
 );
 select throws_ok(
   $$insert into public.lists (user_id, name) values ('11111111-1111-1111-1111-111111111111', 'over')$$,
-  '54000', 'list_limit_exceeded', '101 個目は SQLSTATE 54000・message list_limit_exceeded で落ちる'
+  '54000', 'list_limit_exceeded', '4 個目は SQLSTATE 54000・message list_limit_exceeded で落ちる'
+);
+select is(
+  public.zz_limit_detail('11111111-1111-1111-1111-111111111111'),
+  'max=3', '4 個目が落ちた時の DETAIL は max=3'
 );
 select throws_ok(
   $$insert into public.lists (user_id, name)
@@ -248,7 +291,7 @@ select throws_ok(
 select public.zz_claims('22222222-2222-2222-2222-222222222222');
 select lives_ok(
   $$insert into public.lists (user_id, name) values ('22222222-2222-2222-2222-222222222222', 'u2 は数に影響されない')$$,
-  'u1 が 100 個でも、u2 は自分のリストを作れる'
+  'u1 が 3 個でも、u2 は自分のリストを作れる'
 );
 select public.zz_claims('11111111-1111-1111-1111-111111111111');
 delete from public.lists where name = 'bulk1';
@@ -273,7 +316,7 @@ delete from public.lists where user_id = '11111111-1111-1111-1111-111111111111' 
 -- ===== 21. 退会(finish_withdrawal)でリストと対応が消える =====
 set local role postgres;
 insert into public.profiles (id, username) values ('lst-wd', 'wd');
-insert into public.user_agreements (user_id) values ('lst-wd');
+insert into public.user_agreements (user_id, agreed_terms_version, agreed_privacy_version, version_agreed_at) values ('lst-wd', 1, 4, now());
 insert into public.saved_places (id, user_id, place_id, status)
 values ('d0000000-0000-0000-0000-000000000001', 'lst-wd', 'a0000000-0000-0000-0000-000000000001', 'want_to_go');
 insert into public.lists (id, user_id, name) values ('c0000000-0000-0000-0000-0000000000a1', 'lst-wd', 'wd');

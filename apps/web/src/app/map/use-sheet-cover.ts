@@ -27,7 +27,9 @@ export function useSheetCover(
     const wrapper = sheetWrapperRef.current
     const root = mapBox?.parentElement
     if (!mapBox || !wrapper || !root) return
-    const dialog = wrapper.querySelector<HTMLElement>(':scope > [role="dialog"]')
+    // 保存のシートの上にリストを選ぶシートなどが重なる時は、一番上(上端が一番高い)のシートに合わせる。
+    const dialogs = () => Array.from(wrapper.querySelectorAll<HTMLElement>(':scope > [role="dialog"]'))
+    const dialog = dialogs()[0]
     if (!dialog) {
       if (isDevBuild) {
         console.warn('useSheetCover: シートの dialog が見つからないため、地図を縮めません')
@@ -41,7 +43,7 @@ export function useSheetCover(
 
     // animating = 動きの途中のフレーム。下へ動く間は全画面にする(理由は sheetFollowInset)。
     const measure = (animating = false) => {
-      const sheetTop = measureSheetTop(dialog, root)
+      const sheetTop = Math.min(...dialogs().map((d) => measureSheetTop(d, root)))
       const inset = sheetFollowInset(
         sheetTop,
         root.getBoundingClientRect().height,
@@ -57,14 +59,14 @@ export function useSheetCover(
       if (frame !== null) return
       frame = window.requestAnimationFrame(() => {
         frame = null
-        measure(dialog.getAnimations().length > 0)
+        measure(dialogs().some((d) => d.getAnimations().length > 0))
       })
     }
 
     // 動きの間は毎フレーム測り、動きが終わったフレームで最後に 1 回測って止める。
     const tick = () => {
       frame = null
-      const animating = dialog.getAnimations().length > 0
+      const animating = dialogs().some((d) => d.getAnimations().length > 0)
       measure(animating)
       if (animating) {
         frame = window.requestAnimationFrame(tick)
@@ -84,13 +86,29 @@ export function useSheetCover(
     resizeObserver.observe(dialog)
     resizeObserver.observe(root)
     const mutationObserver = new MutationObserver(startLoop)
-    mutationObserver.observe(dialog, { attributes: true, attributeFilter: ['style'] })
+    const watched = new Set<HTMLElement>()
+    const watch = () => {
+      for (const d of dialogs()) {
+        if (watched.has(d)) continue
+        watched.add(d)
+        resizeObserver.observe(d)
+        mutationObserver.observe(d, { attributes: true, attributeFilter: ['style'] })
+      }
+    }
+    watch()
+    // 後から重なるシート(リストを選ぶシート)を追う。
+    const childObserver = new MutationObserver(() => {
+      watch()
+      startLoop()
+    })
+    childObserver.observe(wrapper, { childList: true })
     // 開く動き(入場の transition)は style 変化の直後に始まる。初回も追従に入れる。
     startLoop()
 
     return () => {
       resizeObserver.disconnect()
       mutationObserver.disconnect()
+      childObserver.disconnect()
       if (frame !== null) window.cancelAnimationFrame(frame)
       mapBox.style.bottom = `${MAP_EDGE_INSET}px`
     }

@@ -11,30 +11,47 @@ import {
   useMapsLibrary,
   type MapMouseEvent,
 } from '@vis.gl/react-google-maps'
-import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
   isFoodPlaceType,
 } from '@harema/shared/constants'
+import { countryCodeOf } from '@harema/shared/ja-name'
+import { filterByList, pinIconFor } from '@harema/shared/lists'
 import { clientEnv } from '@/env/client'
+import {
+  LIST_PARAM,
+  parseListParam,
+  pathWithList,
+  searchWithList,
+} from '@/lib/lists/list-filter-url'
+import {
+  emptyListNoteVisible,
+  resolveSelectedList,
+  selectionAfterSave,
+} from '@/lib/lists/list-selection'
 import { fetchPlaceFields, getPlaceDetails } from '@/lib/places/details-cache'
 import { installModalTiming } from '@/lib/install-prompt'
 import { takePendingShare } from '@/lib/share-pending'
 import { AccountDrawer, type AccountSnapshot } from '../account/drawer'
+import { ListChips } from '../lists/list-chips'
+import type { ListItem } from '../lists/types'
 import { CurrentLocationButton } from './current-location-button'
 import { CurrentLocationMarker } from './current-location-marker'
-import { ConsentNoticeDialog } from './consent-notice-dialog'
+import { ConsentNoticeDialog, type ConsentNoticeContent } from './consent-notice-dialog'
 import { HomeScreenDialog } from './home-screen-dialog'
 import { LocationPermissionBanner } from './location-permission-banner'
 import { MapChrome } from './map-chrome'
+import { MapNoticeCard } from './map-notice-card'
 import { MapsLoadFailCard } from './maps-load-fail-card'
 import { MapToast } from './map-toast'
 import { OfflineOverlay } from './offline-overlay'
 import { Pin } from './pin'
-import { SaveSheet } from './save-sheet'
+import { SaveSheet, type SaveListOutcome } from './save-sheet'
+import { useJapaneseName } from './use-japanese-name'
 import { SearchSuggestions } from './search-suggestions'
 import {
   EMPTY_SOURCE_STATE,
@@ -78,23 +95,41 @@ type MapScreenProps = {
    * profiles から取り、ここは drawer へ渡すだけ(browser client は使わない)。
    */
   account: AccountSnapshot
-  /** 今のバージョンへの同意の記録が無い(「改定のお知らせ」を出す)。判定は page.tsx(DB の current_agreement())。 */
-  consentNoticeDue?: boolean
+  /** 自分のリストの全行(札の列・ピンのアイコン・保存のシートの「リスト」の行)。 */
+  lists: ListItem[]
+  /** リストを開いてよいか(ポリシー 4 回目の改定に同意した人だけ真)。判定は page.tsx(DB の agreement_state() の lists_open)。偽の間、リストの部品を描かない。 */
+  listsOpen?: boolean
+  /** 「改定のお知らせ」の中身(日付の文の段落と、枠に出す更新情報の件の文)。出さない時は null。文と判定は page.tsx(DB の agreement_state())。 */
+  consentNotice?: ConsentNoticeContent | null
   /** メニューの言語の切り替えの行を出すか(適用の日時より前は偽。page.tsx がサーバの時刻で決める)。 */
   languageSwitch?: boolean
 }
 
-export function MapScreen({ savedPlaces, account, consentNoticeDue = false, languageSwitch = true }: MapScreenProps) {
+export function MapScreen({ savedPlaces, account, lists, listsOpen = false, consentNotice = null, languageSwitch = true }: MapScreenProps) {
   // 地図の SDK の言語は表示言語に合わせる(地図の表記・店名の言語)。region は国の書式と順位の指定なので JP のまま。
   const locale = useLocale()
   return (
     <APIProvider apiKey={clientEnv.googleMapsApiKey} language={locale} region="JP">
-      <MapView savedPlaces={savedPlaces} account={account} consentNoticeDue={consentNoticeDue} languageSwitch={languageSwitch} />
+      <MapView
+        savedPlaces={savedPlaces}
+        account={account}
+        lists={lists}
+        listsOpen={listsOpen}
+        consentNotice={consentNotice}
+        languageSwitch={languageSwitch}
+      />
     </APIProvider>
   )
 }
 
-function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitch = true }: MapScreenProps) {
+function MapView({
+  savedPlaces: allSavedPlaces,
+  account,
+  lists,
+  listsOpen = false,
+  consentNotice = null,
+  languageSwitch = true,
+}: MapScreenProps) {
   const map = useMap(MAP_INSTANCE_ID)
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
@@ -135,7 +170,7 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
   // 共有の続きの検索・保存シート・メニューが開いている間は出さない(出す間隔と記録は lib/install-prompt.ts)。
   const installPrompt = useInstallPrompt()
   // 改定のお知らせ(同意の取り直し)。出ている間は「ホーム画面に追加」の案内を出さない(同時に 2 つ出さない)。
-  const [consentOpen, setConsentOpen] = useState(consentNoticeDue)
+  const [consentOpen, setConsentOpen] = useState(consentNotice !== null)
   const [retryingLocation, setRetryingLocation] = useState(false)
   const retrySpinnerTimerRef = useRef<number | undefined>(undefined)
   // 連打ガード(in-flight)。解決前の再入を捨てる —— Place Details は 1 回ごとに課金される。
@@ -151,6 +186,47 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
 
   // S1 の起動コンテキスト。null = シートを出していない。
   const [sheetContext, setSheetContext] = useState<MapLaunchContext | null>(null)
+  // 英語の画面の日本語の店名の札(日本にある店で 1 回目の店名が日本語でない店だけ。押した時だけ取る)。保存のシートの中では取らない。
+  const japaneseName = useJapaneseName(
+    places,
+    sheetContext === null
+      ? null
+      : {
+          googlePlaceId: sheetContext.googlePlaceId,
+          displayName: sheetContext.displayName,
+          displayNameLanguageCode: sheetContext.displayNameLanguageCode,
+          countryCode: sheetContext.countryCode,
+        },
+  )
+  // リストの絞り(null = すべて)。初期値は URL の `list`(uuid の形の時だけ)で、一覧から引き継ぐ。
+  // 自分のリストに無い id・消えたリストの id は `resolveSelectedList` で「すべて」に戻す。解決済みの値は下の effect が URL に写す。
+  const searchParams = useSearchParams()
+  const [selectedListId, setSelectedListId] = useState<string | null>(() =>
+    parseListParam(searchParams.get(LIST_PARAM)),
+  )
+  const activeListId = resolveSelectedList(selectedListId, lists)
+  // 保存の後の絞りを、描画の外の `handleSaved` から求めるために、今の解決済みの絞りを持つ(絞りが変わるたびに写す)。
+  const activeListIdRef = useRef(activeListId)
+  useEffect(() => {
+    activeListIdRef.current = activeListId
+  }, [activeListId])
+  // 解決済みの絞りを URL の `list` に写す(ほかの query は残す)。履歴は積まない(replaceState)。
+  // 書きを 0ms 遅らせる: 最初の読み込みでは、画面の effect が Next の replaceState の包み(AppRouter の effect)より先に走り、
+  // 包まれる前に書くと Next の履歴の印を消して、後でその項目へブラウザの戻るで戻れなくなる。
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const next = searchWithList(window.location.search, activeListId)
+      if (next === window.location.search) return
+      window.history.replaceState(null, '', window.location.pathname + next)
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [activeListId])
+  // 店の無いリストで絞った時の知らせを × で閉じたリスト(絞りを替えるまで出さない)。
+  const [emptyNoteDismissedFor, setEmptyNoteDismissedFor] = useState<string | null>(null)
+  const listsText = useTranslations('web.lists')
+  // 絞った後の行だけをピンにする(ピンの描きは下の `savedPlaces.map`。名前は今の配線の検査と同じに保つ)。
+  const savedPlaces = filterByList(allSavedPlaces, activeListId)
+
   const showHomeDialog =
     !consentOpen &&
     installPrompt.modalDue &&
@@ -408,7 +484,7 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
       // 候補が出ている時点で places はロード済み。toPlace() 自体も places 参照を要さない。
       const place = item.prediction.toPlace()
       if (bucket === 'food') {
-        void fetchPlaceFields(place, ['location', 'displayName', 'formattedAddress'])
+        void fetchPlaceFields(place, ['location', 'displayName', 'formattedAddress', 'addressComponents'])
           .then(() => {
             const loc = place.location
             if (!loc) {
@@ -423,6 +499,8 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
             setSheetContext({
               googlePlaceId: place.id,
               displayName: place.displayName ?? item.mainText,
+              displayNameLanguageCode: place.displayNameLanguageCode ?? null,
+              countryCode: countryCodeOf(place.addressComponents),
               formattedAddress: place.formattedAddress ?? '',
               location,
             })
@@ -466,6 +544,7 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
         'displayName',
         'location',
         'formattedAddress',
+        'addressComponents',
       ])
         .then((place) => {
           if (!isFoodPlaceType(place.types ?? [])) return
@@ -477,6 +556,8 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
           setSheetContext({
             googlePlaceId: place.id,
             displayName: place.displayName ?? '',
+            displayNameLanguageCode: place.displayNameLanguageCode ?? null,
+            countryCode: countryCodeOf(place.addressComponents),
             formattedAddress: place.formattedAddress ?? '',
             location,
           })
@@ -513,11 +594,28 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
   // /map は cookie 依存の動的ルートなので、再描画は router.refresh() で取り直す
   // (transition の中で呼ぶ。WP-10 S9)。
   const handleSaved = useCallback(
-    (mode: 'created' | 'updated' | 'deleted') => {
+    (mode: 'created' | 'updated' | 'deleted', listOutcome: SaveListOutcome) => {
       setSource(sourceOnCloseSheet)
       setSheetContext(null)
       if (mode !== 'deleted') {
-        showToast(mode === 'created' ? 'save-created' : 'save-updated')
+        // リストで絞っている間に、そのリストに入れずに保存・更新したら「すべて」に戻す(入れていれば絞りはそのまま)。
+        const nextListId = selectionAfterSave(activeListIdRef.current, listOutcome.listIds)
+        setSelectedListId(nextListId)
+        // URL の `list` は、下の `router.refresh()` を投げる前に同期で書く。絞りの effect の 0ms 後の書きだと、
+        // Next の replaceState の包み(restore)が、返っていない refresh を捨て、新しいピン・変えた状態が地図に出ない。
+        // この時は effect の側が URL を同じと見て書かない。
+        const nextSearch = searchWithList(window.location.search, nextListId)
+        if (nextSearch !== window.location.search) {
+          window.history.replaceState(null, '', window.location.pathname + nextSearch)
+        }
+        // リストの入れ替えが落ちた時は、店の保存の知らせの代わりに失敗の知らせを出す。
+        showToast(
+          listOutcome.listError
+            ? 'list-error'
+            : mode === 'created'
+              ? 'save-created'
+              : 'save-updated',
+        )
       }
       startTransition(() => {
         router.refresh()
@@ -537,6 +635,12 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
   // オフライン中・Maps JS 失敗中はスクリム/サジェストを出さない(検索状態は保持し、復帰時に
   // 再表示する)。
   const isSearchActive = searchOpen && !offline && !mapsFailed
+  // 店の無いリストで絞った時の知らせ。札の列と同じく、検索を開いている間・地図が読めない間・オフラインの間・同意の門が閉じている間は出さない。
+  const showEmptyListNote =
+    listsOpen &&
+    !isSearchActive &&
+    !chromeDisabled &&
+    emptyListNoteVisible(activeListId, savedPlaces.length, emptyNoteDismissedFor)
 
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
@@ -576,7 +680,7 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
                 zIndex={marker.status === 'visit_again' ? 2 : 1}
                 onClick={() => openPlaceSheet(marker.googlePlaceId)}
               >
-                <Pin status={marker.status} />
+                <Pin status={marker.status} icon={pinIconFor(marker.listIds, lists, activeListId)} />
               </AdvancedMarker>
             ))}
           </Map>
@@ -617,14 +721,40 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
         // 検索を開いている間はサジェストがバナーの下に出るので、トーストを下げると候補を覆う。
         // それ以外(保存成功・地図の POI を押したときの失敗)はバナーの下に置く(D13 案 C)。
         toastBelowBanner={!isSearchActive}
-        bannerSlot={
-          showBanner && (
-            <LocationPermissionBanner
-              onDismiss={() => setBannerDismissed(true)}
-              onRetry={retryLocation}
-              retrying={retryingLocation}
+        listsSlot={
+          listsOpen && lists.length > 0 && !isSearchActive && !chromeDisabled ? (
+            <ListChips
+              variant="map"
+              lists={lists}
+              selectedId={activeListId}
+              onSelect={(next) => {
+                // 今の絞りと同じ札を押した時は、× で閉じた知らせを戻さない(絞りを替えるまで出さない)。
+                if (next !== activeListId) setEmptyNoteDismissedFor(null)
+                setSelectedListId(next)
+              }}
             />
-          )
+          ) : null
+        }
+        bannerSlot={
+          showBanner || showEmptyListNote ? (
+            <>
+              {showBanner && (
+                <LocationPermissionBanner
+                  onDismiss={() => setBannerDismissed(true)}
+                  onRetry={retryLocation}
+                  retrying={retryingLocation}
+                />
+              )}
+              {showEmptyListNote && (
+                // 位置情報の帯と同じ器(MapNoticeCard)。両方の時は位置情報の帯が上、間はチュールの縦の間(9)。
+                <div style={{ marginTop: showBanner ? 9 : 0 }}>
+                  <MapNoticeCard onDismiss={() => setEmptyNoteDismissedFor(activeListId)}>
+                    {listsText('empty')}
+                  </MapNoticeCard>
+                </div>
+              )}
+            </>
+          ) : null
         }
       >
         {isSearchActive && (
@@ -644,11 +774,15 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
       {sheetContext && (
         <div ref={sheetWrapperRef} style={{ display: 'contents' }}>
           <SaveSheet
+            lists={lists}
+            listsOpen={listsOpen}
             context={sheetContext}
+            japaneseName={japaneseName}
             initialSourceText={source.sheetSource}
             onClose={closeSheet}
             onSaved={handleSaved}
             placesLibrary={places}
+            defaultListId={activeListId}
           />
         </div>
       )}
@@ -665,13 +799,17 @@ function MapView({ savedPlaces, account, consentNoticeDue = false, languageSwitc
         onAddToHome={installPrompt.canAdd ? () => installPrompt.add(false) : undefined}
         onDialogChange={setAccountDialogOpen}
         showLanguageSwitch={languageSwitch}
+        savedHref={pathWithList('/saved', activeListId)}
+        listsHref={listsOpen ? pathWithList('/lists', activeListId) : undefined}
       />
 
       {showHomeDialog && (
         <HomeScreenDialog onAdd={installPrompt.add} onCancel={installPrompt.cancel} />
       )}
 
-      {consentOpen && <ConsentNoticeDialog onAgreed={() => setConsentOpen(false)} />}
+      {consentOpen && consentNotice !== null && (
+        <ConsentNoticeDialog notice={consentNotice} onAgreed={() => setConsentOpen(false)} />
+      )}
     </div>
   )
 }

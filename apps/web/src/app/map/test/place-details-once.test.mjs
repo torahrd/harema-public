@@ -121,8 +121,10 @@ describe('PD 地図の S1 の詳細情報', () => {
     assert.ok(open >= 0)
     const call = map.indexOf('getPlaceDetails(', open)
     const openArgs = balanced(map, call + 'getPlaceDetails'.length)
-    assert.match(openArgs.replace(/\s+/g, ' '), /places, placeId, \[ 'types', 'displayName', 'location', 'formattedAddress',? ?\]/)
-    assert.ok(map.includes("fetchPlaceFields(place, ['location', 'displayName', 'formattedAddress'])"))
+    assert.match(openArgs.replace(/\s+/g, ' '), /places, placeId, \[ 'types', 'displayName', 'location', 'formattedAddress', 'addressComponents',? ?\]/)
+    assert.ok(map.includes("fetchPlaceFields(place, ['location', 'displayName', 'formattedAddress', 'addressComponents'])"))
+    // 場所の候補の確定は国を要らないので変えない
+    assert.ok(map.includes("fetchPlaceFields(place, ['location', 'viewport'])"))
 
     const part = src('../place-details-disclosure.tsx')
     const calls = [...part.matchAll(/getPlaceDetails\(/g)]

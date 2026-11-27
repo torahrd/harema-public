@@ -1,13 +1,14 @@
 'use client'
 
 import { PLACE_DETAILS_MEMORY_TTL_MS } from '@harema/shared/constants'
+import type { JapaneseNameResult } from '@harema/shared/ja-name'
 
 /**
  * 表示用 Place Details のクライアントメモリキャッシュ(spec §4.3)。
  *
- * **このモジュールが `fetchFields` の唯一の呼び出し口**で、要求できるフィールドは下の union に
- * 閉じてある(spec §4.2 の帯表に載っているものだけ)。散らばった fetchFields は Field Mask を
- * 散らし、1 フィールドの追加で課金帯が跳ねる —— 入口を 1 つにすることが最小化の構造担保になる。
+ * **`fetchFields` を呼ぶのはこのモジュールの `fetchInto` と `getJapaneseDisplayName` の 2 か所だけ**で、
+ * 要求できるフィールドは下の union に閉じてある(spec §4.2 の帯表に載っているものだけ)。散らばった fetchFields は Field Mask を
+ * 散らし、1 フィールドの追加で課金帯が跳ねる —— 入口をこの 2 か所に限ることが最小化の構造担保になる。
  *
  * REST 版の `fields` パラメータでは末尾 2 文字が小文字の綴りだが、この SDK(`@types/google.maps`)
  * の実際のプロパティ名・要求できる文字列は末尾が大文字の `websiteURI` である。`fetchFields` の
@@ -27,6 +28,7 @@ export type PlaceDetailsField =
   | 'formattedAddress'
   | 'types'
   | 'viewport'
+  | 'addressComponents'
   | 'regularOpeningHours'
   | 'nationalPhoneNumber'
   | 'websiteURI'
@@ -69,7 +71,7 @@ function evict(now: number): void {
 }
 
 /**
- * 唯一の fetchFields 呼び出し口。成功したときだけキャッシュへ反映する ——
+ * 表示用の fetchFields 呼び出し口(もう 1 つは日本語の店名の `getJapaneseDisplayName`)。成功したときだけキャッシュへ反映する ——
  * 失敗をエントリにすると、次の操作までの TTL 分だけ「取れない店」が固定される。
  */
 async function fetchInto(
@@ -125,4 +127,53 @@ export async function fetchPlaceFields(
   const known =
     cached && cached.place === place ? cached.fetched : new Set<PlaceDetailsField>()
   return fetchInto(place, fields, known)
+}
+
+// ── 英語の画面の日本語の店名(harema#219)────────────────────────────────────────
+
+/** 日本語の店名で要求するフィールド。項目を足すと、型(`PlaceDetailsField`)が止める。帯は Pro のまま。 */
+const JA_NAME_FIELDS = ['displayName'] as const satisfies readonly PlaceDetailsField[]
+
+type JapaneseNameEntry = { value: JapaneseNameResult; expiresAt: number }
+
+/**
+ * place_id → 日本語の店名(Google が返した名前と言語そのもの)。表示言語の `entries` には**書かない**
+ * (書くと、一覧・シートの英語名が日本語に入れ替わる)。同じ 10 分・同じ上限。
+ */
+const japaneseNames = new Map<string, JapaneseNameEntry>()
+
+function evictJapaneseNames(now: number): void {
+  for (const [placeId, entry] of japaneseNames) {
+    if (entry.expiresAt <= now) japaneseNames.delete(placeId)
+  }
+  while (japaneseNames.size > MAX_ENTRIES) {
+    const oldest = japaneseNames.keys().next()
+    if (oldest.done) return
+    japaneseNames.delete(oldest.value)
+  }
+}
+
+/**
+ * 日本語の店名(`displayName` だけ・言語 `ja`)を取る。TTL 内の 2 回目は取得しない。
+ * 失敗はキャッシュしない(投げる)。表示言語の `entries` の `Place` とは別の `Place` で取る。
+ * 「英語名と同じか」「日本語か」の判断はここでしない(呼ぶ側の `resolveJapaneseName`)。
+ */
+export async function getJapaneseDisplayName(
+  placesLibrary: google.maps.PlacesLibrary,
+  placeId: string,
+): Promise<JapaneseNameResult> {
+  const now = Date.now()
+  const cached = japaneseNames.get(placeId)
+  if (cached && cached.expiresAt > now) return cached.value
+  if (cached) japaneseNames.delete(placeId)
+  const place = new placesLibrary.Place({ id: placeId, requestedLanguage: 'ja' })
+  await place.fetchFields({ fields: JA_NAME_FIELDS })
+  const value: JapaneseNameResult = {
+    displayName: place.displayName ?? '',
+    displayNameLanguageCode: place.displayNameLanguageCode ?? null,
+  }
+  const fetchedAt = Date.now()
+  japaneseNames.set(placeId, { value, expiresAt: fetchedAt + PLACE_DETAILS_MEMORY_TTL_MS })
+  evictJapaneseNames(fetchedAt)
+  return value
 }

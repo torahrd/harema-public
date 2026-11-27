@@ -10,7 +10,7 @@ select plan(52);
 -- (補助関数 zz_claims を作る前に数える。補助関数は判定を持たない検査用の関数のため)
 select is(
   (select count(*)::int from pg_policies where schemaname = 'public'),
-  15, 'public の policy は 15 本(profiles と user_agreements の insert の policy は無い・改訂 6。lists 4 本と list_places 3 本を含む)'
+  17, 'public の policy は 17 本(profiles と user_agreements の insert の policy は無い・改訂 6。lists 4 本と list_places 3 本を含む。リストの門の restrictive 2 本を足した)'
 );
 select is(
   (select count(*)::int from pg_policies

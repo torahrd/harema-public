@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect, RedirectType } from 'next/navigation'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@harema/supabase/types'
+import { readAgreementState } from '@/lib/auth/consent-notice'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
 import {
   runFetchSourceTitle,
@@ -36,6 +37,8 @@ export type ResolveSavedPlaceResult =
       memo: string
       sourceText: string
       sourceTitle: string
+      /** その店が今入っているリストの id(保存のシートの「リスト」の行の初期値)。`saved_places.id` は返さない。 */
+      listIds: string[]
     }
   | { ok: false; reason: 'invalid_input' | 'unauthenticated' | 'failed' }
 
@@ -106,7 +109,7 @@ export async function resolveSavedPlace(
 
   const { data: saved, error: savedError } = await supabase
     .from('saved_places')
-    .select('status, memo, source_text, source_title')
+    .select('status, memo, source_text, source_title, list_places(list_id)')
     .eq('user_id', user.id)
     .eq('place_id', lookup.placeId)
     .maybeSingle()
@@ -117,6 +120,9 @@ export async function resolveSavedPlace(
     return { ok: true, mode: 'create' }
   }
 
+  // リストはポリシー 4 回目の改定に同意した人(DB の agreement_state() の lists_open)にだけ返す。失敗は閉じる側。
+  const listsOpen = (await readAgreementState(supabase)).listsOpen
+
   // 入力欄はいずれも制御された文字列なので、DB の NULL は空欄として返す。
   return {
     ok: true,
@@ -125,6 +131,7 @@ export async function resolveSavedPlace(
     memo: saved.memo ?? '',
     sourceText: saved.source_text ?? '',
     sourceTitle: saved.source_title ?? '',
+    listIds: listsOpen ? saved.list_places.map((row) => row.list_id) : [],
   }
 }
 

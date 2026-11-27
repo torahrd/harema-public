@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { OG_IMAGE, publicAlternates } from '@/lib/site'
 import { publicCopy } from '@/app/_public/copy'
+import { requestTime } from '@/app/_public/request-time'
 import { HomeView } from '@/app/_public/home-view'
 
 const home = publicCopy('en').home
@@ -22,6 +23,8 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function EnHome() {
-  return <HomeView locale="en" />
+export default async function EnHome() {
+  // 本文・文は、この要求のサーバの時刻で選ぶ(適用の日時の 0 時ちょうどに、デプロイなしで切り替わる。requestTime は await connection() の後の時刻)。
+  const now = await requestTime()
+  return <HomeView locale="en" now={now} />
 }

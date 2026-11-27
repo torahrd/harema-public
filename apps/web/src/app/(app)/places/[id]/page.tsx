@@ -1,6 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { savedPlaceIdSchema } from '@harema/shared/validations'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
+import { readAgreementState } from '@/lib/auth/consent-notice'
+import { readLists } from '@/lib/lists/list-read'
 import { detailBack } from '@/app/map/detail-origin'
 import { PlaceDetailScreen } from '@/app/places/[id]/place-detail-screen'
 
@@ -63,7 +65,7 @@ export default async function PlaceDetailPage({ params, searchParams }: PlaceDet
   const { data: row, error } = await supabase
     .from('saved_places')
     .select(
-      'id, status, memo, source_text, source_title, places(google_place_id, latitude, longitude)',
+      'id, status, memo, source_text, source_title, places(google_place_id, latitude, longitude), list_places(list_id)',
     )
     .eq('id', requestedId.data)
     .maybeSingle()
@@ -77,18 +79,27 @@ export default async function PlaceDetailPage({ params, searchParams }: PlaceDet
     notFound()
   }
 
+  // リストは、ポリシー 4 回目の改定に同意した人(DB の agreement_state() の lists_open)にだけ読む・出す。失敗は閉じる側。
+  const listsOpen = (await readAgreementState(supabase)).listsOpen
+
+  // 自分のリストの全行(失敗は投げる)。入っているリストの札と、保存のシートの「リスト」の行に使う。閉じている間は読まない。
+  const lists = listsOpen ? await readLists(supabase) : []
+
   // Client へ渡すのはこのスライスの描画が要る値だけ(saved_places.id は渡さない)。
   // lat/lng は S1 起動コンテキスト(MapLaunchContext)用に select 済みで、「編集する」が
   // 開く編集シートへ渡すためだけにここで消費する(DB へは書き戻さない)。
   return (
     <PlaceDetailScreen
       back={detailBack(query.from)}
+      lists={lists}
+      listsOpen={listsOpen}
       data={{
         status: row.status,
         memo: row.memo,
         sourceText: row.source_text,
         sourceTitle: row.source_title,
         googlePlaceId: row.places.google_place_id,
+        listIds: listsOpen ? row.list_places.map((entry) => entry.list_id) : [],
         location:
           row.places.latitude !== null && row.places.longitude !== null
             ? { lat: row.places.latitude, lng: row.places.longitude }

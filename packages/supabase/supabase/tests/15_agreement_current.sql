@@ -1,7 +1,7 @@
 -- consent-version(再提示の画面・時刻の門): public.current_agreement()・record_agreement の時刻の門・お知らせの判定
 -- (改定の一覧・列・記録・登録・削除は 14_agreement_versions.sql)
 begin;
-select plan(40);
+select plan(46);
 
 create function public.zz_claims(p_sub text, p_age interval default interval '1 minute')
 returns text
@@ -20,6 +20,8 @@ grant execute on function public.zz_claims(text, interval) to public;
 -- 時刻によらない形にする: 本物のポリシー 3(適用 2026-11-22 0 時 JST・notice 真)の適用の日時をまたいで走らせても結果が変わらないよう、
 -- 以後の節は「ポリシー 3 は先の改定」を前提にする。適用の日時を遠い先へ置く(C5 で、notice でない改定へ置き換えて適用の前後を試す)。
 update private.legal_revisions set effective_at = now() + interval '10 years' where doc = 'privacy' and version = 3;
+-- 4 回目以降の改定(25 本目の後の migration が足す行)は消してから始める(C10 は自分で行を入れる)。
+delete from private.legal_revisions where doc = 'privacy' and version >= 4;
 
 -- ===== C1: 権限と形 =====
 select ok(
@@ -147,6 +149,31 @@ select is((select notice_due from public.current_agreement()), false, 'C9: 一�
 select throws_ok($$select public.record_agreement()$$, 'P0001', 'no revision in effect', 'C9: 一覧が空なら record_agreement は no revision in effect');
 set local role postgres;
 insert into private.legal_revisions select * from zz_saved;
+
+-- ===== C10: 文をビルドに持たない改定(builtin_text 偽)は、旧い判定の notice_due に数えない(25 本目) =====
+-- この時点: ポリシー 2(notice・builtin_text 真)は適用済み。ポリシー 3 を notice 真・適用済みへ戻し、4 回目(notice 真・builtin_text 偽)を適用済みで足す。
+update private.legal_revisions set notice = true, effective_at = now() - interval '1 hour' where doc = 'privacy' and version = 3;
+insert into private.legal_revisions (doc, version, revised_on, effective_at, notice, builtin_text, notice_ja, notice_en)
+values ('privacy', 4, date '2026-11-29', now() - interval '30 minutes', true, false, array['ja'], array['en']);
+insert into public.profiles (id, username) values ('cc-v3', 'cv3'), ('cc-v4', 'cv4');
+insert into public.user_agreements (user_id, agreed_terms_version, agreed_privacy_version, version_agreed_at)
+values ('cc-v3', 1, 3, now()), ('cc-v4', 1, 4, now());
+set local role authenticated;
+select public.zz_claims('cc-v3');
+select is((select notice_due from public.current_agreement()), false, 'C10: 4 回目(builtin_text 偽)は旧い関数の notice_due に数えない');
+select is((select agreed from public.current_agreement()), false, 'C10: agreed は 4 回目も今の番号として数える(変えない)');
+select public.zz_claims('cc-v2');
+select is((select notice_due from public.current_agreement()), true, 'C10: 3 回目(builtin_text 真)を見ていない人には notice_due 真');
+select public.zz_claims('cc-v4');
+select is((select agreed from public.current_agreement()), true, 'C10: 4 に同意した人は agreed 真');
+select is((select notice_due from public.current_agreement()), false, 'C10: 4 に同意した人は notice_due 偽');
+-- 4 回目の行の builtin_text を真にすると、旧い関数も数える(条件が builtin_text そのものであることを見る)
+set local role postgres;
+update private.legal_revisions set builtin_text = true where doc = 'privacy' and version = 4;
+set local role authenticated;
+select public.zz_claims('cc-v3');
+select is((select notice_due from public.current_agreement()), true, 'C10: builtin_text 真の 4 回目は、3 に同意した人に notice_due 真');
+set local role postgres;
 
 select * from finish();
 rollback;

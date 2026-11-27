@@ -19,7 +19,7 @@ import { SiteAnalytics } from '@/app/_public/site-analytics'
 import { LpNotice } from '@/app/_public/lp-notice'
 import { LpClock } from '@/app/_public/lp-clock'
 import { LangLinks } from '@/app/_public/lang-links'
-import { NEWS, LP_NEWS_COUNT, newsDateTime, newsText } from '@/app/_public/news'
+import { LP_NEWS_COUNT, visibleNews, newsDateTime, newsText } from '@/app/_public/news'
 import { NewsSentence } from '@/app/_public/news-sentence'
 import { Rich } from '@/app/_public/rich'
 import { CONTACT_MAILTO, OPERATOR_X_URL } from '@/app/_public/content'
@@ -70,7 +70,7 @@ function AppQr() {
  * LP の本体(`/` と `/en`)。文は copy/{ja,en}.ts、言語は引数。頁(page.tsx)は metadata を持つ。
  * 英語の頁は、ログアウト・退会の後の知らせ(LpNotice)を出さない(印は日本語の LP が読む。英語の頁へは戻らない)。
  */
-export function HomeView({ locale }: { locale: PublicLocale }) {
+export function HomeView({ locale, now }: { locale: PublicLocale; now: number }) {
   const c = publicCopy(locale)
   const h = c.home
   const home = locale === 'en' ? '/en' : '/'
@@ -156,7 +156,7 @@ export function HomeView({ locale }: { locale: PublicLocale }) {
 {act}
 <div>
 <h3 className="h3 hd sub">{h.newsHeading}</h3>
-<ol className="nws-list" data-lp-feed="news">{NEWS.slice(0, LP_NEWS_COUNT).map((item) => { const { title, texts } = newsText(item, locale); return <li className="nws-item" key={`${item.date}-${item.targets.join()}-${item.title}`}><p className="nws-meta"><time className="nws-date" dateTime={newsDateTime(item.date)}>{item.date}</time>{item.targets.map((t) => <span className="nws-tag" key={t}>{t}</span>)}</p><div className="nws-t hd"><p className="nws-ttl">{title}</p>{texts.length > 1 ? <ul className="nws-ul">{texts.map((text) => <li key={text}><NewsSentence text={text} locale={locale} /></li>)}</ul> : texts.map((text) => <p className="nws-d" key={text}><NewsSentence text={text} locale={locale} /></p>)}</div></li> })}</ol>
+<ol className="nws-list" data-lp-feed="news">{visibleNews(now).slice(0, LP_NEWS_COUNT).map((item) => { const { title, texts } = newsText(item, locale, now); return <li className="nws-item" key={`${item.date}-${item.targets.join()}-${item.title}`}><p className="nws-meta"><time className="nws-date" dateTime={newsDateTime(item.date)}>{item.date}</time>{item.targets.map((t) => <span className="nws-tag" key={t}>{t}</span>)}</p><div className="nws-t hd"><p className="nws-ttl">{title}</p>{texts.length > 1 ? <ul className="nws-ul">{texts.map((text) => <li key={text}><NewsSentence text={text} locale={locale} /></li>)}</ul> : texts.map((text) => <p className="nws-d" key={text}><NewsSentence text={text} locale={locale} /></p>)}</div></li> })}</ol>
 <p className="nws-all"><Link className="x-ul" href={locale === 'en' ? '/en/news' : '/news'}>{h.newsAll}</Link></p>
 </div>
 </div>

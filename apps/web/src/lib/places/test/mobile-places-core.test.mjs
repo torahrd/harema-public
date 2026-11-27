@@ -22,13 +22,14 @@ const TOKEN36 = 'a'.repeat(36)
 const bias = { south: 35.6, west: 139.7, north: 35.7, east: 139.8 }
 
 describe('T-W5 用途 → mask と URL', () => {
-  it('5 用途の mask が計画の表の文字列と一字違わない', () => {
+  it('6 用途の mask が計画の表の文字列と一字違わない', () => {
     assert.deepEqual(DETAILS_FIELD_MASKS, {
-      select_food: 'location,displayName,formattedAddress',
+      select_food: 'location,displayName,formattedAddress,addressComponents',
       select_location: 'location,viewport',
-      poi: 'types,displayName,location,formattedAddress',
-      summary: 'displayName,formattedAddress',
+      poi: 'types,displayName,location,formattedAddress,addressComponents',
+      summary: 'displayName,formattedAddress,addressComponents',
       enterprise: 'regularOpeningHours,nationalPhoneNumber,websiteUri',
+      name_ja: 'displayName',
     })
     assert.equal(
       AUTOCOMPLETE_FIELD_MASK,
@@ -57,7 +58,7 @@ describe('T-W5 用途 → mask と URL', () => {
     const url = new URL(built.url)
     assert.equal(url.searchParams.get('languageCode'), 'ja')
     assert.equal(url.searchParams.get('regionCode'), 'JP')
-    assert.equal(built.fieldMask, 'displayName,formattedAddress')
+    assert.equal(built.fieldMask, 'displayName,formattedAddress,addressComponents')
   })
 
   it('place ID の / ? # は encodeURIComponent され、宛先の origin は places.googleapis.com だけ', () => {
@@ -120,7 +121,7 @@ describe('T-W5 入力のスキーマ', () => {
     assert.equal(mobileAutocompleteRequestSchema.safeParse({ ...ok, input: '😀'.repeat(100) }).success, true)
   })
 
-  it('Details の要求: 用途は 5 値だけ・sessionToken は select_* だけ受ける', () => {
+  it('Details の要求: 用途は 6 値だけ・sessionToken は select_* だけ受ける', () => {
     const base = { placeId: 'ChIJx' }
     assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose: 'photos' }).success, false)
     assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose: 'select_food', sessionToken: TOKEN36 }).success, true)
@@ -216,6 +217,8 @@ describe('T-W6 応答の読み取り', () => {
       purpose: 'poi',
       food: true,
       displayName: '喫茶',
+      displayNameLanguageCode: null,
+      countryCode: null,
       formattedAddress: '東京',
       location: { lat: 35, lng: 139 },
     })
@@ -232,7 +235,15 @@ describe('T-W6 応答の読み取り', () => {
         { location: { latitude: 35, longitude: 139 }, displayName: { text: '店' }, formattedAddress: '住所' },
         isFoodPlaceType,
       ),
-      { ok: true, purpose: 'select_food', displayName: '店', formattedAddress: '住所', location: { lat: 35, lng: 139 } },
+      {
+        ok: true,
+        purpose: 'select_food',
+        displayName: '店',
+        displayNameLanguageCode: null,
+        countryCode: null,
+        formattedAddress: '住所',
+        location: { lat: 35, lng: 139 },
+      },
     )
     assert.deepEqual(
       readDetailsResponse(
@@ -256,7 +267,7 @@ describe('T-W6 応答の読み取り', () => {
     )
     assert.deepEqual(
       readDetailsResponse('summary', { displayName: { text: '店' }, formattedAddress: '住所' }, isFoodPlaceType),
-      { ok: true, purpose: 'summary', displayName: '店', formattedAddress: '住所' },
+      { ok: true, purpose: 'summary', displayName: '店', displayNameLanguageCode: null, countryCode: null, formattedAddress: '住所' },
     )
     assert.deepEqual(
       readDetailsResponse(
@@ -346,5 +357,211 @@ describe('T7 古い iOS(language を送らない)と新しいサーバの組', (
     assert.equal(a.language, 'ja')
     const d = mobilePlaceDetailsRequestSchema.parse({ placeId: 'ChIJx', purpose: 'summary' })
     assert.equal(d.language, 'ja')
+  })
+})
+
+// ── ja-name(英語の画面の日本語の店名。harema#219)JN-1〜JN-5 ─────────────────────────────
+
+describe('JN-1 name_ja の mask と言語', () => {
+  it('JN-1a name_ja の mask は displayName だけ', () => {
+    assert.equal(DETAILS_FIELD_MASKS.name_ja, 'displayName')
+    assert.equal(buildDetailsRequest('ChIJx', 'name_ja').fieldMask, 'displayName')
+    assert.equal(buildDetailsRequest('ChIJx', 'name_ja', undefined, 'en').fieldMask, 'displayName')
+  })
+
+  it('JN-1b name_ja の languageCode は、language が en でも省略でも ja(regionCode=JP・sessionToken は載らない)', () => {
+    for (const language of ['en', 'ja', undefined]) {
+      const url = new URL(buildDetailsRequest('ChIJx', 'name_ja', undefined, language).url)
+      assert.equal(url.searchParams.get('languageCode'), 'ja', String(language))
+      assert.equal(url.searchParams.get('regionCode'), 'JP')
+      assert.equal(url.searchParams.has('sessionToken'), false)
+    }
+    // 札を渡されても name_ja の URL には載せない
+    assert.ok(!buildDetailsRequest('ChIJx', 'name_ja', TOKEN36, 'en').url.includes('sessionToken'))
+    // 表の外の用途は、今までどおり要求の language を使う
+    assert.equal(new URL(buildDetailsRequest('ChIJx', 'summary', undefined, 'en').url).searchParams.get('languageCode'), 'en')
+  })
+})
+
+describe('JN-2 Zod: 用途は 6 値だけ・name_ja に sessionToken は拒む', () => {
+  const base = { placeId: 'ChIJx' }
+  it('name_ja は通る(language が en でも通り、サーバが ja に固定する)', () => {
+    assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose: 'name_ja' }).success, true)
+    assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose: 'name_ja', language: 'en' }).success, true)
+  })
+
+  it('name_en・displayName・__proto__ は拒む / 札付きの name_ja は拒む', () => {
+    for (const purpose of ['name_en', 'displayName', '__proto__', 'constructor', 'name_JA']) {
+      assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose }).success, false, purpose)
+    }
+    assert.equal(mobilePlaceDetailsRequestSchema.safeParse({ ...base, purpose: 'name_ja', sessionToken: TOKEN36 }).success, false)
+  })
+
+  it('用途の許可リストは 6 値(5 つの今の用途 + name_ja)', () => {
+    assert.deepEqual(Object.keys(DETAILS_FIELD_MASKS).sort(), ['enterprise', 'name_ja', 'poi', 'select_food', 'select_location', 'summary'])
+  })
+})
+
+describe('JN-3 name_ja の応答は 4 つだけ', () => {
+  it('Google の応答に住所・座標・types が混ざっていても、返す形の鍵は ok・purpose・displayName・displayNameLanguageCode', () => {
+    const read = readDetailsResponse(
+      'name_ja',
+      {
+        displayName: { text: '天ぷら 一心', languageCode: 'ja' },
+        formattedAddress: '住所',
+        location: { latitude: 35, longitude: 139 },
+        types: ['restaurant'],
+      },
+      isFoodPlaceType,
+    )
+    assert.deepEqual(read, { ok: true, purpose: 'name_ja', displayName: '天ぷら 一心', displayNameLanguageCode: 'ja' })
+    assert.deepEqual(Object.keys(read).sort(), ['displayName', 'displayNameLanguageCode', 'ok', 'purpose'])
+  })
+
+  it('名前の無い応答は空の店名・言語 null(失敗にしない)', () => {
+    assert.deepEqual(readDetailsResponse('name_ja', {}, isFoodPlaceType), {
+      ok: true,
+      purpose: 'name_ja',
+      displayName: '',
+      displayNameLanguageCode: null,
+    })
+  })
+})
+
+describe('JN-4 displayNameLanguageCode(形の違う値は null)', () => {
+  const food = { types: ['cafe'], location: { latitude: 35, longitude: 139 }, formattedAddress: '東京' }
+  const read = (purpose, displayName) => readDetailsResponse(purpose, { ...food, displayName, formattedAddress: '東京' }, isFoodPlaceType)
+
+  it('select_food・poi(飲食)・summary・name_ja が、言語タグの形の languageCode をそのまま返す', () => {
+    for (const purpose of ['select_food', 'poi', 'summary', 'name_ja']) {
+      assert.equal(read(purpose, { text: 'Cafe', languageCode: 'en' }).displayNameLanguageCode, 'en', purpose)
+      assert.equal(read(purpose, { text: 'カフェ', languageCode: 'ja-JP' }).displayNameLanguageCode, 'ja-JP', purpose)
+      assert.equal(read(purpose, { text: 'Cafe', languageCode: 'zh-Hant-TW' }).displayNameLanguageCode, 'zh-Hant-TW', purpose)
+    }
+  })
+
+  it('languageCode が無い・数・長い文字列・記号入り・空 → null', () => {
+    const bad = [undefined, 5, null, '', 'a'.repeat(100), `en-${'x'.repeat(40)}`, 'en; x', 'en&x=1', '<script>', 'e', ['en'], { x: 1 }]
+    for (const purpose of ['select_food', 'poi', 'summary', 'name_ja']) {
+      for (const languageCode of bad) {
+        assert.equal(read(purpose, { text: 'Cafe', languageCode }).displayNameLanguageCode, null, `${purpose} ${JSON.stringify(languageCode)}`)
+      }
+    }
+    // displayName が文字列など object でない時も null(店名は空)
+    assert.equal(read('summary', 'Cafe').displayNameLanguageCode, null)
+  })
+})
+
+describe('JN-5 古い iOS(language なし・5 用途)の要求は前と同じ', () => {
+  it('5 用途の mask は一字も変わらず、language の無い要求は languageCode=ja', () => {
+    // 3 用途(select_food・poi・summary)だけ、国を見分ける addressComponents が末尾に足される(JN-C1)。ほかは前の字のまま
+    const expected = {
+      select_food: 'location,displayName,formattedAddress,addressComponents',
+      select_location: 'location,viewport',
+      poi: 'types,displayName,location,formattedAddress,addressComponents',
+      summary: 'displayName,formattedAddress,addressComponents',
+      enterprise: 'regularOpeningHours,nationalPhoneNumber,websiteUri',
+    }
+    for (const [purpose, mask] of Object.entries(expected)) {
+      const request = mobilePlaceDetailsRequestSchema.parse({ placeId: 'ChIJx', purpose })
+      const built = buildDetailsRequest(request.placeId, request.purpose, request.sessionToken, request.language)
+      assert.equal(built.fieldMask, mask, purpose)
+      assert.equal(new URL(built.url).searchParams.get('languageCode'), 'ja', purpose)
+      assert.equal(new URL(built.url).searchParams.get('regionCode'), 'JP', purpose)
+    }
+  })
+})
+
+// ── 国の見分け(英語の画面の日本語の店名の札・harema#219)JN-C1・JN-C2 ──────────────────
+
+describe('JN-C1 国を見分ける mask', () => {
+  it('select_food・poi・summary の mask の末尾に addressComponents(一字違わない)。ほかの用途には無い', () => {
+    assert.equal(DETAILS_FIELD_MASKS.select_food, 'location,displayName,formattedAddress,addressComponents')
+    assert.equal(DETAILS_FIELD_MASKS.poi, 'types,displayName,location,formattedAddress,addressComponents')
+    assert.equal(DETAILS_FIELD_MASKS.summary, 'displayName,formattedAddress,addressComponents')
+    for (const purpose of ['select_location', 'enterprise', 'name_ja']) {
+      assert.ok(!DETAILS_FIELD_MASKS[purpose].includes('addressComponents'), purpose)
+    }
+  })
+
+  it('mask は言語で変わらない(en でも ja でも、言語の無い要求でも同じ)', () => {
+    for (const purpose of ['select_food', 'poi', 'summary']) {
+      const masks = new Set(
+        [undefined, 'ja', 'en'].map((language) => buildDetailsRequest('ChIJx', purpose, undefined, language).fieldMask),
+      )
+      assert.equal(masks.size, 1, purpose)
+    }
+  })
+})
+
+describe('JN-C2 応答の countryCode', () => {
+  const country = (shortText, types = ['country', 'political']) => ({ longText: 'x', shortText, types })
+  const withComponents = (addressComponents) => ({
+    types: ['cafe'],
+    displayName: { text: 'Cafe', languageCode: 'en' },
+    location: { latitude: 35, longitude: 139 },
+    formattedAddress: '東京',
+    addressComponents,
+  })
+  const usedPurposes = ['select_food', 'poi', 'summary']
+
+  it('国の部品の shortText が JP → JP・US → US(3 用途とも)', () => {
+    for (const purpose of usedPurposes) {
+      for (const code of ['JP', 'US']) {
+        const read = readDetailsResponse(
+          purpose,
+          withComponents([{ longText: '1-2-3', shortText: '1-2-3', types: ['street_number'] }, country(code)]),
+          isFoodPlaceType,
+        )
+        assert.equal(read.countryCode, code, `${purpose} ${code}`)
+      }
+    }
+  })
+
+  it('国の部品が無い・jp・JPN・数・addressComponents が配列でない・無い → null', () => {
+    const bad = [
+      [{ longText: 'x', shortText: 'x', types: ['locality'] }],
+      [country('jp')],
+      [country('JPN')],
+      [country(81)],
+      [{ shortText: 'JP', types: 'country' }],
+      [{ shortText: 'JP' }],
+      [],
+      'JP',
+      { 0: country('JP') },
+      null,
+      undefined,
+    ]
+    for (const purpose of usedPurposes) {
+      for (const components of bad) {
+        assert.equal(
+          readDetailsResponse(purpose, withComponents(components), isFoodPlaceType).countryCode,
+          null,
+          `${purpose} ${JSON.stringify(components)}`,
+        )
+      }
+    }
+  })
+
+  it('3 用途の応答の鍵に addressComponents が無い(番地や郵便番号の部品が混ざっていても、足される鍵は countryCode だけ)', () => {
+    const components = [
+      { longText: '1', shortText: '1', types: ['street_number'] },
+      { longText: '100-0001', shortText: '100-0001', types: ['postal_code'] },
+      country('JP'),
+    ]
+    for (const purpose of usedPurposes) {
+      const read = readDetailsResponse(purpose, withComponents(components), isFoodPlaceType)
+      assert.ok(!('addressComponents' in read), purpose)
+      assert.ok('countryCode' in read, purpose)
+      assert.ok(!JSON.stringify(read).includes('100-0001'), `${purpose} 郵便番号を返さない`)
+    }
+  })
+
+  it('select_location・enterprise・name_ja・poi(飲食でない)の応答に countryCode が無い', () => {
+    const json = { ...withComponents([country('JP')]), viewport: { low: { latitude: 1, longitude: 2 }, high: { latitude: 3, longitude: 4 } } }
+    for (const purpose of ['select_location', 'enterprise', 'name_ja']) {
+      assert.ok(!('countryCode' in readDetailsResponse(purpose, json, isFoodPlaceType)), purpose)
+    }
+    assert.ok(!('countryCode' in readDetailsResponse('poi', { ...json, types: ['park'] }, isFoodPlaceType)))
   })
 })

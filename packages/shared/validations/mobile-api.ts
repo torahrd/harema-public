@@ -58,6 +58,8 @@ export const MOBILE_PLACE_DETAILS_PURPOSES = [
   'poi',
   'summary',
   'enterprise',
+  /** 英語の画面の日本語の店名(mask は displayName だけ・言語はサーバが ja に固定)。 */
+  'name_ja',
 ] as const
 
 export type MobilePlaceDetailsPurpose = (typeof MOBILE_PLACE_DETAILS_PURPOSES)[number]
@@ -109,15 +111,29 @@ export type MobileAutocompleteResponse = { ok: true; suggestions: MobileSuggesti
 
 type LatLng = { lat: number; lng: number }
 
+/**
+ * 名前の言語(Google の `displayName.languageCode` そのもの。言語タグの形でなければ・無ければ null)。
+ * 英語の画面の日本語の店名を取るか(1 回目の名前が日本語か)を、クライアントが決めるのに使う。
+ */
+type DisplayNameLanguageCode = { displayNameLanguageCode: string | null }
+
+/**
+ * 店の国(Google の `addressComponents` の国の部品の `shortText`。大文字 2 字・無ければ null)。
+ * 英語の画面で、日本にある店だけに「日本語の店名」の札を置くかを、クライアントが決めるのに使う(harema#219)。
+ * `addressComponents` そのもの(番地・郵便番号・市区町村の部品)は返さない・記録しない。
+ */
+type CountryCode = { countryCode: string | null }
+
 /** 用途ごとの Place Details の応答の形(成功)。 */
 export type MobilePlaceDetailsResponse =
-  | {
+  | ({
       ok: true
       purpose: 'select_food'
       displayName: string
       formattedAddress: string
       location: LatLng
-    }
+    } & DisplayNameLanguageCode &
+      CountryCode)
   | {
       ok: true
       purpose: 'select_location'
@@ -125,15 +141,18 @@ export type MobilePlaceDetailsResponse =
       viewport: { south: number; west: number; north: number; east: number } | null
     }
   | { ok: true; purpose: 'poi'; food: false }
-  | {
+  | ({
       ok: true
       purpose: 'poi'
       food: true
       displayName: string
       formattedAddress: string
       location: LatLng
-    }
-  | { ok: true; purpose: 'summary'; displayName: string; formattedAddress: string }
+    } & DisplayNameLanguageCode &
+      CountryCode)
+  | ({ ok: true; purpose: 'summary'; displayName: string; formattedAddress: string } & DisplayNameLanguageCode &
+      CountryCode)
+  | ({ ok: true; purpose: 'name_ja'; displayName: string } & DisplayNameLanguageCode)
   | {
       ok: true
       purpose: 'enterprise'

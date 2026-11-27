@@ -19,7 +19,7 @@ export interface LegalRevision {
  * 番号は頁に出さない。同意した番号の記録は DB が決める(呼ぶ側は番号を渡さない)ので、web・mobile がこの一覧から番号を送ることは無い。
  *
  * 改定を足す時: 新しい migration で一覧に 1 行足し、ここにも同じ 1 行を足す(その文書の番号を 1 つ足す)。
- * お知らせを出す改定なら、`LEGAL_EFFECTIVE_AT` もその行の適用の日時にする。
+ * お知らせの文は、`builtin_text` が偽の行なら DB の行(`notice_ja`・`notice_en`)に持つ。ここ(web・mobile)には写さない。
  */
 export const LEGAL_REVISIONS: { readonly terms: readonly LegalRevision[]; readonly privacy: readonly LegalRevision[] } = {
   terms: [{ version: 1, revisedOn: '2026.11.05', effectiveAt: '2026-11-04T15:00:00Z', notice: false }],
@@ -27,27 +27,20 @@ export const LEGAL_REVISIONS: { readonly terms: readonly LegalRevision[]; readon
     { version: 1, revisedOn: '2026.11.05', effectiveAt: '2026-11-04T15:00:00Z', notice: false },
     { version: 2, revisedOn: '2026.11.20', effectiveAt: '2026-11-19T15:00:00Z', notice: true },
     { version: 3, revisedOn: '2026.11.22', effectiveAt: '2026-11-21T15:00:00Z', notice: true },
+    { version: 4, revisedOn: '2026.11.29', effectiveAt: '2026-11-28T15:00:00Z', notice: true },
   ],
 }
 
 /**
- * 今回の改定(ポリシー 3・最終改定日 2026.11.22)の適用の日時。UTC の ISO 文字列(JST の 2026-11-22 0 時 = 2026-11-21T15:00:00Z)。
- * `LEGAL_REVISIONS` の notice が真の最新の行の `effectiveAt` と同じ値(照合のテストが見る)。使う所は 3 つ。
- *   - DB の `private.legal_revisions` の行(migration 20261121000001)。DB の now() がこの日時より前の間は、その番号を記録せず「今の番号」にもしない。
- *   - 言語の cookie を書く 2 つの道(`setLocale`・`refreshLocaleCookie`)の門。サーバの時刻がこの日時より前は書かない。
- *   - 「改定のお知らせ」の本文の日付(下の `LEGAL_NOTICE_EFFECTIVE_ON`)。
- * 掲示の日がずれて適用の日が変わる時は、この 1 か所と DB の行(新しい migration)を変える。
+ * 言語の cookie を書いてよい日時(UTC の ISO 文字列)。ポリシー 3(最終改定日 2026.11.22・言語の Cookie の説明を足した改定)の適用の日時
+ * (JST の 2026-11-22 0 時 = 2026-11-21T15:00:00Z)と同じ値(照合のテストが見る)。
+ * 言語の cookie を書く 2 つの道(`setLocale`・`refreshLocaleCookie`)の門で、サーバの時刻がこの日時より前は書かない。
+ * 最新の改定とは切り離してある(以後の改定の行を足しても、この値は変えない。変えると、掲示の間に言語の切り替えの部品が消える)。
+ * お知らせの本文の日付は、DB の `agreement_state()` の `notice_effective_on`(行の `effective_at` の 1 か所)から出す。
  */
-export const LEGAL_EFFECTIVE_AT = '2026-11-21T15:00:00Z'
+export const LOCALE_COOKIE_EFFECTIVE_AT = '2026-11-21T15:00:00Z'
 
-/** 「改定のお知らせ」の本文に出す適用の日(JST の暦日・`YYYY.MM.DD`)。`LEGAL_EFFECTIVE_AT` から作る。 */
-export const LEGAL_NOTICE_EFFECTIVE_ON: string = (() => {
-  const jst = new Date(Date.parse(LEGAL_EFFECTIVE_AT) + 9 * 60 * 60 * 1000)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${jst.getUTCFullYear()}.${pad(jst.getUTCMonth() + 1)}.${pad(jst.getUTCDate())}`
-})()
-
-/** `LEGAL_EFFECTIVE_AT` 以後か(サーバの時刻で決める。端末の時計に頼らない)。 */
-export function isLegalEffective(now: number = Date.now()): boolean {
-  return now >= Date.parse(LEGAL_EFFECTIVE_AT)
+/** `LOCALE_COOKIE_EFFECTIVE_AT` 以後か(サーバの時刻で決める。端末の時計に頼らない)。 */
+export function isLocaleCookieEffective(now: number = Date.now()): boolean {
+  return now >= Date.parse(LOCALE_COOKIE_EFFECTIVE_AT)
 }

@@ -230,6 +230,10 @@ if (!(lang in LANGS)) fail(`unknown language: ${lang}`)
 const dirOf = (l) => l === 'en' ? resolve(legalDir, 'en') : legalDir
 const parsedBy = Object.fromEntries(Object.keys(LANGS).map((l) => [l, Object.fromEntries(names.map((name) => [name, parseLegal(readFileSync(resolve(dirOf(l), `${name}.md`), 'utf8'), l)]))]))
 const parsed = parsedBy[lang]
+// 掲示の間の本文(docs/legal/posting/)。docs/legal の本文は効力発生の後の本文で、効力発生の日時になるまで /privacy には posting の本文が出る
+// (切り替えは apps/web/src/app/_public/legal-switch.ts がサーバの時刻で行う)。
+const postingOf = (l) => parseLegal(readFileSync(resolve(l === 'en' ? resolve(legalDir, 'posting', 'en') : resolve(legalDir, 'posting'), 'privacy.md'), 'utf8'), l)
+const posting = { ja: postingOf('ja'), en: postingOf('en') }
 const hrefs = (doc, l = 'ja') => expectedRows(doc, l).split('\n').flatMap((row) => splitLinks(row.split('\t')[2] ?? '').filter((part) => part.kind === 'url').map((part) => part.value))
 
 // 英語の参考訳が、日本語の正本と同じ組み(条の数・番号・項・号・表・箇条)で、約束した書き方をしているか。
@@ -287,6 +291,8 @@ if (args.includes('--self-test')) {
     const ok = checkEnglish(name, parsedBy.en[name], parsedBy.ja[name])
     if (ok.length) fail(`english check: baseline fails: ${ok.join(' / ')}`)
   }
+  const postingBaseline = checkEnglish('privacy', posting.en, posting.ja)
+  if (postingBaseline.length) fail(`english check (posting): baseline fails: ${postingBaseline.join(' / ')}`)
   const en = parsedBy.en, ja = parsedBy.ja
   const mutate = (doc, change) => { const copy = structuredClone(doc); change(copy); return copy }
   const englishControls = [
@@ -311,7 +317,7 @@ if (args.includes('--self-test')) {
   console.log(`self-test: PASS (${controlCount + englishControls.length} negative cases・${INTERNAL_TERMS.length} internal-term rules・${SAFE_SENTENCES.length} safe sentences・${URL_ADJACENT.length} after-URL cases)`)
 } else if (args.includes('--generate')) {
   const gen = (l, name) => JSON.stringify(parsedBy[l][name], null, 2)
-  writeFileSync(resolve(webDir, 'src/app/_public/legal.ts'), `// Generated from the frozen public bodies. Verify with check:legal.\nexport type Block = { kind: 'note' | 'paragraph'; sentences: string[] } | { kind: 'list'; items: { label?: string; sentences: string[] }[] } | { kind: 'table'; header: string[]; rows: string[][] }\nexport type Item = { no: number; sentences: string[]; blocks: Block[] }\nexport type Paragraph = { no?: number; heading?: string; sentences: string[]; items: Item[]; blocks: Block[] }\nexport type Article = { no: number; heading: string; paragraphs: Paragraph[] }\nexport type LegalDocument = { title: string; revisedOn: string; preamble: string[]; articles: Article[] }\nexport const terms: LegalDocument = ${gen('ja', 'terms')}\nexport const privacy: LegalDocument = ${gen('ja', 'privacy')}\n// English reference translations (docs/legal/en). The Japanese version prevails.\nexport const termsEn: LegalDocument = ${gen('en', 'terms')}\nexport const privacyEn: LegalDocument = ${gen('en', 'privacy')}\n`)
+  writeFileSync(resolve(webDir, 'src/app/_public/legal.ts'), `// Generated from the frozen public bodies. Verify with check:legal.\nexport type Block = { kind: 'note' | 'paragraph'; sentences: string[] } | { kind: 'list'; items: { label?: string; sentences: string[] }[] } | { kind: 'table'; header: string[]; rows: string[][] }\nexport type Item = { no: number; sentences: string[]; blocks: Block[] }\nexport type Paragraph = { no?: number; heading?: string; sentences: string[]; items: Item[]; blocks: Block[] }\nexport type Article = { no: number; heading: string; paragraphs: Paragraph[] }\nexport type LegalDocument = { title: string; revisedOn: string; preamble: string[]; articles: Article[] }\nexport const terms: LegalDocument = ${gen('ja', 'terms')}\nexport const privacy: LegalDocument = ${gen('ja', 'privacy')}\n// English reference translations (docs/legal/en). The Japanese version prevails.\nexport const termsEn: LegalDocument = ${gen('en', 'terms')}\nexport const privacyEn: LegalDocument = ${gen('en', 'privacy')}\n// Bodies shown while the notice of revision is posted (docs/legal/posting). Switched to the bodies above at the effective time by legal-switch.ts.\nexport const privacyPosting: LegalDocument = ${JSON.stringify(posting.ja, null, 2)}\nexport const privacyPostingEn: LegalDocument = ${JSON.stringify(posting.en, null, 2)}\n`)
 } else if (args.includes('--emit-expected')) {
   const name = args[args.indexOf('--emit-expected') + 1]
   if (!names.includes(name)) fail('unknown document')
@@ -320,8 +326,14 @@ if (args.includes('--self-test')) {
   const live = await import(pathToFileURL(resolve(webDir, 'src/app/_public/legal.ts')).href)
   const liveKey = (l, name) => l === 'en' ? `${name}En` : name
   for (const l of Object.keys(LANGS)) for (const name of names) if (!equal(parsedBy[l][name], live[liveKey(l, name)])) fail(`${l}/${name}: legal body differs`)
-  const problems = names.flatMap((name) => checkEnglish(name, parsedBy.en[name], parsedBy.ja[name]).map((problem) => `en/${name}: ${problem}`))
+  if (!equal(posting.ja, live.privacyPosting)) fail('ja/privacyPosting: legal body differs')
+  if (!equal(posting.en, live.privacyPostingEn)) fail('en/privacyPosting: legal body differs')
+  const problems = [
+    ...names.flatMap((name) => checkEnglish(name, parsedBy.en[name], parsedBy.ja[name]).map((problem) => `en/${name}: ${problem}`)),
+    ...checkEnglish('privacy', posting.en, posting.ja).map((problem) => `en/posting/privacy: ${problem}`),
+  ]
   if (problems.length) fail(`english translation checks:\n${problems.join('\n')}`)
   console.log('差分 0・規則外 0・placeholder 0・英訳の照合 0')
+  for (const l of Object.keys(LANGS)) console.log(`${l}/posting/privacy hrefs (${hrefs(posting[l], l).length}): ${hrefs(posting[l], l).join(' | ')}`)
   for (const l of Object.keys(LANGS)) for (const name of names) console.log(`${l}/${name} hrefs (${hrefs(parsedBy[l][name], l).length}): ${hrefs(parsedBy[l][name], l).join(' | ')}`)
 }

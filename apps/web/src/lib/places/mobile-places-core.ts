@@ -33,11 +33,22 @@ export const AUTOCOMPLETE_FIELD_MASK =
 
 /** 用途 → Place Details の mask(REST の綴り)。課金帯を決める唯一の表。散らさない。 */
 export const DETAILS_FIELD_MASKS: Record<MobilePlaceDetailsPurpose, string> = {
-  select_food: 'location,displayName,formattedAddress',
+  // addressComponents(Essentials)は国を見分けるためだけに足す(英語の画面の日本語の店名の札・harema#219)。応答には国の 2 字だけを返す
+  select_food: 'location,displayName,formattedAddress,addressComponents',
   select_location: 'location,viewport',
-  poi: 'types,displayName,location,formattedAddress',
-  summary: 'displayName,formattedAddress',
+  poi: 'types,displayName,location,formattedAddress,addressComponents',
+  summary: 'displayName,formattedAddress,addressComponents',
   enterprise: 'regularOpeningHours,nationalPhoneNumber,websiteUri',
+  // 英語の画面の日本語の店名。displayName だけ(言語 languageCode は mask を変えずに displayName の中に入る)
+  name_ja: 'displayName',
+}
+
+/**
+ * 用途 → サーバが固定する `languageCode`。この表にある用途は、クライアントが送る `language` を使わない
+ * (`name_ja` は英語の画面から呼ばれても必ず日本語で取る)。表に無い用途は要求の `language`。
+ */
+export const DETAILS_FIXED_LANGUAGES: Partial<Record<MobilePlaceDetailsPurpose, Locale>> = {
+  name_ja: 'ja',
 }
 
 /** セッションを閉じる(札を送る)用途。 */
@@ -100,8 +111,10 @@ export function buildDetailsRequest(
 ): DetailsHttpRequest {
   const fieldMask = Object.hasOwn(DETAILS_FIELD_MASKS, purpose) ? DETAILS_FIELD_MASKS[purpose] : undefined
   if (fieldMask === undefined) throw new Error('unknown purpose')
+  // 固定の言語がある用途は、引数の language より先にそれを使う(クライアントが言語を選べない)
+  const fixedLanguage = Object.hasOwn(DETAILS_FIXED_LANGUAGES, purpose) ? DETAILS_FIXED_LANGUAGES[purpose] : undefined
   const query = new URLSearchParams({
-    languageCode: language,
+    languageCode: fixedLanguage ?? language,
     regionCode: PLACES_REGION_CODE,
   })
   if (sessionToken !== undefined && SESSION_PURPOSES.has(purpose)) query.set('sessionToken', sessionToken)
@@ -121,6 +134,37 @@ function isObject(value: unknown): value is JsonObject {
 
 function readText(value: unknown): string {
   return isObject(value) && typeof value.text === 'string' ? value.text : ''
+}
+
+// 言語タグの形(`en`・`ja-JP`・`zh-Hant-TW`)。長さの上限は BCP-47 の実用上の長さ(35 字)。
+const LANGUAGE_TAG = /^[a-z]{2,3}(?:-[a-z0-9]{1,8})*$/i
+const LANGUAGE_TAG_MAX_LENGTH = 35
+
+/** `displayName.languageCode`。言語タグの形の文字列だけ返し、それ以外(無い・数・長い・記号入り)は null。 */
+function readLanguageCode(value: unknown): string | null {
+  if (!isObject(value)) return null
+  const code = value.languageCode
+  if (typeof code !== 'string' || code.length > LANGUAGE_TAG_MAX_LENGTH || !LANGUAGE_TAG.test(code)) return null
+  return code
+}
+
+// 国の部品の `shortText`(ISO 3166-1 の 2 字。大文字)
+const COUNTRY_CODE = /^[A-Z]{2}$/
+
+/**
+ * `addressComponents` → 国の 2 字。`types` に `country` を含む部品の `shortText` が大文字 2 字の時だけ返し、
+ * それ以外(部品が無い・配列でない・形が違う・小文字・3 字)は null(投げない)。番地・郵便番号・市区町村の部品は読まない・返さない。
+ * (web の `packages/shared/ja-name` の `countryCodeOf` と同じ決め方。この file は値の import を持たない約束なので、ここに書く。)
+ */
+function readCountryCode(value: unknown): string | null {
+  if (!Array.isArray(value)) return null
+  for (const component of value) {
+    if (!isObject(component)) continue
+    if (!readStringArray(component.types).includes('country')) continue
+    const shortText = component.shortText
+    return typeof shortText === 'string' && COUNTRY_CODE.test(shortText) ? shortText : null
+  }
+  return null
 }
 
 function readLatLng(value: unknown): { latitude: number; longitude: number } | null {
@@ -202,6 +246,8 @@ export function readDetailsResponse(
         ok: true,
         purpose,
         displayName: readText(json.displayName),
+        displayNameLanguageCode: readLanguageCode(json.displayName),
+        countryCode: readCountryCode(json.addressComponents),
         formattedAddress: typeof json.formattedAddress === 'string' ? json.formattedAddress : '',
         location,
       }
@@ -229,6 +275,8 @@ export function readDetailsResponse(
         purpose,
         food: true,
         displayName: readText(json.displayName),
+        displayNameLanguageCode: readLanguageCode(json.displayName),
+        countryCode: readCountryCode(json.addressComponents),
         formattedAddress: typeof json.formattedAddress === 'string' ? json.formattedAddress : '',
         location,
       }
@@ -238,7 +286,17 @@ export function readDetailsResponse(
         ok: true,
         purpose,
         displayName: readText(json.displayName),
+        displayNameLanguageCode: readLanguageCode(json.displayName),
+        countryCode: readCountryCode(json.addressComponents),
         formattedAddress: typeof json.formattedAddress === 'string' ? json.formattedAddress : '',
+      }
+    // 住所・座標は mask に無く、返さない(店名と言語の 4 つだけ)
+    case 'name_ja':
+      return {
+        ok: true,
+        purpose,
+        displayName: readText(json.displayName),
+        displayNameLanguageCode: readLanguageCode(json.displayName),
       }
     case 'enterprise': {
       const hours = isObject(json.regularOpeningHours)

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { asLines } from '@/i18n/lines'
 import { META } from '../text-styles'
+import { MapNoticeCard } from './map-notice-card'
 
 /**
  * 位置情報が拒否されているときのバナー(design B-5 逐語)。既定エリア(東京駅)表示のまま
@@ -35,7 +36,6 @@ export function LocationPermissionBanner({
   retrying: boolean
 }) {
   const t = useTranslations('web.map.locationBanner')
-  const common = useTranslations('web.common')
   const denied = asLines(t.raw('denied'))
   const reloadHint = asLines(t.raw('reloadHint'))
   // 再試行が終わってもこのバナーが残っている = 失敗。成功した場合は親が 'granted' へ移して
@@ -49,116 +49,56 @@ export function LocationPermissionBanner({
   }, [retrying])
 
   return (
-    <div
-      style={{
-        // 位置はチュールの縦リズム(固定行 → gap:9)が決める。絶対配置で固定行の下へ重ねると、
-        // 同じ帯を使うサジェストパネルを覆ってしまう(1 件目が押せなくなる)。左右 12 も
-        // チュールの padding が持つ。z は据え置き(検索スクリム 2 の上・トースト 16 の下)。
-        position: 'relative',
-        zIndex: 11,
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 10,
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-card)',
-        padding: '12px 14px',
-        boxShadow: 'var(--shadow-2)',
-      }}
-    >
-      <span
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          background: 'var(--accent)',
-          flex: 'none',
-          marginTop: 6,
-        }}
-      />
-      <div
-        style={{
-          flex: 1,
-          ...META,
-          color: 'var(--fg-1)',
-        }}
-      >
-        {/*
-          文の切れ目「。」の後で必ず行を変える(所有者 2026-11-03 17:44 JST・デザインシステムの和文の
-          「行は句読点の後で終える」)。1 文目は 1 行。2 文目は句ごとの塊で、入る幅では 1 行に並び、
-          入らない幅では句の切れ目「、」の後で折れる。字は META のまま変えない。
-        */}
-        {[denied.slice(0, 1), denied.slice(1)].map((sentence) => (
-          <span key={sentence.join('')} style={{ display: 'block' }}>
-            {sentence.map((phrase) => (
-              <span key={phrase} style={{ display: 'inline-block' }}>
-                {phrase}
-              </span>
-            ))}
-          </span>
-        ))}
-        <button
-          type="button"
-          onClick={onRetry}
-          disabled={retrying}
-          aria-busy={retrying}
-          style={{
-            // 本文の下に自分の行を持つ(親は非 flex なので block レベルの flex にする)。
-            display: 'flex',
-            width: 'fit-content',
-            alignItems: 'center',
-            gap: 8,
-            marginTop: 8,
-            background: 'transparent',
-            border: 0,
-            padding: 0,
-            cursor: retrying ? 'default' : 'pointer',
-            opacity: retrying ? 0.5 : 1,
-            ...META,
-            color: 'var(--accent)',
-            textDecoration: 'underline',
-            textUnderlineOffset: 3,
-          }}
-        >
-          {t('retry')}
-          {retrying && <span className="spinner" aria-hidden="true" />}
-        </button>
-        {reloadHintShown && (
-          <span style={{ display: 'block', marginTop: 8 }}>
-            {reloadHint.map((clause) => (
-              <span key={clause} style={{ display: 'inline-block' }}>
-                {clause}
-              </span>
-            ))}
-          </span>
-        )}
-      </div>
+    <MapNoticeCard onDismiss={onDismiss}>
+      {/*
+        文の切れ目「。」の後で必ず行を変える(所有者 2026-11-03 17:44 JST・デザインシステムの和文の
+        「行は句読点の後で終える」)。1 文目は 1 行。2 文目は句ごとの塊で、入る幅では 1 行に並び、
+        入らない幅では句の切れ目「、」の後で折れる。字は META のまま変えない。
+      */}
+      {[denied.slice(0, 1), denied.slice(1)].map((sentence) => (
+        <span key={sentence.join('')} style={{ display: 'block' }}>
+          {sentence.map((phrase) => (
+            <span key={phrase} style={{ display: 'inline-block' }}>
+              {phrase}
+            </span>
+          ))}
+        </span>
+      ))}
       <button
         type="button"
-        onClick={onDismiss}
-        aria-label={common('close')}
+        onClick={onRetry}
+        disabled={retrying}
+        aria-busy={retrying}
         style={{
-          flex: 'none',
+          // 本文の下に自分の行を持つ(親は非 flex なので block レベルの flex にする)。
           display: 'flex',
-          marginTop: 2,
+          width: 'fit-content',
+          alignItems: 'center',
+          gap: 8,
+          marginTop: 8,
           background: 'transparent',
           border: 0,
           padding: 0,
-          cursor: 'pointer',
+          cursor: retrying ? 'default' : 'pointer',
+          opacity: retrying ? 0.5 : 1,
+          ...META,
+          color: 'var(--accent)',
+          textDecoration: 'underline',
+          textUnderlineOffset: 3,
         }}
       >
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--fg-muted)"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-        >
-          <path d="M6 6l12 12 M18 6l-12 12" />
-        </svg>
+        {t('retry')}
+        {retrying && <span className="spinner" aria-hidden="true" />}
       </button>
-    </div>
+      {reloadHintShown && (
+        <span style={{ display: 'block', marginTop: 8 }}>
+          {reloadHint.map((clause) => (
+            <span key={clause} style={{ display: 'inline-block' }}>
+              {clause}
+            </span>
+          ))}
+        </span>
+      )}
+    </MapNoticeCard>
   )
 }

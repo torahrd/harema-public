@@ -15,6 +15,11 @@ describe('matchLocale', () => {
     assert.equal(matchLocale(['fr']), 'ja')
     assert.equal(matchLocale([]), 'ja')
   })
+  it('第 3 引数の fallback は当たらない・空のときだけ効く(当たれば並びの言語)', () => {
+    assert.equal(matchLocale(['fr'], LOCALES, 'en'), 'en')
+    assert.equal(matchLocale([], LOCALES, 'en'), 'en')
+    assert.equal(matchLocale(['ja'], LOCALES, 'en'), 'ja')
+  })
   it('有効な言語が ja だけなら常に ja', () => {
     assert.equal(matchLocale(['en-US', 'en'], ['ja']), 'ja')
     assert.equal(pick('en-US,en;q=0.9', ['ja']), 'ja')

@@ -7,6 +7,8 @@ import {
 import { savedPlaceStatusSchema } from '@harema/shared/validations'
 import { refreshStalePlaces } from '@/lib/places/refresh-stale'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
+import { readAgreementState } from '@/lib/auth/consent-notice'
+import { readListsWithMembers } from '@/lib/lists/list-read'
 import { toListPosition } from '@/app/saved/list-map-layout'
 import { SavedListScreen } from '@/app/saved/saved-list-screen'
 import type { SavedListCounts, SavedListRow } from '@/app/saved/types'
@@ -77,6 +79,14 @@ export default async function SavedPage({ searchParams }: SavedPageProps) {
     throw error
   }
 
+  // リストは、ポリシー 4 回目の改定に同意した人(DB の agreement_state() の lists_open)にだけ読む・出す。失敗は閉じる側。
+  const listsOpen = (await readAgreementState(supabase)).listsOpen
+
+  // 自分のリストの全行と、店ごとの所属(失敗は投げる)。閉じている間は読まない。
+  const { lists, membership } = listsOpen
+    ? await readListsWithMembers(supabase)
+    : { lists: [], membership: new Map<string, string[]>() }
+
   // 29 日を超えた(座標が消えた)もういいの行を取り直す(Google の規約の 30 日・place-refresh #39)。応答を送出した後に走らせる。
   // cookies() は上で読み終えている(Next.js の `after` の制約)。
   after(() =>
@@ -97,6 +107,7 @@ export default async function SavedPage({ searchParams }: SavedPageProps) {
         status: row.status,
         googlePlaceId: place.google_place_id,
         position: toListPosition(row.status, place.latitude, place.longitude),
+        listIds: membership.get(row.id) ?? [],
       },
     ]
   })
@@ -107,6 +118,8 @@ export default async function SavedPage({ searchParams }: SavedPageProps) {
       // 件数は DB の行そのものから数える(join の防御で落ちた行があっても真値を出す)。
       counts={countByStatus(rows ?? [])}
       initialStatus={initialStatus}
+      lists={lists}
+      listsOpen={listsOpen}
     />
   )
 }

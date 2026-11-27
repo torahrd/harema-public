@@ -47,17 +47,18 @@ export function parseAcceptLanguage(header: string | null): string[] {
 }
 
 /**
- * 優先順の並びの先頭から、主の言語が有効な言語に当たる最初の物を返す。無ければ ja。
+ * 優先順の並びの先頭から、主の言語が有効な言語に当たる最初の物を返す。無ければ `fallback`(省略は ja)。
  * 返すのは LOCALES の値だけで、入力の文字列は返さない。
  */
 export function matchLocale(
   preferred: readonly string[],
   enabled: readonly Locale[] = LOCALES,
+  fallback: Locale = DEFAULT_LOCALE,
 ): Locale {
   for (const tag of preferred) {
     const primary = tag.split('-')[0]?.toLowerCase()
     const hit = enabled.find((l) => l === primary)
     if (hit !== undefined) return hit
   }
-  return DEFAULT_LOCALE
+  return fallback
 }

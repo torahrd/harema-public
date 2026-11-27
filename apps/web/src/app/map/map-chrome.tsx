@@ -46,6 +46,11 @@ type MapChromeProps = {
    * 検索を開いている間は偽にする —— 下げるとサジェストを覆うので、そのときは今の位置。
    */
   toastBelowBanner?: boolean
+  /**
+   * リストの絞りの札の列(検索欄の下・位置情報バナーの上。仮の決定・harema#152)。リストが 0 個・検索を開いている間は
+   * 呼び出し側が渡さない。トーストは、バナーが無ければこの列の下端 + 9px に置く(`toastBelowBanner` と同じ考え)。
+   */
+  listsSlot?: React.ReactNode
   children?: React.ReactNode
 }
 
@@ -60,11 +65,13 @@ export function MapChrome({
   toastSlot,
   bannerSlot,
   toastBelowBanner = false,
+  listsSlot,
   children,
 }: MapChromeProps) {
   const t = useTranslations('web.map')
   const common = useTranslations('web.common')
   const anchorToBanner = toastBelowBanner && Boolean(bannerSlot)
+  const anchorToLists = toastBelowBanner && !bannerSlot && Boolean(listsSlot)
   const toastLayer = toastSlot && (
     <div
       style={{
@@ -74,6 +81,7 @@ export function MapChrome({
         right: 0,
         marginTop: 9,
         zIndex: 16,
+        pointerEvents: 'auto',
       }}
     >
       {toastSlot}
@@ -262,8 +270,16 @@ export function MapChrome({
 
         {/* 16 は地図画面のルート文脈での値。バナー(11)・現在地ボタン(15)より上、S1 の
             スクリム(20)と .edge-tint(100)より下。 */}
-        {!anchorToBanner && toastLayer}
+        {!anchorToBanner && !anchorToLists && toastLayer}
       </div>
+
+      {listsSlot && (
+        // 幅いっぱいの箱は押しを通し(札の右の空きで地図を動かせる)、札の器とトーストだけが受ける。
+        <div style={{ position: 'relative', pointerEvents: 'none' }}>
+          {listsSlot}
+          {anchorToLists && toastLayer}
+        </div>
+      )}
 
       {bannerSlot && (
         // 位置決めだけの枠(z-index を持たない —— 持つとトーストがこの枠の値に閉じ込められる)。

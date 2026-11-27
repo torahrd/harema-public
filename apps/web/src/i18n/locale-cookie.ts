@@ -1,4 +1,4 @@
-import { isLegalEffective } from '@harema/shared/constants'
+import { isLocaleCookieEffective } from '@harema/shared/constants'
 import { localeSchema, matchLocale, parseAcceptLanguage, type Locale } from '@harema/shared/i18n'
 
 /**
@@ -48,11 +48,11 @@ export function parseLoginLang(value: unknown): Locale | null {
 }
 
 /**
- * 言語の cookie を書いてよい時か(適用の日時 `LEGAL_EFFECTIVE_AT` 以後)。ポリシーの改定(言語の Cookie の説明の追加)の適用の前は書かない。
+ * 言語の cookie を書いてよい時か(適用の日時 `LOCALE_COOKIE_EFFECTIVE_AT`(ポリシー 3 の適用の日時)以後)。ポリシーの改定(言語の Cookie の説明の追加)の適用の前は書かない。
  * 時刻はサーバの時刻(引数で渡せる形・既定は今)。cookie を読む側(request.ts)は変えない(Accept-Language で英語は出る)。
  */
 export function localeCookieWritable(now: number = Date.now()): boolean {
-  return isLegalEffective(now)
+  return isLocaleCookieEffective(now)
 }
 
 /**

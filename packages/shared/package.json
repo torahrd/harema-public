@@ -13,7 +13,8 @@
     "./search-scope": "./search-scope/index.ts",
     "./lists": "./lists/index.ts",
     "./share-url": "./share-url/index.ts",
-    "./share-parse": "./share-parse/index.ts"
+    "./share-parse": "./share-parse/index.ts",
+    "./ja-name": "./ja-name/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

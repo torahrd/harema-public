@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl'
 import type { MapToastVariant, SearchErrorVariant } from './types'
 import { META } from '../text-styles'
 import { JpText } from '../_ui/jp-text'
+import { LIST_BULK_MAX } from '@harema/shared/constants'
+import { asLines } from '@/i18n/lines'
 
 /**
  * 上部トースト(design ④ 逐語)。2b 造形を踏襲しつつ、失敗は成功と記号で分ける ——
@@ -28,6 +30,14 @@ function isSearchError(variant: MapToastVariant): variant is SearchErrorVariant 
   return variant === 'suggestions' || variant === 'details'
 }
 
+/**
+ * リストの失敗は検索の失敗と同じ器(茜の記号・alert)で、文だけ `web.lists` から読む。
+ * 一括の状態の変更・削除の失敗(`bulk-error`)も同じ器で、文は `web.common.errorTryLater`(2 句)。
+ */
+function isListError(variant: MapToastVariant): boolean {
+  return variant === 'list-error'
+}
+
 export function MapToast({
   variant,
   visible,
@@ -39,12 +49,25 @@ export function MapToast({
 }) {
   const t = useTranslations('web.map.toast')
   const sheet = useTranslations('web.saveSheet')
+  const lists = useTranslations('web.lists')
+  const common = useTranslations('web.common')
+  const [bulkBody = '', bulkTail = ''] = asLines(common.raw('errorTryLater'))
   const error = isSearchError(variant)
     ? { body: t(`${variant}Body`), tail: t(`${variant}Tail`) }
-    : null
-  const successMessage = isSearchError(variant)
+    : isListError(variant)
+      ? { body: lists('toastErrorBody'), tail: lists('toastErrorTail') }
+      : variant === 'bulk-error'
+        ? { body: bulkBody, tail: bulkTail }
+        : variant === 'bulk-limit'
+          ? { body: lists('bulkLimit', { count: LIST_BULK_MAX }), tail: '' }
+          : null
+  const successMessage = error
     ? null
-    : sheet(variant === 'save-created' ? 'toastCreated' : 'toastUpdated')
+    : variant === 'list-added'
+      ? lists('toastAdded')
+      : variant === 'list-removed'
+        ? lists('toastRemoved')
+        : sheet(variant === 'save-created' ? 'toastCreated' : 'toastUpdated')
 
   return (
     <div
@@ -99,8 +122,13 @@ export function MapToast({
       >
         {error ? (
           <>
-            <JpText text={error.body} />{' '}
-            <span style={{ color: 'var(--fg-whisper)' }}><JpText text={error.tail} /></span>
+            <JpText text={error.body} />
+            {error.tail !== '' && (
+              <>
+                {' '}
+                <span style={{ color: 'var(--fg-whisper)' }}><JpText text={error.tail} /></span>
+              </>
+            )}
           </>
         ) : (
           successMessage

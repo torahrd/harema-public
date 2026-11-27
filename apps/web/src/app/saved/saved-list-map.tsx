@@ -8,7 +8,7 @@ import {
   useApiLoadingStatus,
   useMap,
 } from '@vis.gl/react-google-maps'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_ZOOM,
@@ -89,13 +89,18 @@ function SavedListMarkers({ rows, status, selectedId, onSelect }: SavedListMapPr
   const map = useMap(SAVED_MAP_INSTANCE_ID)
   const markers = useMemo(() => markersForTab(rows, status), [rows, status])
 
-  // 範囲合わせは、地図ができたときとタブが変わったときだけ走る。markers は rows(サーバから
-  // 渡る不変の配列)と status だけから作るので、行の取得の完了・失敗の描き直しでは変わらない。
-  // 取得の状態など描き直しのたびに変わる値を依存に足すと fitBounds が走り、利用者が動かした
-  // 地図が戻る。
+  // 範囲合わせは、地図ができたとき・タブが変わったとき・ピンの id と座標の並びが変わったときだけ走る。
+  // rows はリストの操作(名前の変更・一括など)の応答で新しい配列に入れ替わるので、markers そのものを
+  // 依存にすると、ピンが変わらない操作でも fitBounds が走り、利用者が動かした地図が戻る。
+  // 取得の状態など描き直しのたびに変わる値も依存に足さない。
+  const markersKey = markers.map((m) => `${m.id}:${m.position.lat},${m.position.lng}`).join('|')
+  const markersRef = useRef(markers)
+  useEffect(() => {
+    markersRef.current = markers
+  })
   useEffect(() => {
     if (map === null) return
-    const camera = cameraForMarkers(markers, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
+    const camera = cameraForMarkers(markersRef.current, DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
     if (camera.kind === 'center') {
       map.setCenter(camera.center)
       map.setZoom(camera.zoom)
@@ -108,7 +113,7 @@ function SavedListMarkers({ rows, status, selectedId, onSelect }: SavedListMapPr
       if (zoom !== undefined && zoom > MAX_FIT_ZOOM) map.setZoom(MAX_FIT_ZOOM)
     })
     return () => listener.remove()
-  }, [map, markers])
+  }, [map, markersKey, status])
 
   return (
     <>

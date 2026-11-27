@@ -77,12 +77,10 @@ export const ja = {
         ['登録の有無は', 'ログインの後に分かるため、', '登録済みの方も、', 'ログインのたびに', '同意が要ります。'],
       ],
     },
-    // 改定のお知らせ(地図を開いた時・同意の記録が今のバージョンに無い人だけ。web と iOS で同じ鍵)。{date} は適用の日(LEGAL_NOTICE_EFFECTIVE_ON)。
+    // 改定のお知らせ(地図を開いた時・同意の記録が今のバージョンに無い人だけ。web と iOS で同じ鍵)。本文(段落)は辞書に持たず、DB の `private.legal_revisions` の `notice_ja`・`notice_en` から `agreement_state()` が返す({date} は適用の日 = `notice_effective_on`)。
     // 同意の行はログイン画面の `login.consentTerms`、記録の失敗は `common.errorTryLater`、ログアウトの失敗は `drawer.logoutError` を使う。
     consentNotice: {
       title: '改定のお知らせ',
-      body1: 'プライバシーポリシーを、{date} に改定しました。',
-      body2: '言語を選べるようにするため、Cookie の説明を加え、同意の記録の説明を改めました。',
       continue: '続ける',
       declineLogout: '同意しないでログアウト',
     },
@@ -126,11 +124,58 @@ export const ja = {
       panelWebsite: 'website',
       enterpriseFetchFail: '詳細情報を読み込めませんでした。',
     },
+    // 英語の画面の日本語の店名の札と、押した後の文(所有者の決定 2026-11-25 15:47・15:53・harema#219)。
+    // ja の値は画面に出ない(日本語の画面は札を置かない)。型 `Messages = typeof ja` が鍵を ja に要求するので、en の文の訳を置く。
+    japaneseName: {
+      show: '日本語の店名を表示',
+      none: '日本語の店名はありません。',
+      same: '上の店名と同じです。',
+      failed: '日本語の店名を読み込めませんでした。',
+    },
     savedList: {
       title: '保存した店',
       backToMap: '地図へ戻る',
       empty: '保存した店は、まだありません。',
       detailsUnavailable: '店舗の情報を読み込めませんでした。',
+    },
+    // リストの画面(仮の決定・所有者の再確認待ち・harema#152)。文言の出どころ: 単位 lists-web の DESIGN.md の 5。
+    lists: {
+      filterAll: 'すべて',
+      filterLabel: 'リストで絞る',
+      empty: '当てはまる店はありません。',
+      select: '選ぶ',
+      selectedCount: '{count} 件を選択中',
+      // 「選ぶ」で上限(LIST_BULK_MAX)まで選んだ後に、もう 1 件を押した時の知らせ(失敗の知らせの器)。
+      bulkLimit: '一度に選べるのは {count} 件までです。',
+      bulkAdd: 'リストに入れる',
+      bulkRemove: 'リストから外す',
+      pickAddTitle: '入れるリストを選ぶ',
+      bulkStatus: '状態を変える',
+      statusPickTitle: '状態を選ぶ',
+      statusCurrent: '今の状態',
+      bulkDeleteConfirmTitle: '削除しますか？',
+      bulkDeleteConfirmBody: '選んだ {count} 件の店を、保存した店から削除します。メモ・状態・出典も消え、元に戻せません。',
+      toastAdded: 'リストに入れました。',
+      toastRemoved: 'リストから外しました。',
+      toastErrorBody: 'リストを変更できませんでした。',
+      toastErrorTail: '少し待って、もう一度お試しください。',
+      label: 'リスト',
+      // 行の右に、入っているリストの名前をつなぐ区切り。
+      nameSeparator: '、',
+      pickTitle: 'リストを選ぶ',
+      pickConfirm: '決定する',
+      newList: '新しいリスト',
+      editTitle: 'リストを編集',
+      nameLabel: '名前',
+      namePlaceholder: '例: ラーメン',
+      nameHelp: '1〜15字。前後の空白は除かれます。',
+      iconLabel: 'アイコン',
+      iconHelp: '1字。絵文字・漢字・かな・英字・数字が使えます。',
+      iconError: '1字だけ入れてください。',
+      create: '作成する',
+      deleteConfirmTitle: 'リストを削除しますか？',
+      deleteConfirmBody: '「{name}」を削除します。元に戻せません。入れていた店は消えず、保存した店に残ります。',
+      limit: 'リストは 3 個までです。',
     },
     map: {
       searchPlaceholder: '店名・場所で検索',
@@ -172,8 +217,12 @@ export const ja = {
   // iOS のアプリの文言。web と同じ文は `web` の鍵を読み、ここには iOS にだけある文を置く(apps/mobile/src/i18n)。
   mobile: {
     drawer: {
-      // 所有者の決定 2026-11-22 00:12 JST・harema#150: iOS のメニューの言語の行。どちらの言語の画面でも同じ字(押すと「設定」のアプリのこのアプリの頁へ)。
+      // 所有者の決定 2026-11-22 00:12 JST・harema#150: iOS のメニューの言語の行。どちらの言語の画面でも同じ字(押すと知らせを出す)。
       itemLanguage: '言語 / Language',
+      // 言語の行を押すと出す知らせ(harema#150)。文は仮(所有者の決定カードの答え待ち)。副ボタンは `web.common.cancel`。
+      languageDialogTitle: '言語を変える',
+      languageDialogBody: ['「設定」で言語を変えると、hareMa は一度終了します。', 'もう一度開くと、選んだ言語で表示されます。'],
+      languageDialogOpen: '設定を開く',
     },
     login: {
       // ログインが無効と分かってログイン画面へ送られた時の知らせ(所有者 2026-11-11 21:18 の決定)。

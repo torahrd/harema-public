@@ -17,12 +17,43 @@ export type NewsItem = {
   texts: readonly string[]
   /** 英語の更新情報(/en と /en/news)。題と文の数は日本語と同じ。日本語と同じ事実だけを書き、新機能と不具合の修正を書き分ける。英語の文には「/」の印を入れない(英語は語の間で折れる)。 */
   en: { title: string; texts: readonly string[] }
+  /**
+   * 適用の日時から差し替える文(任意)。`at`(UTC の ISO 文字列)以後は、`texts`・`en.texts` の代わりにこの文を出す
+   * (掲示の件を、適用の後に「本文に反映しています」へ直す。0 時ちょうどに、デプロイなしで切り替わる)。
+   * `at` はその改定の適用の日時(`LEGAL_REVISIONS` の行・DB の行と同じ瞬間。照合は legal-switch.test.mjs)。文の数は元と同じ。
+   * 置き方の約束(相対 import を持たない)のため、`at` は値で書く。
+   */
+  after?: { at: string; texts: readonly string[]; en: { texts: readonly string[] } }
+  /**
+   * この件の文を、改定のお知らせ(地図・同意の取り直し)の枠に出す改定の適用の日(`YYYY.MM.DD`。DB の `notice_effective_on` と同じ。
+   * 照合は legal-switch.test.mjs)。お知らせは適用の後にしか出ないので、枠には `after` の文が出る(`after` を必ず持つ)。
+   * 同じ値を持つ件は 1 つだけ。
+   */
+  notice?: string
+  /**
+   * この日時(UTC の ISO 文字列)より前は、件を LP と /news に出さない(任意)。機能の門が開く日時と同じ瞬間に、
+   * デプロイなしで件が出る(先に公開しておく web の公開で、0 時の前に件が見えないようにする)。
+   */
+  from?: string
 }
 
 /** 新しい順。 */
 export const NEWS: readonly NewsItem[] = [
+  // リストの門が開く 2026-11-29 0 時(JST)から出す(DB の agreement_state の lists_open と同じ瞬間)。
+  { date: '2026.11.29', targets: ['Web', 'Android'], title: '機能の追加', from: '2026-11-28T15:00:00Z', texts: [
+    '保存した店を/リストに分けられるようにしました。',
+    'リストは 3 個まで、/名前は 15 文字までです。',
+    '地図と保存した店の一覧で、/リストを選んで/絞り込めるようにしました。',
+    '一覧で複数の店を選び、/まとめてリストに入れる・外す・/状態を変える・削除が/できるようにしました。',
+  ],
+    en: { title: 'New features', texts: [
+      'You can now sort saved places into lists.',
+      'You can have up to 3 lists, with names up to 15 characters.',
+      'On the map and in the saved list, you can now choose a list to filter places.',
+      'In the saved list, you can now select several places and add them to or remove them from a list, change their status or delete them at once.',
+    ] } },
   { date: '2026.11.25', targets: ['Web', 'Android', 'iPhone'], title: 'プライバシーポリシーなどの改定', texts: [
-    '2026.11.29 午前 0 時(日本標準時)から/プライバシーポリシーを改定します。',
+    '2026.11.29/ 午前 0 時(日本標準時)から/プライバシーポリシーを改定します。',
     '保存した店をリストに/分けられるようにするため、/リストと、リストに入れた店を/保存する情報に追加します。',
     '改定の内容は/プライバシーポリシーのページの冒頭に/掲載しています。',
     '問い合わせの窓口を/X のダイレクトメッセージから/メールに変えました。',
@@ -32,7 +63,21 @@ export const NEWS: readonly NewsItem[] = [
       'To let you sort saved places into lists, we are adding lists and the places in them to the information we store.',
       'The details of the revision are posted at the top of the Privacy Policy page.',
       'We changed the contact point for inquiries from X direct messages to email.',
-    ] } },
+    ] },
+    // 改定のお知らせ(地図)の枠に出す件。値は 4 回目の改定の適用の日(DB の notice_effective_on)。
+    notice: '2026.11.29',
+    // 適用の日時(2026-11-29 0 時 JST)から、冒頭の掲示を外した本文に合わせて 3 つ目の文だけ直す(2026.11.16 の件と同じ形)。
+    after: { at: '2026-11-28T15:00:00Z', texts: [
+      '2026.11.29/ 午前 0 時(日本標準時)から/プライバシーポリシーを改定します。',
+      '保存した店をリストに/分けられるようにするため、/リストと、リストに入れた店を/保存する情報に追加します。',
+      '改定後の内容は/プライバシーポリシーの/本文に反映しています。',
+      '問い合わせの窓口を/X のダイレクトメッセージから/メールに変えました。',
+    ], en: { texts: [
+      'The Privacy Policy will be revised from 0:00 a.m. on 2026.11.29 (Japan Standard Time).',
+      'To let you sort saved places into lists, we are adding lists and the places in them to the information we store.',
+      'The revised content is reflected in the body of the Privacy Policy.',
+      'We changed the contact point for inquiries from X direct messages to email.',
+    ] } } },
   { date: '2026.11.25', targets: ['iPhone'], title: 'バージョン 2.0.0 を公開', texts: [
     'iPhone の言語を英語にすると/アプリも英語で表示するようにしました。',
     'メニューに/言語の行を追加し/ iPhone の設定を開けるようにしました。',
@@ -133,9 +178,24 @@ export const NEWS: readonly NewsItem[] = [
     ] } },
 ]
 
-/** 件の題と文を言語で選ぶ(日本語は件の `title`・`texts`、英語は `en`)。 */
-export function newsText(item: NewsItem, locale: 'ja' | 'en'): { title: string; texts: readonly string[] } {
-  return locale === 'en' ? item.en : { title: item.title, texts: item.texts }
+/**
+ * 件の題と文を言語で選ぶ(日本語は件の `title`・`texts`、英語は `en`)。`after` を持つ件は、`now`(`Date.now()` の値)が `after.at` 以後なら
+ * `after` の文を出す(`>=`。適用の瞬間から)。呼ぶ側は `await connection()` の後に `Date.now()` を渡す(静的な頁では固まる)。
+ */
+export function newsText(item: NewsItem, locale: 'ja' | 'en', now: number): { title: string; texts: readonly string[] } {
+  const switched = item.after !== undefined && now >= Date.parse(item.after.at)
+  if (locale === 'en') return { title: item.en.title, texts: switched && item.after ? item.after.en.texts : item.en.texts }
+  return { title: item.title, texts: switched && item.after ? item.after.texts : item.texts }
+}
+
+/** `now`(`Date.now()` の値)の時点で出す件(`from` が先の件を除く。`>=`。呼ぶ側は `await connection()` の後に渡す)。 */
+export function visibleNews(now: number): readonly NewsItem[] {
+  return NEWS.filter((item) => item.from === undefined || now >= Date.parse(item.from))
+}
+
+/** 改定のお知らせの枠に出す件(`notice` が適用の日と同じ件)。無ければ null(枠を出さない)。 */
+export function noticeNewsItem(effectiveOn: string): NewsItem | null {
+  return NEWS.find((item) => item.notice === effectiveOn) ?? null
 }
 
 /** LP に出す件数(先頭から)。 */

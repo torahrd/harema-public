@@ -256,6 +256,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      agree_current: { Args: never; Returns: string }
+      agreement_state: {
+        Args: never
+        Returns: {
+          agreed: boolean
+          lists_open: boolean
+          notice_due: boolean
+          notice_effective_on: string
+          notice_en: string[]
+          notice_ja: string[]
+        }[]
+      }
       begin_withdrawal: { Args: never; Returns: string }
       check_request: { Args: never; Returns: undefined }
       claim_ogp_fetch: {
@@ -277,6 +289,14 @@ export type Database = {
         Returns: undefined
       }
       complete_onboarding: { Args: { p_username: string }; Returns: undefined }
+      cron_health: {
+        Args: never
+        Returns: {
+          cleanup_ogp: boolean
+          purge_coords: boolean
+          refresh_places: boolean
+        }[]
+      }
       current_agreement: {
         Args: never
         Returns: {

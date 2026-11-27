@@ -88,11 +88,9 @@ export const en = {
         ],
       ],
     },
-    // 所有者が 2026-11-21 23:48 JST に承認した文(consent-version)。{date} は適用の日。
+    // 所有者が 2026-11-21 23:48 JST に承認した文(consent-version)。本文(段落)は辞書に持たず、DB の `notice_en` から `agreement_state()` が返す。
     consentNotice: {
       title: 'Policy update',
-      body1: 'We updated the Privacy Policy on {date}.',
-      body2: 'To let you choose a language, we added an explanation of the language cookie and revised the explanation of the record of agreement.',
       continue: 'Continue',
       declineLogout: 'Log out without agreeing',
     },
@@ -139,11 +137,56 @@ export const en = {
       panelWebsite: 'Website',
       enterpriseFetchFail: 'Couldn’t load the details.',
     },
+    // 英語の画面の日本語の店名の札と、押した後の文(所有者の決定 2026-11-25 15:47・15:53・harema#219)。
+    japaneseName: {
+      show: 'Show name in Japanese',
+      none: 'No Japanese name.',
+      same: 'Same as the name above.',
+      failed: 'Couldn’t load the Japanese name.',
+    },
     savedList: {
       title: 'Saved places',
       backToMap: 'Back to map',
       empty: 'No saved places yet.',
       detailsUnavailable: 'Couldn’t load this place’s info.',
+    },
+    // リストの画面(仮の決定・所有者の再確認待ち・harema#152)。
+    lists: {
+      filterAll: 'All',
+      filterLabel: 'Filter by list',
+      empty: 'No matching places.',
+      select: 'Select',
+      selectedCount: '{count} selected',
+      // 「選ぶ」で上限(LIST_BULK_MAX)まで選んだ後に、もう 1 件を押した時の知らせ(失敗の知らせの器)。文言は案(所有者の文言の問いで確定する)。
+      bulkLimit: 'You can select up to {count} places at a time.',
+      bulkAdd: 'Add to list',
+      bulkRemove: 'Remove from list',
+      pickAddTitle: 'Add to which list?',
+      bulkStatus: 'Change status',
+      statusPickTitle: 'Choose a status',
+      statusCurrent: 'Current',
+      bulkDeleteConfirmTitle: 'Delete selected places?',
+      bulkDeleteConfirmBody: 'Selected places ({count}) will be removed from your saved places. Notes, status, and source will be erased and can’t be restored.',
+      toastAdded: 'Added to list.',
+      toastRemoved: 'Removed from list.',
+      toastErrorBody: 'Couldn’t update the list.',
+      toastErrorTail: 'Please wait a moment and try again.',
+      label: 'List',
+      nameSeparator: ', ',
+      pickTitle: 'Choose lists',
+      pickConfirm: 'Done',
+      newList: 'New list',
+      editTitle: 'Edit lists',
+      nameLabel: 'Name',
+      namePlaceholder: 'e.g. Ramen',
+      nameHelp: '1–15 characters. Spaces at the start and end are removed.',
+      iconLabel: 'Icon',
+      iconHelp: 'One character. Emoji, letters, and numbers are allowed.',
+      iconError: 'Enter one character.',
+      create: 'Create',
+      deleteConfirmTitle: 'Delete this list?',
+      deleteConfirmBody: '“{name}” will be deleted and can’t be restored. The places in it stay in your saved places.',
+      limit: 'You can have up to 3 lists.',
     },
     map: {
       searchPlaceholder: 'Search by name or area',
@@ -187,6 +230,10 @@ export const en = {
     drawer: {
       // 所有者の決定 2026-11-22 00:12 JST・harema#150: ja と同じ「言語 / Language」(どちらの言語の画面でも同じ字)。日本語の字が入るので、辞書のテストの除外に名指ししてある。
       itemLanguage: '言語 / Language',
+      // 言語の行を押すと出す知らせ(harema#150)。文は仮(所有者の決定カードの答え待ち)。副ボタンは `web.common.cancel`。
+      languageDialogTitle: 'Change language',
+      languageDialogBody: ['When you change the language in Settings, hareMa closes.', 'Open it again to see the new language.'],
+      languageDialogOpen: 'Open Settings',
     },
     login: {
       sessionExpired: 'You were logged out.',

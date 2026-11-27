@@ -680,11 +680,11 @@ export type LoginDeps = {
   /**
    * 本文の `agreed` がログインの画面を経た目印(`true`)か。route が shared の Zod(`agreedMarkSchema`)で確かめた結果を返す
    * (core は import を持たないので依存として受ける)。`recordAgreement` と両方が渡されたときだけ記録する。
-   * 同意した番号は本文に載らない。番号も日時も DB の `record_agreement()` が決める。
+   * 同意した番号は本文に載らない。番号も日時も DB の `agree_current()` が決める。
    */
   parseAgreed?: (value: unknown) => boolean
   /**
-   * 検証済みの ID トークンで同意を記録する口(DB の `record_agreement()`・引数なし)。投げても・返らなくても受付は成功のまま
+   * 検証済みの ID トークンで同意を記録する口(DB の `agree_current()`・引数なし)。投げても・返らなくても受付は成功のまま
    * (`agreementTimeoutMs` で打ち切る)。戻りは `recorded`・`already`・`skipped` だけを通し、ほかの値は `failed` に倒す。
    */
   recordAgreement?: (idToken: string) => Promise<unknown>

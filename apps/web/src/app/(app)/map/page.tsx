@@ -2,11 +2,18 @@ import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { SAVED_PLACE_STATUSES, type SavedPlaceStatus } from '@harema/shared/constants'
 import { refreshStalePlaces } from '@/lib/places/refresh-stale'
-import { isConsentNoticeDue } from '@/lib/auth/consent-notice'
+import { getLocale } from 'next-intl/server'
+import { noticeParagraphs } from '@harema/shared/validations'
+import { matchLocale } from '@harema/shared/i18n'
+import { noticeNewsItem, newsText } from '@/app/_public/news'
+import { requestTime } from '@/app/_public/request-time'
+import { readAgreementState } from '@/lib/auth/consent-notice'
 import { localeCookieWritable } from '@/i18n/locale-cookie'
 import { createUserSupabase, getVerifiedUser } from '@/lib/auth/session'
+import { readLists } from '@/lib/lists/list-read'
 import type { AccountSnapshot } from '@/app/account/drawer'
 import { MapScreen } from '@/app/map/map-screen'
+import type { ConsentNoticeContent } from '@/app/map/consent-notice-dialog'
 import type { SavedPlaceMarker } from '@/app/map/types'
 
 // もういい(no_thanks)は地図に出さない(spec §7)。表示する状態は生成 enum から導出し、
@@ -53,13 +60,21 @@ export default async function MapPage() {
   const { data: rows, error } = await supabase
     .from('saved_places')
     .select(
-      'id, status, places(google_place_id, latitude, longitude, cached_at)',
+      'id, status, places(google_place_id, latitude, longitude, cached_at), list_places(list_id)',
     )
     .in('status', MAP_VISIBLE_STATUSES)
   // 取得失敗を「保存 0 件の正常画面」に化けさせない。error boundary に拾わせる。
   if (error) {
     throw error
   }
+
+  // 同意の状態(DB の agreement_state())。リストは、ポリシー 4 回目の改定に同意した人(listsOpen)にだけ読む・出す。
+  // 判定の失敗は閉じる側(お知らせを出さず・リストを開かない)。
+  const agreement = await readAgreementState(supabase)
+  const listsOpen = agreement.listsOpen
+
+  // 自分のリストの全行(失敗は投げる)。リストの絞りの札とピンのアイコンに使う。閉じている間は読まない。
+  const lists = listsOpen ? await readLists(supabase) : []
 
   // 29 日を超えた(座標が消えた)行の取り直しは、応答を送出した後に走らせる(spec §4.3)。
   // その行はピンにせず、更新結果は次回の表示に出る。cookies() は getVerifiedUser() と createUserSupabase() が上で読み終えて
@@ -84,18 +99,32 @@ export default async function MapPage() {
         status: row.status,
         latitude: place.latitude,
         longitude: place.longitude,
+        listIds: listsOpen ? row.list_places.map((entry) => entry.list_id) : [],
       },
     ]
   })
 
-  // 改定のお知らせ: 見ていないお知らせ付き(DB の notice)の改定が適用済みの人だけ(DB の current_agreement() の notice_due)。適用の前は出ない。判定の失敗は「出さない」(地図を使えなくしない)。
-  const consentNoticeDue = await isConsentNoticeDue(supabase)
+  // 改定のお知らせ: 見ていないお知らせ付き(DB の notice)の改定が適用済みの人だけ。文は DB の行(表示言語の段落・{date} は適用の日で埋めた物)。
+  // 適用の前は出ない。判定の失敗・文が無い時は「出さない」(地図を使えなくしない)。
+  // 枠の文は、その改定の LP の更新情報の 1 件(news.ts の `notice` が適用の日と同じ件)を、LP と同じ切り替え(`newsText`)で選ぶ。
+  // 件が無い時は枠を出さない(日付の文だけ)。時計は requestTime() だけが読む(request-time.ts)。
+  let consentNotice: ConsentNoticeContent | null = null
+  if (agreement.notice !== null) {
+    const locale = await getLocale()
+    const item = noticeNewsItem(agreement.notice.effectiveOn)
+    consentNotice = {
+      paragraphs: noticeParagraphs(agreement.notice, locale),
+      news: item === null ? null : newsText(item, matchLocale([locale]), await requestTime()),
+    }
+  }
 
   return (
     <MapScreen
       savedPlaces={savedPlaces}
       account={account}
-      consentNoticeDue={consentNoticeDue}
+      lists={lists}
+      listsOpen={listsOpen}
+      consentNotice={consentNotice}
       languageSwitch={localeCookieWritable()}
     />
   )

@@ -3,14 +3,21 @@
 import { useState } from 'react'
 import { unstable_rethrow } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { LEGAL_NOTICE_EFFECTIVE_ON } from '@harema/shared/constants'
 import { legalPath, matchLocale } from '@harema/shared/i18n'
 import { asLines } from '@/i18n/lines'
 import { clearLpNotice, markLpNotice } from '@/lib/lp-notice'
 import { signOut } from '../account/actions'
 import { ActionError } from '../_auth-ui/action-error'
 import { JpText } from '../_ui/jp-text'
+import { NewsSentence } from '../_public/news-sentence'
 import { agreeToCurrentRevision } from './consent-actions'
+import { NoticeNewsBox } from './notice-news-box'
+
+/** 改定のお知らせの中身。`paragraphs` = 日付の文(DB の行)、`news` = 枠に出す LP の更新情報の 1 件の題と文(件が無い時は null = 枠なし)。 */
+export type ConsentNoticeContent = {
+  paragraphs: readonly string[]
+  news: { title: string; texts: readonly string[] } | null
+}
 
 /**
  * 改定のお知らせ(地図を開いた時・見ていないお知らせ付きの改定が適用済みの人だけ。判定は地図のガード map の page.tsx)。
@@ -20,7 +27,14 @@ import { agreeToCurrentRevision } from './consent-actions'
  * 「同意しないでログアウト」= 今のログアウトと同じ動き(account/drawer.tsx の handleLogout)。
  * 「開いているときだけ mount される」前提。
  */
-export function ConsentNoticeDialog({ onAgreed }: { onAgreed: () => void }) {
+export function ConsentNoticeDialog({
+  notice,
+  onAgreed,
+}: {
+  /** 本文の段落(表示言語・日付は埋めた物。DB の agreement_state() の文)と、枠の件の文(news.ts)。サーバが渡す。 */
+  notice: ConsentNoticeContent
+  onAgreed: () => void
+}) {
   const t = useTranslations('web.consentNotice')
   const login = useTranslations('web.login')
   const common = useTranslations('web.common')
@@ -93,13 +107,24 @@ export function ConsentNoticeDialog({ onAgreed }: { onAgreed: () => void }) {
           {t('title')}
         </h3>
         <div id="consent-notice-body">
-          <p className="qs-dlg-b">
-            <JpText text={t('body1', { date: LEGAL_NOTICE_EFFECTIVE_ON })} />
-          </p>
-          <p className="qs-dlg-b">
-            <JpText text={t('body2')} />
-          </p>
+          {notice.paragraphs.map((text, index) => (
+            <p key={index} className="qs-dlg-b">
+              <JpText text={text} />
+            </p>
+          ))}
         </div>
+        {/* 改定の中身(LP の更新情報の、その改定の 1 件の文だけ)。説明(aria-describedby)の外に置く: 器を開いた時に全文を読み上げない。 */}
+        {notice.news !== null && (
+          <NoticeNewsBox title={notice.news.title}>
+            <ul className="news-ul news-t">
+              {notice.news.texts.map((text) => (
+                <li key={text}>
+                  <NewsSentence text={text} locale={locale} />
+                </li>
+              ))}
+            </ul>
+          </NoticeNewsBox>
+        )}
         {/* ログイン画面の 1 つ目の同意と同じ文・同じリンク。開いた先で地図の位置を残すため、新しいタブで開く(ドロワーの規約のリンクと同じ)。 */}
         <label className="qs-cr" style={{ marginTop: 8 }}>
           <input

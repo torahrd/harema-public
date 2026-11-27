@@ -23,6 +23,10 @@ function checked(re, fixture, label) {
   return re
 }
 
+// 件の文は、元の文と、適用の日時から出す文(after)の両方を検査の対象にする(0 時からの文が検査の外に出ない)
+const allJa = (item) => [...item.texts, ...(item.after?.texts ?? [])]
+const allEn = (item) => [...item.en.texts, ...(item.after?.en.texts ?? [])]
+
 describe('更新情報', () => {
   it('件は新しい順に並ぶ', () => {
     assert.ok(NEWS.length >= LP_NEWS_COUNT)
@@ -47,7 +51,7 @@ describe('更新情報', () => {
   it('説明は 1 文ずつで、句は印「/」の位置だけで切れる', () => {
     for (const item of NEWS) {
       assert.ok(item.texts.length > 0)
-      for (const text of item.texts) {
+      for (const text of allJa(item)) {
         assert.equal(text.split('。').length, 2, `「。」が末尾の 1 つだけでない: ${text}`)
         assert.ok(text.endsWith('。'), text)
         const phrases = newsPhrases(text)
@@ -66,8 +70,9 @@ describe('更新情報', () => {
   })
 
   it('LP は先頭の LP_NEWS_COUNT 件・/news は全件を、news.ts から読む', () => {
-    const sliceRe = checked(/NEWS\s*\.\s*slice\(\s*0\s*,\s*LP_NEWS_COUNT\s*\)/, 'NEWS.slice(0, LP_NEWS_COUNT).map((item) =>', 'slice')
-    const mapRe = checked(/NEWS\s*\.\s*map\(/, '<ol className="news-list">{NEWS.map((item) =>', 'map')
+    // 先に公開しておく件(from)を除くため、NEWS を直に並べず visibleNews(now) から読む
+    const sliceRe = checked(/visibleNews\(now\)\s*\.\s*slice\(\s*0\s*,\s*LP_NEWS_COUNT\s*\)/, 'visibleNews(now).slice(0, LP_NEWS_COUNT).map((item) =>', 'slice')
+    const mapRe = checked(/visibleNews\(now\)\s*\.\s*map\(/, '<ol className="news-list">{visibleNews(now).map((item) =>', 'map')
     // 本体は PR4 で _public/home-view.tsx・_public/document-view.tsx に移り、(site) と en の頁が言語を引数にして呼ぶ。
     assert.match(read('../../app/_public/home-view.tsx'), sliceRe)
     assert.match(read('../../app/_public/document-view.tsx'), mapRe)
@@ -77,7 +82,7 @@ describe('更新情報', () => {
     for (const f of files) {
       const body = readFileSync(f, 'utf8')
       for (const item of NEWS) {
-        for (const text of item.texts) assert.ok(!body.includes(newsPlain(text)) && !body.includes(text), `${f} に件の text が直書きされている: ${text}`)
+        for (const text of allJa(item)) assert.ok(!body.includes(newsPlain(text)) && !body.includes(text), `${f} に件の text が直書きされている: ${text}`)
       }
     }
   })
@@ -112,7 +117,8 @@ describe('更新情報', () => {
     for (const item of NEWS) {
       assert.ok(item.en && item.en.title.length > 0, `${item.date} に en.title が無い`)
       assert.equal(item.en.texts.length, item.texts.length, `${item.date} ${item.title}: 英語の文の数が日本語と違う`)
-      for (const text of item.en.texts) {
+      if (item.after) assert.equal(item.after.en.texts.length, item.after.texts.length, `${item.date} ${item.title}: after の英語の文の数が日本語と違う`)
+      for (const text of allEn(item)) {
         assert.ok(text.length > 0)
         assert.ok(text.endsWith('.'), `英語の文が「.」で終わらない: ${text}`)
         assert.ok(!text.includes('/'), `英語の文に「/」の印がある: ${text}`)
@@ -127,7 +133,33 @@ describe('更新情報', () => {
     const files = sourceFiles(SRC).filter((p) => !p.endsWith(join('_public', 'news.ts')) && !p.endsWith(join('_public', 'legal.ts')))
     for (const f of files) {
       const body = readFileSync(f, 'utf8')
-      for (const item of NEWS) for (const text of item.en.texts) assert.ok(!body.includes(text), `${f} に英語の件の text が直書きされている: ${text}`)
+      for (const item of NEWS) for (const text of allEn(item)) assert.ok(!body.includes(text), `${f} に英語の件の text が直書きされている: ${text}`)
     }
+  })
+})
+
+// 先に公開しておく件(from)は、その日時より前は LP と /news に出ない(2026-11-29 0 時のリストの件)
+describe('更新情報の出す時刻(from)', async () => {
+  const { visibleNews } = await import('../../app/_public/news.ts')
+  it('from の 1 ミリ秒前は出さず、from の瞬間から出す', () => {
+    const items = NEWS.filter((n) => n.from !== undefined)
+    assert.ok(items.length >= 1)
+    for (const item of items) {
+      const at = Date.parse(item.from)
+      assert.ok(Number.isFinite(at), item.from)
+      assert.ok(!visibleNews(at - 1).includes(item), `${item.date} が from の前に出る`)
+      assert.ok(visibleNews(at).includes(item), `${item.date} が from の瞬間に出ない`)
+    }
+  })
+  it('リストの件は門の日時(2026-11-29 0 時 JST)から出す', () => {
+    const item = NEWS.find((n) => n.date === '2026.11.29')
+    assert.equal(item?.from, '2026-11-28T15:00:00Z')
+  })
+  it('LP と /news は visibleNews から読む(NEWS を直に並べない)', () => {
+    const home = read('../../app/_public/home-view.tsx')
+    const doc = read('../../app/_public/document-view.tsx')
+    assert.match(home, /visibleNews\(now\)\.slice\(0, LP_NEWS_COUNT\)/)
+    assert.match(doc, /visibleNews\(now\)\.map\(/)
+    assert.doesNotMatch(home + doc, /NEWS\.(slice|map)\(/)
   })
 })

@@ -56,7 +56,7 @@ describe('T4 英語の辞書に抜けが無い', () => {
 
   it('ja の値には日本語の文字がある(英語の文を ja に置いていない)。言語によらない物だけ除く', () => {
     // 言語によらない値(事業者・ブランドの語)だけ、日本語の文字が無くてよい。
-    const neutral = new Set(['web.placeDetail.panelWebsite', 'web.login.noteMark'])
+    const neutral = new Set(['web.placeDetail.panelWebsite', 'web.login.noteMark', 'web.lists.nameSeparator'])
     for (const [k, v] of jaFlat) {
       if (neutral.has(k)) continue
       assert.ok(JA_CHAR.test(v), `ja の ${k} に日本語の文字が無い: ${v}`)

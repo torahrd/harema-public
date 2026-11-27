@@ -11,12 +11,17 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { googleMapsHref, type SavedPlaceStatus } from '@harema/shared/constants'
+import { countryCodeOf } from '@harema/shared/ja-name'
 import { FullViewportShell } from '@/app/full-viewport-shell'
 import type { DetailBack } from '@/app/map/detail-origin'
 import { MapToast } from '@/app/map/map-toast'
+import type { ListItem } from '@/app/lists/types'
+import { listsOfPlace } from '@/lib/lists/list-selection'
+import { JapaneseNameSlot } from '@/app/map/japanese-name-slot'
 import { PlaceDetailsDisclosure } from '@/app/map/place-details-disclosure'
-import { SaveSheet } from '@/app/map/save-sheet'
-import type { MapLaunchContext } from '@/app/map/types'
+import { SaveSheet, type SaveListOutcome } from '@/app/map/save-sheet'
+import { useJapaneseName } from '@/app/map/use-japanese-name'
+import type { MapLaunchContext, MapToastVariant } from '@/app/map/types'
 import { GoogleAttribution } from '@/app/saved/google-attribution'
 import type { PlaceDisplay } from '@/app/saved/types'
 import { clientEnv } from '@/env/client'
@@ -35,9 +40,15 @@ export type PlaceDetailData = {
   sourceTitle: string | null
   googlePlaceId: string
   location: { lat: number; lng: number } | null
+  /** その店が入っているリストの id。 */
+  listIds: string[]
 }
 
 type PlaceDetailScreenProps = {
+  /** 自分のリストの全行(入っているリストの札と、保存のシートの「リスト」の行に使う)。 */
+  lists: ListItem[]
+  /** リストを開いてよいか(ポリシー 4 回目の改定に同意した人だけ真)。偽の間、リストの行・保存のシートの「リスト」の行を描かない。 */
+  listsOpen: boolean
   /** 戻るの行き先と読み上げ名(地図から開いたときだけ地図。`detailBack`)。 */
   back: DetailBack
   data: PlaceDetailData
@@ -57,23 +68,27 @@ const TOAST_VISIBLE_MS = 4000
  * 一覧・地図と同じ形で中身を分けて包む。**地図コンポーネントそのものは描かない**(起動するのは
  * Places ライブラリの解決だけで、地図インスタンスの生成契機は無い)。
  */
-export function PlaceDetailScreen({ data, back }: PlaceDetailScreenProps) {
+export function PlaceDetailScreen({ data, back, lists, listsOpen }: PlaceDetailScreenProps) {
   // 地図の SDK の言語は表示言語に合わせる(店名・住所・営業時間の言語)。region は国の書式と順位の指定なので JP のまま。
   const locale = useLocale()
   return (
     <APIProvider apiKey={clientEnv.googleMapsApiKey} language={locale} region="JP">
-      <PlaceDetailView data={data} back={back} />
+      <PlaceDetailView data={data} back={back} lists={lists} listsOpen={listsOpen} />
     </APIProvider>
   )
 }
 
-function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
+function PlaceDetailView({ data, back, lists, listsOpen }: PlaceDetailScreenProps) {
   const t = useTranslations('web.placeDetail')
   const tWeb = useTranslations('web')
   const statusNames = useTranslations('savedPlaceStatus')
   const places = useMapsLibrary('places')
   const apiStatus = useApiLoadingStatus()
   const [display, setDisplay] = useState<PlaceDisplay | undefined>(undefined)
+  // 1 回目の店名の言語(Google が返した値。返らない時は null)と店の国(`addressComponents` の国の部品。分からない時は null)。
+  // 英語の画面で日本語の店名の札を置くかの判断に使う(`useJapaneseName`)。表示用で、保存も送信もしない。
+  const [displayNameLanguageCode, setDisplayNameLanguageCode] = useState<string | null>(null)
+  const [countryCode, setCountryCode] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
   // 1 マウントにつき 1 回だけ発火させるガード(StrictMode の二重実行対策。一覧・地図の
   // 同種のガードと同じ層)。
@@ -86,6 +101,20 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   const mapsFailed = apiStatus === APILoadingStatus.FAILED
   const effectiveFailed = failed || mapsFailed
 
+  // 英語の画面の日本語の店名の札(harema#219)。1 回目の店名・住所・国が取れてから、日本にある店で名前が日本語でない店だけ札を置く
+  // (日本語の画面・海外の店・国が分からない店・名前が日本語の店は札なし)。取るのは札を押した時だけ。一覧・「Google マップで開く」には使わない。
+  const japaneseName = useJapaneseName(
+    places,
+    display === undefined
+      ? null
+      : {
+          googlePlaceId: data.googlePlaceId,
+          displayName: display.displayName,
+          displayNameLanguageCode,
+          countryCode,
+        },
+  )
+
   useEffect(() => {
     if (places === null) return
     if (startedRef.current) return
@@ -93,11 +122,14 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
     let cancelled = false
     void (async () => {
       try {
-        // 即時マスクはこの 2 つだけ(確定事項 2026-08-24。一覧の可視行キャッシュ済みマスクと
-        // 揃う)。配列リテラルで直書きする(変数へ逃がすと静的に読めなくなる)。
+        // 即時マスクは一覧の可視行キャッシュ済みマスクと揃う(確定事項 2026-08-24。当時は displayName と
+        // formattedAddress の 2 つだけ)。2026-11-25 に、国を見分けるため `addressComponents`(Essentials・帯は変わらない)を
+        // 足した。一覧と同じ mask のまま(詳細は一覧と同じキャッシュの項目を使うので、足さないと一覧から開くたびに取り直す)。
+        // 所有者の決定 2026-11-25・harema#219。配列リテラルで直書きする(変数へ逃がすと静的に読めなくなる)。
         const place = await getPlaceDetails(places, data.googlePlaceId, [
           'displayName',
           'formattedAddress',
+          'addressComponents',
         ])
         if (cancelled) return
         const { displayName, formattedAddress } = place
@@ -105,6 +137,8 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
           setFailed(true)
           return
         }
+        setDisplayNameLanguageCode(place.displayNameLanguageCode ?? null)
+        setCountryCode(countryCodeOf(place.addressComponents))
         setDisplay({ displayName, formattedAddress })
       } catch {
         // 握り潰しではない —— 失敗はこの画面の確定文言として出る。自動リトライしない。
@@ -129,6 +163,8 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   const sourceLabel =
     data.sourceTitle && data.sourceTitle.length > 0 ? data.sourceTitle : data.sourceText
   const statusLabel = statusNames(data.status)
+  const tLists = useTranslations('web.lists')
+  const placeLists = listsOfPlace(data.listIds, lists)
   const badge = badgeAppearance(data.status)
 
   // 「編集する」が開く先(design D-1 注記「編集は S1 シートへ」)。S1(save-sheet.tsx)は
@@ -148,6 +184,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   // 更新後トースト(design 面 7)。既存 map-toast.tsx を改変せず再利用する(C-D6・WP-10 S9)。
   // 削除にはトーストを出さない(確定事項 §12-⑧-4)—— /saved へ遷移するので通知の必要がない。
   const [updateToastShown, setUpdateToastShown] = useState(false)
+  const [updateToastVariant, setUpdateToastVariant] = useState<MapToastVariant>('save-updated')
   const [updateToastVisible, setUpdateToastVisible] = useState(false)
   const updateToastExitTimerRef = useRef<number | null>(null)
 
@@ -191,13 +228,18 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
   // の型が `'deleted'` を含む契約である以上その分岐を欠くと不能な組合せを暗黙に作ることになる、
   // (2) 万一 `SaveSheet` 側の配線が将来変わっても、ここが安全側(/saved へ倒す)のまま残って
   // ほしい、(3) 消しても得るものが無い(無コストの安全網)。
-  const handleSaved = (mode: 'created' | 'updated' | 'deleted') => {
+  const handleSaved = (
+    mode: 'created' | 'updated' | 'deleted',
+    listOutcome: SaveListOutcome,
+  ) => {
     setEditOpen(false)
     if (mode === 'deleted') {
       router.replace('/saved')
       return
     }
     router.refresh()
+    // リストの入れ替えが落ちた時は、更新の知らせの代わりに失敗の知らせを出す。
+    setUpdateToastVariant(listOutcome.listError ? 'list-error' : 'save-updated')
     setUpdateToastVisible(false)
     setUpdateToastShown(true)
   }
@@ -257,7 +299,7 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
           }}
         >
           <MapToast
-            variant="save-updated"
+            variant={updateToastVariant}
             visible={updateToastVisible}
             onDismiss={dismissUpdateToast}
           />
@@ -319,6 +361,8 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
               >
                 {display.displayName}
               </div>
+              {/* 英語の画面の日本語の店名。英語名 → 札(押すと日本語の店名) → 住所の順で、上の間は住所と同じ */}
+              <JapaneseNameSlot state={japaneseName} onReveal={japaneseName.reveal} marginTop={5} />
               <div
                 style={{
                   ...META,
@@ -363,6 +407,30 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
               </span>
             </span>
           </div>
+
+          {/* 入っているリスト(見るだけ。変えるのは「編集する」から)。入っていない店には段を出さない。 */}
+          {listsOpen && placeLists.length > 0 && (
+            <div data-testid="place-lists" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={CAPTION_STYLE}>{tLists('label')}</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, minWidth: 0 }}>
+                {placeLists.map((list) => (
+                  <span
+                    key={list.id}
+                    style={{
+                      ...META,
+                      color: 'var(--fg-1)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-chip)',
+                      padding: '5px 12px',
+                      overflowWrap: 'anywhere',
+                    }}
+                  >
+                    {list.icon !== null ? `${list.icon} ${list.name}` : list.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {hasMemo && (
             <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 15 }}>
@@ -480,9 +548,12 @@ function PlaceDetailView({ data, back }: PlaceDetailScreenProps) {
           (save-sheet.tsx 自身が絶対配置するので、この外殻の position: fixed が包含ブロックになる)。 */}
       {editOpen && (
         <SaveSheet
+          lists={lists}
+          listsOpen={listsOpen}
           context={editContext}
           onClose={() => setEditOpen(false)}
           onSaved={handleSaved}
+          japaneseName={japaneseName}
           deleteRedirectsToSaved
         />
       )}

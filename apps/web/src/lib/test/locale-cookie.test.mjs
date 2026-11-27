@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { describe, it } from 'node:test'
 import { LOCALE_NAMES } from '@harema/shared/i18n'
-import { LEGAL_EFFECTIVE_AT } from '@harema/shared/constants'
+import { LEGAL_REVISIONS, LOCALE_COOKIE_EFFECTIVE_AT } from '@harema/shared/constants'
 import { LOCALE_COOKIE_NAME, localeCookieAttributes, localeCookieWritable, parseLoginLang, refreshLocaleCookie, resolveLocale } from '../../i18n/locale-cookie.ts'
 import { setLocaleIfAgreed } from '../../i18n/set-locale-core.ts'
 
@@ -54,7 +54,7 @@ describe('T14(1) localeCookieAttributes', () => {
 })
 
 describe('T19 ログインを受け付けた応答で言語の cookie を書く(同意の記録に成功した時だけ・所有者 2026-11-21)', () => {
-  const AFTER = Date.parse(LEGAL_EFFECTIVE_AT) + 1000
+  const AFTER = Date.parse(LOCALE_COOKIE_EFFECTIVE_AT) + 1000
   const run = (value, login, now = AFTER) => {
     const sets = []
     const request = { cookies: { get: (name) => (name === LOCALE_COOKIE_NAME && value !== undefined ? { value } : undefined) } }
@@ -83,7 +83,7 @@ describe('T19 ログインを受け付けた応答で言語の cookie を書く(
     assert.deepEqual(run('', OK), [])
   })
   it('適用の日時より前は何もしない・ちょうどとその後は書く(サーバの時刻)', () => {
-    const at = Date.parse(LEGAL_EFFECTIVE_AT)
+    const at = Date.parse(LOCALE_COOKIE_EFFECTIVE_AT)
     assert.deepEqual(run('en', OK, at - 1), [])
     assert.deepEqual(run('ja', { agreed: true, chosen: 'en' }, 0), [])
     assert.equal(run('en', OK, at).length, 1)
@@ -184,9 +184,11 @@ describe('T21 setLocale: 未ログイン・未同意は書かず、ログイン�
     assert.ok(src.indexOf('store.set(') > src.indexOf('write: async'))
     assert.ok(!read('i18n/set-locale-core.ts').includes("from 'next"))
   })
-  it('hasAgreedToCurrent は DB の current_agreement の agreed だけを見て、失敗は false', () => {
+  it('hasAgreedToCurrent は DB の agreement_state の agreed だけを見て、失敗は false(閉じた状態は agreed 偽)', () => {
     const src = read('lib/auth/consent-notice.ts')
-    assert.match(src, /export async function hasAgreedToCurrent\(client: Client\): Promise<boolean> \{[\s\S]*?row\.agreed === true[\s\S]*?return false/)
+    assert.match(src, /export async function hasAgreedToCurrent\(client: Client\): Promise<boolean> \{\s*return \(await readAgreementState\(client\)\)\.agreed\s*\}/)
+    assert.match(src, /if \(error !== null\) return CLOSED_AGREEMENT_STATE/)
+    assert.match(src, /\} catch \{\s*return CLOSED_AGREEMENT_STATE/)
   })
 })
 
@@ -226,8 +228,8 @@ describe('T22 ログイン画面の言語の切り替えは cookie を書かず�
   })
 })
 
-describe('T20 言語の cookie を書く門(適用の日時 LEGAL_EFFECTIVE_AT・サーバの時刻)', () => {
-  const at = Date.parse(LEGAL_EFFECTIVE_AT)
+describe('T20 言語の cookie を書く門(適用の日時 LOCALE_COOKIE_EFFECTIVE_AT・サーバの時刻)', () => {
+  const at = Date.parse(LOCALE_COOKIE_EFFECTIVE_AT)
   it('前は書けず、ちょうどと後は書ける', () => {
     assert.equal(localeCookieWritable(at - 1), false)
     assert.equal(localeCookieWritable(at), true)
@@ -340,5 +342,27 @@ describe('T18 言語の cookie を書く・読む道が決めた所だけ', () =
   })
   it('自称の名前は定数。ja・en の 2 つ', () => {
     assert.deepEqual(LOCALE_NAMES, { ja: '日本語', en: 'English' })
+  })
+})
+
+describe('T-A9 言語の cookie の門は、最新の改定の適用の日時に引きずられない', () => {
+  const at = Date.parse(LOCALE_COOKIE_EFFECTIVE_AT)
+  it('門の日時はポリシー 3(言語の Cookie の説明を足した改定)の適用の日時と同じ瞬間', () => {
+    const p3 = LEGAL_REVISIONS.privacy.find((r) => r.version === 3)
+    assert.ok(p3, 'ポリシー 3 が一覧に在る')
+    assert.equal(Date.parse(p3.effectiveAt), at)
+  })
+  it('一覧に適用が先の 4 行目を足しても、門はポリシー 3 の適用の日時のまま・今の時刻で書ける(掲示の間も切り替えの部品が消えない)', () => {
+    const withFourth = [...LEGAL_REVISIONS.privacy, { version: 4, revisedOn: '2099.01.01', effectiveAt: '2099-01-01T00:00:00Z', notice: true }]
+    // 門は一覧から作らない: 4 行目を足した一覧の最新の適用の日時は未来だが、門の値は変わらない
+    const latestNotice = withFourth.filter((r) => r.notice).map((r) => Date.parse(r.effectiveAt)).sort((a, b) => b - a)[0]
+    assert.ok(latestNotice > at)
+    assert.equal(Date.parse(LOCALE_COOKIE_EFFECTIVE_AT), at)
+    assert.equal(localeCookieWritable(at + 1), true)
+    assert.equal(localeCookieWritable(Date.parse('2026-11-25T00:00:00Z')), true)
+  })
+  it('門の定数は legal-versions.ts で、一覧(LEGAL_REVISIONS)の行から導かない(固定の値)', () => {
+    const src = readFileSync(new URL('../../../../../packages/shared/constants/legal-versions.ts', import.meta.url), 'utf8')
+    assert.match(src, /export const LOCALE_COOKIE_EFFECTIVE_AT = '2026-11-21T15:00:00Z'/)
   })
 })

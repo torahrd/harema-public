@@ -12,6 +12,8 @@ export type SavedPlaceMarker = {
   status: Exclude<SavedPlaceStatus, 'no_thanks'>
   latitude: number
   longitude: number
+  /** その店が入っているリストの id(ピンのアイコンと絞りに使う)。 */
+  listIds: string[]
 }
 
 /**
@@ -23,6 +25,16 @@ export type SavedPlaceMarker = {
 export type MapLaunchContext = {
   googlePlaceId: string
   displayName: string
+  /**
+   * `displayName` の言語(Google が返した値。返らなければ null か省略)。英語の画面で日本語の店名を取るか
+   * (1 回目の名前が日本語か)の判断に使う。これも表示用で、サーバへ送りも永続化もしない。
+   */
+  displayNameLanguageCode?: string | null
+  /**
+   * 店の国(1 回目の `addressComponents` の国の部品から。大文字 2 字。分からなければ null か省略)。英語の画面で、
+   * 日本にある店だけに「日本語の店名」の札を置くかの判断に使う。これも表示用で、サーバへ送りも永続化もしない(harema#219)。
+   */
+  countryCode?: string | null
   formattedAddress: string
   location: { lat: number; lng: number } | null
 }
@@ -45,4 +57,28 @@ export type SearchErrorVariant = 'suggestions' | 'details'
  * 閉じてトースト」)。成功を新規 / 更新で分けるのは、CTA が「保存する」/「更新する」で分かれて
  * いるのに結果の報せを対応させるため。
  */
-export type MapToastVariant = SearchErrorVariant | 'save-created' | 'save-updated'
+export type MapToastVariant =
+  | SearchErrorVariant
+  | 'save-created'
+  | 'save-updated'
+  | ListToastVariant
+  | BulkErrorToastVariant
+  | BulkLimitToastVariant
+
+/**
+ * リストの知らせ 3 種(入れた・外した・失敗)。今のトーストの器に足した(新しい形のトーストを作らない)。
+ * 失敗は店の保存の知らせの代わりにも出る(保存は通ったが、リストの入れ替えが通らなかった時)。
+ */
+export type ListToastVariant = 'list-added' | 'list-removed' | 'list-error'
+
+/**
+ * 一覧の「選ぶ」の一括の状態の変更・削除が失敗した時の知らせ。今のトーストの失敗の器に、既存の文
+ * (`web.common.errorTryLater`)を入れる。「リストを変更できませんでした。」は状態・削除には事実と違うので使わない。
+ */
+export type BulkErrorToastVariant = 'bulk-error'
+
+/**
+ * 一覧の「選ぶ」で上限(`LIST_BULK_MAX`)まで選んだ後に、もう 1 件を押した時の知らせ。今のトーストの失敗の器(茜の円と「!」)に、
+ * 文 `web.lists.bulkLimit`(尾は無し)を入れる。選びは変えない。単位 lists-filter-carry の受入条件 6。
+ */
+export type BulkLimitToastVariant = 'bulk-limit'

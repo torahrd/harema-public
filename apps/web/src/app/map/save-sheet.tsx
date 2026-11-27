@@ -16,7 +16,13 @@ import {
 } from '@harema/shared/validations'
 import { EXTERNAL_ARROW } from '@/app/places/[id]/place-detail-copy'
 import { sourceChipUrl, sourceLinkLabel } from '@/lib/external-link'
+import { listChoiceForNewPlace, listsOfPlace } from '@/lib/lists/list-selection'
+import { setPlaceLists } from '../lists/list-actions'
+import { ListEditorSheet } from '../lists/list-editor-sheet'
+import { ListSheet } from '../lists/list-sheet'
+import type { ListItem } from '../lists/types'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
+import { JapaneseNameSlot } from './japanese-name-slot'
 import {
   deleteSavedPlace,
   deleteSavedPlaceFromDetail,
@@ -27,8 +33,9 @@ import {
 import { PlaceDetailsDisclosure } from './place-details-disclosure'
 import { initialSheetFields } from './sheet-initial'
 import type { MapLaunchContext } from './types'
+import type { JapaneseNameView } from './use-japanese-name'
 import { useSheetViewport } from './use-sheet-viewport'
-import { LABEL_EN, LABEL_JA, META, heading } from '../text-styles'
+import { BODY, LABEL_EN, LABEL_JA, META, heading } from '../text-styles'
 
 /**
  * S1 保存/編集ボトムシート(design C-1 = 新規 / C-2 = 編集を 1 コンポーネントで)。起動元に
@@ -74,8 +81,24 @@ const NOTE_STYLE: React.CSSProperties = {
   color: 'var(--fg-2)',
 }
 
+/** 保存が通った時に親へ返す、リストの結果。`listIds` は保存の後のその店の所属(入れ替えが落ちた時は保存の前の所属)。 */
+export type SaveListOutcome = { listIds: string[]; listError: boolean }
+
+function sameIds(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id) => b.includes(id))
+}
+
 type SaveSheetProps = {
+  /** 自分のリストの全行(「リスト」の行と、リストを選ぶシートに使う)。 */
+  lists: readonly ListItem[]
+  /** リストを開いてよいか(ポリシー 4 回目の改定に同意した人だけ真)。偽の間は「リスト」の行・リストのシートを描かない。 */
+  listsOpen: boolean
   context: MapLaunchContext
+  /**
+   * 英語の画面の日本語の店名の札(英語名の下・住所の上)の状態と、押す操作。省略 = 何も描かない。シートの中では取らない
+   * (呼び出し元が持つ状態と `reveal` をそのまま渡す。店舗詳細の編集のシートには、詳細が持つ物を渡す。harema#219)。
+   */
+  japaneseName?: JapaneseNameView
   /** 共有から来た出典。新規のときだけ出典の欄に入れる(編集では DB の値を上書きしない)。 */
   initialSourceText?: string | null
   /** 保存せずに閉じた。 */
@@ -84,7 +107,7 @@ type SaveSheetProps = {
    * (WP-10 S9。`deleted` は map-screen.tsx / place-detail-screen.tsx がそれぞれ持つ)。
    * `deleteRedirectsToSaved` が true のときは削除成功時にサーバ側 redirect が先に発火するため、
    * この呼び出しの `'deleted'` 分岐には実務上到達しない(AD-N1 是正)。 */
-  onSaved: (mode: 'created' | 'updated' | 'deleted') => void
+  onSaved: (mode: 'created' | 'updated' | 'deleted', listOutcome: SaveListOutcome) => void
   /** true のとき、削除確定は `deleteSavedPlaceFromDetail`(サーバ側 `redirect('/saved')`)を
    * 呼ぶ。省略時(地図からの起動)は従来どおり `deleteSavedPlace` を呼び、`onSaved('deleted')`
    * 経由で呼び出し元が遷移を決める(AD-N1 是正・WP-10-irregular-ad-n1-2026-08-26 §3.2)。 */
@@ -92,20 +115,30 @@ type SaveSheetProps = {
   /** Places ライブラリ。**省略 = 「詳細情報」の行を出さない。** 地図の画面から開いた S1 だけが渡す(店舗詳細から
    * 開く編集は渡さない)。行を押した時だけ営業時間・電話・website を取る(所有者の決定 2026-11-08・harema#121)。 */
   placesLibrary?: google.maps.PlacesLibrary | null
+  /** 新しい店を保存する時の「リスト」の初期の選び(地図で絞っているリスト)。**省略 = 空。** 地図の画面だけが渡す(店舗詳細の編集は渡さない)。
+   * 保存済みの店の編集と、所属を読めなかった時には入れない。開いた時の値だけを使い、絞りが変わっても解決をやり直さない。 */
+  defaultListId?: string | null
 }
 
 export function SaveSheet({
+  lists,
+  listsOpen,
   context,
+  japaneseName,
   initialSourceText,
   onClose,
   onSaved,
   deleteRedirectsToSaved,
   placesLibrary,
+  defaultListId,
 }: SaveSheetProps) {
   const router = useRouter()
+  // シートを開いた時の絞り。解決の effect の依存に入れず、絞りが変わっても解決をやり直さない。
+  const defaultListIdRef = useRef(defaultListId)
   const t = useTranslations('web.saveSheet')
   const common = useTranslations('web.common')
   const statusNames = useTranslations('savedPlaceStatus')
+  const lt = useTranslations('web.lists')
 
   const [entered, setEntered] = useState(false)
   const [closePending, setClosePending] = useState(false)
@@ -131,6 +164,21 @@ export function SaveSheet({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   /** 削除のサーバ往復中。D5 のボタンとスクリムを塞ぎ、二重送信を防ぐ。 */
   const [deleting, setDeleting] = useState(false)
+
+  /** 保存の前にその店が入っていたリスト(編集で解決した値。新規は空)。 */
+  const [initialListIds, setInitialListIds] = useState<string[]>([])
+  // 今の所属が読めたか。読めていない間は「全部」として送らないよう、リストの行を押せなくする。
+  const [listsKnown, setListsKnown] = useState(false)
+  /** 「リスト」の行に出す選び(リストを選ぶシートで「決定する」を押すまで変わらない)。 */
+  const [listIds, setListIds] = useState<string[]>([])
+  /** リストを選ぶシートの下書き(外側を押して閉じると捨てる)。 */
+  const [pickDraft, setPickDraft] = useState<string[]>([])
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [newListOpen, setNewListOpen] = useState(false)
+  /** このシートの中で作ったリスト(props の `lists` に載るまでの間も選べるように持つ)。 */
+  const [createdLists, setCreatedLists] = useState<ListItem[]>([])
+  const allLists = [...lists, ...createdLists.filter((c) => !lists.some((l) => l.id === c.id))]
+  const listOutcomeRef = useRef<SaveListOutcome>({ listIds: [], listError: false })
 
   const [memoFocused, setMemoFocused] = useState(false)
   const [sourceFocused, setSourceFocused] = useState(false)
@@ -201,9 +249,13 @@ export function SaveSheet({
           setSaveError(true)
           return
         }
+        setListsKnown(true)
+        if (result.mode !== 'edit') setListIds(listChoiceForNewPlace(defaultListIdRef.current))
         const initial = initialSheetFields(result, initialSourceText, UNRATED_STATUS)
         if (result.mode === 'edit') {
           setExistingStatus(initial.existingStatus)
+          setInitialListIds(result.listIds)
+          setListIds(result.listIds)
           setStatus(initial.status)
           setMemo(initial.memo)
           setSourceText(initial.sourceText)
@@ -276,7 +328,7 @@ export function SaveSheet({
     const id = window.setTimeout(() => {
       const outcome = outcomeRef.current
       if (outcome === 'close') onClose()
-      else onSaved(outcome)
+      else onSaved(outcome, listOutcomeRef.current)
     }, EXIT_MS)
     return () => window.clearTimeout(id)
   }, [leaving, onClose, onSaved])
@@ -352,6 +404,20 @@ export function SaveSheet({
     try {
       const result = await savePlace(input)
       if (result.ok) {
+        // 店の保存は通った。リストの選びが開いた時と違う時だけ、入れ替えを送る(落ちても保存は残る。知らせで伝える)。
+        let listError = false
+        if (!sameIds(listIds, initialListIds)) {
+          try {
+            const changed = await setPlaceLists({ googlePlaceId: context.googlePlaceId, listIds })
+            listError = !changed.ok
+          } catch {
+            listError = true
+          }
+        }
+        listOutcomeRef.current = {
+          listIds: listError ? initialListIds : listIds,
+          listError,
+        }
         outcomeRef.current = result.mode
         beginClose()
         return
@@ -366,6 +432,9 @@ export function SaveSheet({
         const again = await resolveSavedPlace(context.googlePlaceId)
         if (again.ok && again.mode === 'edit') {
           setExistingStatus(again.status)
+          setInitialListIds(again.listIds)
+          setListIds((current) => [...new Set([...again.listIds, ...current])])
+          setListsKnown(true)
         }
       }
       setSaveError(true)
@@ -435,6 +504,8 @@ export function SaveSheet({
   }
 
   const showAddress = !keyboardOpen && context.formattedAddress.length > 0
+  // 日本語の店名の行は住所と同じく、キーボードが出ている間は出さない
+  const showJapaneseName = !keyboardOpen && japaneseName !== undefined && japaneseName.phase !== 'hidden'
 
   const fieldStyle = (focused: boolean): React.CSSProperties => ({
     display: 'block',
@@ -530,11 +601,20 @@ export function SaveSheet({
               style={{
                 ...heading(keyboardOpen ? 18 : 20),
                 color: 'var(--fg-1)',
-                ...(showAddress ? null : { marginBottom: 14 }),
+                ...(showJapaneseName || showAddress ? null : { marginBottom: 14 }),
               }}
             >
               {context.displayName}
             </div>
+          )}
+          {/* 英語の画面の日本語の店名の札と結果の行。上の間は住所と同じ(4)。下の間は、住所が続けば 0・続かなければ住所の行と同じ */}
+          {showJapaneseName && (
+            <JapaneseNameSlot
+              state={japaneseName}
+              onReveal={japaneseName.reveal}
+              marginTop={4}
+              marginBottom={showAddress ? 0 : mode === 'create' ? 18 : 14}
+            />
           )}
           {showAddress && (
             <div
@@ -637,6 +717,70 @@ export function SaveSheet({
                 })}
               </div>
               {revertBlocked && <p style={NOTE_STYLE}>{t('statusRevertNote')}</p>}
+
+              {/* 「リスト」の行(状態の下)。押すとリストを選ぶシート。右に入っているリストの名前(1 行・あふれたら …)。 */}
+              {listsOpen && (
+                <button
+                  type="button"
+                  data-testid="list-row"
+                  disabled={busy || !listsKnown}
+                  onClick={() => {
+                    setPickDraft(listIds)
+                    setPickerOpen(true)
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    width: '100%',
+                    marginTop: 16,
+                    background: 'transparent',
+                    border: 0,
+                    borderTop: '1px solid var(--border-subtle)',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    padding: '15px 0',
+                    ...BODY,
+                    color: 'var(--fg-1)',
+                    textAlign: 'left',
+                    cursor: busy || !listsKnown ? 'default' : 'pointer',
+                    // 所属を読めなかった時(押しても開かない)は薄くして、押せないことを見せる。
+                    opacity: !resolving && !listsKnown ? 0.5 : 1,
+                  }}
+                >
+                  <span style={{ flex: 'none' }}>{lt('label')}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    <span
+                      style={{
+                        ...META,
+                        color: 'var(--fg-2)',
+                        minWidth: 0,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {listsOfPlace(listIds, allLists)
+                        .map((list) => (list.icon !== null ? `${list.icon} ${list.name}` : list.name))
+                        .join(lt('nameSeparator'))}
+                    </span>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="var(--fg-2)"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      style={{ flex: 'none' }}
+                    >
+                      <path d="M9 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                </button>
+              )}
 
               <label
                 htmlFor="save-sheet-memo"
@@ -951,6 +1095,35 @@ export function SaveSheet({
           )}
         </div>
       </div>
+
+      {/* リストを選ぶシート(保存のシートの上・スクリム 30 / シート 31)。「決定する」で選びを行へ戻す。外側を押すと下書きを捨てる。 */}
+      {listsOpen && pickerOpen && (
+        <ListSheet
+          zBase={30}
+          mode="check"
+          title={lt('pickTitle')}
+          lists={allLists}
+          checkedIds={pickDraft}
+          onToggle={(id) =>
+            setPickDraft((draft) =>
+              draft.includes(id) ? draft.filter((x) => x !== id) : [...draft, id],
+            )
+          }
+          onConfirm={() => setListIds(pickDraft)}
+          onNew={() => setNewListOpen(true)}
+          onClosed={() => setPickerOpen(false)}
+        />
+      )}
+      {listsOpen && newListOpen && (
+        <ListEditorSheet
+          zBase={40}
+          onCreated={(list) => {
+            setCreatedLists((prev) => [...prev, list])
+            setPickDraft((draft) => [...draft, list.id])
+          }}
+          onClosed={() => setNewListOpen(false)}
+        />
+      )}
 
       {deleteConfirmOpen && (
         <DeleteConfirmDialog

@@ -46,6 +46,8 @@ export function AccountDrawer({
   onAddToHome,
   onDialogChange,
   showLanguageSwitch = true,
+  savedHref = '/saved',
+  listsHref,
 }: {
   open: boolean
   onClose: () => void
@@ -56,11 +58,16 @@ export function AccountDrawer({
   onDialogChange?: (open: boolean) => void
   /** 言語の切り替えの行を出すか。適用の日時より前は偽(サーバの時刻で、地図の頁が決める)。 */
   showLanguageSwitch?: boolean
+  /** 「保存した店」の行き先。地図で絞っているリストを引き継ぐ時は `/saved?list=…`(解決済みの値から組む)。 */
+  savedHref?: string
+  /** 「リスト」の画面(web だけ)の行き先。渡された時だけ項目を出す(ポリシー 4 回目の改定に同意した人)。地図で絞っている時は `/lists?list=…`。 */
+  listsHref?: string
 }) {
   const router = useRouter()
   const t = useTranslations('web.drawer')
   const locale = matchLocale([useLocale()])
   const common = useTranslations('web.common')
+  const listsT = useTranslations('web.lists')
   const [dialog, setDialog] = useState<DialogKind>(null)
   useEffect(() => {
     onDialogChange?.(dialog !== null)
@@ -221,12 +228,23 @@ export function AccountDrawer({
           <button
             type="button"
             disabled={pendingLogout}
-            onClick={() => closeAnd(() => router.push('/saved'))}
+            onClick={() => closeAnd(() => router.push(savedHref))}
             className="qs-it"
           >
             {t('itemSaved')}
             <span className="qs-ar">{'→'}</span>
           </button>
+          {listsHref !== undefined && (
+            <button
+              type="button"
+              disabled={pendingLogout}
+              onClick={() => closeAnd(() => router.push(listsHref))}
+              className="qs-it"
+            >
+              {listsT('label')}
+              <span className="qs-ar">{'→'}</span>
+            </button>
+          )}
           <button
             type="button"
             disabled={pendingLogout}

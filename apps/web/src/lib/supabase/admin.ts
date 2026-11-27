@@ -11,7 +11,8 @@ import type { ResolvedPlace } from '@/lib/places/details'
  *
  * この module の外に出さない。用途は、Place Details で検証した座標の places への書込
  * (`upsertVerifiedPlace`)と、定期の取り直しの対象の取得(`claimPlaceRefreshBatch`・共有の places の
- * google_place_id を返すだけで利用者の ID は返さない)の 2 つだけ。本人の削除は DB の `begin_withdrawal()`・`finish_withdrawal()` と Firebase の
+ * google_place_id を返すだけで利用者の ID は返さない)と、定期実行の成否の 3 つの真偽の読み取り
+ * (`readCronHealth`・引数なし・利用者のデータも識別子も返さない)の 3 つだけ。本人の削除は DB の `begin_withdrawal()`・`finish_withdrawal()` と Firebase の
  * `accounts:delete`(本人の ID トークン)で行い、secret key では行わない。
  */
 function createAdminClient() {
@@ -65,4 +66,15 @@ export async function claimPlaceRefreshBatch(limit: number): Promise<string[]> {
       ? [row.google_place_id]
       : [],
   )
+}
+
+/**
+ * 定期実行の成否の 3 つの真偽(`cron_health()`・refresh_places / cleanup_ogp / purge_coords)の最初の行。
+ * 呼び出しは `app/api/health/cron` だけ。引数は無く、外から来た値は渡さない。エラーは投げる(中身は口が出さない)。
+ */
+export async function readCronHealth(): Promise<unknown> {
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('cron_health')
+  if (error) throw error
+  return data?.[0]
 }

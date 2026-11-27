@@ -926,6 +926,15 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .qs-dlg-h { margin-top: 12px; font: 700 24px/32px var(--qs-sans); letter-spacing: 0.01em; font-feature-settings: 'palt'; color: var(--qs-fg); }
 .qs-dlg-b { margin-top: 12px; font: 400 16px/1.8 var(--qs-sans); letter-spacing: 0.04em; color: var(--qs-fg2); }
 .qs-dlg-b + .qs-dlg-b { margin-top: 8px; }
+/* 改定のお知らせの枠(map/notice-news-box.tsx)。値は承認された図のとおり(2026-11-25 22:56 JST・harema#152 コメント 7164529219)。
+   字は LP の更新情報(.news-ul・.news-t)と同じで、色だけ面の本文色(--qs-fg2)。標準のスクロールバーは隠し、図の印(.qs-nbx-thumb)を重ねる。 */
+.qs-nbx { position: relative; margin-top: 12px; }
+.qs-nbx-in { height: 176px; overflow-y: auto; box-sizing: border-box; padding: 12px 14px; background: var(--qs-panel); border: 1px solid var(--qs-panel-rule); border-radius: var(--radius-control); scrollbar-width: none; }
+.qs-nbx-in::-webkit-scrollbar { display: none; }
+.qs-nbx-in:focus-visible { outline: 2px solid var(--qs-fg); outline-offset: 2px; }
+.qs-nbx-in .news-ul { margin: 0; color: var(--qs-fg2); }
+.qs-nbx-track { position: absolute; inset: 1px; pointer-events: none; }
+.qs-nbx-thumb { position: absolute; right: 3px; width: 3px; border-radius: 2px; background: color-mix(in srgb, var(--qs-fg) 32%, transparent); }
 .qs-dlg-col { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
 .qs-dlg .auth-err { margin-top: 16px; }
 .qs-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; box-sizing: border-box; padding: 0 16px; border-radius: 8px; font: 500 16px/24px var(--qs-sans); letter-spacing: 0.04em; cursor: pointer; flex: none; }
@@ -1094,3 +1103,8 @@ body:has(.qs-page) .edge-tint { background: var(--qs-bg); }
 .news-t .sent { display: block; }
 .news-t .nw { white-space: nowrap; }
 /* WP-12.5: public pages — end */
+
+/* リストの札の列(横に流れる)。スクロールバーを出さない(インラインの style では書けない)。
+   仮の決定(所有者の再確認待ち・harema#152)。 */
+.list-chips-scroll { scrollbar-width: none; -ms-overflow-style: none; overscroll-behavior-x: contain; }
+.list-chips-scroll::-webkit-scrollbar { display: none; }

@@ -228,7 +228,7 @@ select is(
 select is((select count(*)::int from v_public_rel), 7, 'public のリレーションは 7 件(増減したら本テストの期待値を更新する)');
 select is(
   (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace and n.nspname = 'public'),
-  15, 'public の関数は 15 件(増減したら本テストの期待値を更新する)'
+  18, 'public の関数は 18 件(増減したら本テストの期待値を更新する。agreement_state・agree_current を足した)'
 );
 
 -- ===== §7 pg_default_acl(将来オブジェクトの既定)—— per-schema 行と global 行の両方を見る =====

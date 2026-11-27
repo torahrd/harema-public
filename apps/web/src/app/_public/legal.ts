@@ -592,16 +592,8 @@ export const terms: LegalDocument = {
 }
 export const privacy: LegalDocument = {
   "title": "プライバシーポリシー",
-  "revisedOn": "2026.11.22",
+  "revisedOn": "2026.11.29",
   "preamble": [
-    "改定のお知らせ(2026.11.25 掲示)",
-    "2026.11.29 午前 0 時(日本標準時)から、本ポリシーの​第 1 条と第 3 条を​次のとおり改定します。保存した店を​リストに分けられるようにするため、リストと、リストに入れた店を、保存する情報に加えます。",
-    "第 1 条(4)に、次の 2 つの項目を加えます。",
-    "リスト —— 保存した店を​分けるために​本人が作るリストの、リストごとの識別子、アカウントの識別子、名前(30 文字まで)、アイコン(任意で 1 字)、作成・更新日時です。",
-    "リストに入れた店 —— ​どのリストに​どの保存した店を​入れたかの対応と、入れた日時です。",
-    "第 3 条 3 項の、退会のときに削除する情報に、リストと、リストに入れた店を加えます。",
-    "第 3 条 5 項の最後に、次の文を加えます。",
-    "リストは、本人が作成・変更・削除でき、保存した店を​リストに入れたり外したりできます。リストを削除しても、保存した店は削除しません。保存した店を削除すると、その店をリストからも外します。",
     "hareMa(以下「本サービス」)の運営者は、利用者の情報を次のとおり取り扱います。本ポリシーは利用規約の一部です。利用規約は https://harema.app/terms です。ログインでは、Apple・Google・Firebase と通信します。本ポリシーは、この通信や、公開ページの閲覧に伴う情報にも適用します。本ポリシーは、harema.app の web と、スマートフォンのアプリの両方に適用します。web とアプリで取り扱いが異なるところは、「web では」「iOS アプリでは」と書きます。"
   ],
   "articles": [
@@ -764,6 +756,18 @@ export const privacy: LegalDocument = {
                   "label": "作成・更新日時",
                   "sentences": [
                     "保存日の新しい順の表示などに使います。"
+                  ]
+                },
+                {
+                  "label": "リスト",
+                  "sentences": [
+                    "保存した店を分けるために本人が作るリストの、リストごとの識別子、アカウントの識別子、名前(15 文字まで)、アイコン(任意で 1 字)、作成・更新日時です。"
+                  ]
+                },
+                {
+                  "label": "リストに入れた店",
+                  "sentences": [
+                    "どのリストにどの保存した店を入れたかの対応と、入れた日時です。"
                   ]
                 }
               ]
@@ -976,7 +980,7 @@ export const privacy: LegalDocument = {
         {
           "no": 3,
           "sentences": [
-            "退会すると、運営者は、アカウントと、それに紐づくプロフィール・同意記録・保存した店・第 1 条(5)の一時記録・ログアウトの記録をデータベースから速やかに削除し、Firebase のアカウントも削除します。退会の手続は、ログインに使った Apple または Google のアカウントでの再認証を経て行い、Apple のアカウントの場合は、本サービスが Apple のトークンの取り消しも行います。削除は取り消せず、利用者の求めに応じて復元できません。外国にある第三者への提供についての法令が求める第三者提供記録は、これらとは別に、法令に定める期間保存します。運営者は、この記録の体制(要件を満たす代替の記録による場合を含みます)を整えてから、対象となる提供を開始します。"
+            "退会すると、運営者は、アカウントと、それに紐づくプロフィール・同意記録・保存した店・リスト・リストに入れた店・第 1 条(5)の一時記録・ログアウトの記録をデータベースから速やかに削除し、Firebase のアカウントも削除します。退会の手続は、ログインに使った Apple または Google のアカウントでの再認証を経て行い、Apple のアカウントの場合は、本サービスが Apple のトークンの取り消しも行います。削除は取り消せず、利用者の求めに応じて復元できません。外国にある第三者への提供についての法令が求める第三者提供記録は、これらとは別に、法令に定める期間保存します。運営者は、この記録の体制(要件を満たす代替の記録による場合を含みます)を整えてから、対象となる提供を開始します。"
           ],
           "items": [],
           "blocks": []
@@ -992,7 +996,7 @@ export const privacy: LegalDocument = {
         {
           "no": 5,
           "sentences": [
-            "保存した店は、本人が 1 件ずつ削除できます。"
+            "保存した店は、本人が 1 件ずつ削除できます。リストは、本人が作成・変更・削除でき、保存した店をリストに入れたり外したりできます。リストを削除しても、保存した店は削除しません。保存した店を削除すると、その店をリストからも外します。"
           ],
           "items": [],
           "blocks": []
@@ -2374,13 +2378,2405 @@ export const termsEn: LegalDocument = {
 }
 export const privacyEn: LegalDocument = {
   "title": "Privacy Policy",
+  "revisedOn": "2026.11.29",
+  "preamble": [
+    "This is an English translation for reference. The Japanese version is the official version, and if there is any inconsistency between the two, the Japanese version prevails.",
+    "The Operator of hareMa (the “Service”) handles users’ information as follows. This Policy is part of the Terms of Use. See the Terms of Use (https://harema.app/en/terms). When users log in, the Service communicates with Apple, Google, and Firebase. This Policy also applies to this communication and to information that arises when public pages are viewed. This Policy applies to both the web version at harema.app and the smartphone app. Where handling differs between the web and the app, this Policy says “on the web” or “in the iOS app”."
+  ],
+  "articles": [
+    {
+      "no": 1,
+      "heading": "Information Obtained and Stored",
+      "paragraphs": [
+        {
+          "sentences": [
+            "The Service’s database stores the following information. In addition, the shared data about the places themselves stores Google’s place identifier, latitude and longitude, and the date and time of retrieval. This record has no user identifier; the link between a user and a place is stored in (4). Place names, addresses, types, business hours, phone numbers, and websites are not stored in this database."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "heading": "(1) Account information",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Account identifier",
+                  "sentences": [
+                    "A code issued for each user by Firebase Authentication, which is used for login (the Firebase uid)."
+                  ]
+                },
+                {
+                  "label": "Pre-consent registration record",
+                  "sentences": [
+                    "The identifier in (1), the creation date and time, a deletion-in-progress marker, and the versions of the Terms of Use and this Policy agreed to at a login before the registration process is complete, with the date and time of that agreement. This is the record kept from login until the registration of a username and agreement to the Terms of Use are complete; the creation date and time are also used to decide whether to delete accounts whose registration is not completed."
+                  ]
+                },
+                {
+                  "label": "Logout record",
+                  "sentences": [
+                    "To make the login that was logged out unusable again, the identifier in (1), the time of that login, and the date and time of logout are recorded. This does not affect logins on the same user’s other devices."
+                  ]
+                },
+                {
+                  "label": "Account invalidation record",
+                  "sentences": [
+                    "To make all logins unusable for accounts that were deleted by account deletion or whose registration was canceled, and for accounts deleted automatically under Article 3, paragraph 2, the identifier in (1) and a time are recorded."
+                  ]
+                },
+                {
+                  "label": "Account deletion marker",
+                  "sentences": [
+                    "The identifier in (1) and a time, showing that account deletion or cancellation of registration is in progress."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(2) Profile",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Link to the account",
+                  "sentences": [
+                    "Uses the identifier in (1)."
+                  ]
+                },
+                {
+                  "label": "Username",
+                  "sentences": [
+                    "1 to 15 characters. Duplicates are allowed, and it is not shown to other users."
+                  ]
+                },
+                {
+                  "label": "Display language",
+                  "sentences": [
+                    "Japanese and English are supported. The Service is displayed to match the language of the device or browser. You can also choose the language on the screen."
+                  ]
+                },
+                {
+                  "sentences": [
+                    "Creation and update date and time."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(3) Record of agreement to the Terms of Use",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Account that agreed",
+                  "sentences": [
+                    "The identifier in (1)."
+                  ]
+                },
+                {
+                  "label": "Date and time of agreement",
+                  "sentences": [
+                    "The database-side time is recorded; the user’s device time and input values are not used."
+                  ]
+                },
+                {
+                  "sentences": [
+                    "Record creation date and time."
+                  ]
+                },
+                {
+                  "label": "Agreed versions",
+                  "sentences": [
+                    "The versions of the Terms of Use and this Policy at the time of agreement, and the date and time of that agreement. Each document has its own sequential version number, which moves to the next number with each revision and corresponds one-to-one with the last revised date. When you agree to a new revision, the versions and the date and time are overwritten. At a login before the registration process is complete, they are recorded in the pre-consent registration record and copied here when registration is complete. If the pre-consent registration record has no versions, the versions in effect at that login and the date and time of that login are recorded when registration is complete."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(4) Saved places",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Link between user and place",
+                  "sentences": [
+                    "An identifier for each saved item, the account identifier, and the place identifier."
+                  ]
+                },
+                {
+                  "label": "Status",
+                  "sentences": [
+                    "One of “Want to go”, “Would go back”, or “Not for me”."
+                  ]
+                },
+                {
+                  "label": "Notes",
+                  "sentences": [
+                    "Optional input of up to 500 characters. What is entered is saved."
+                  ]
+                },
+                {
+                  "label": "Source",
+                  "sentences": [
+                    "Optional text or URL of up to 1,000 characters. If the title of the page could be obtained from the URL, that title is also saved, up to 200 characters."
+                  ]
+                },
+                {
+                  "label": "Creation and update date and time",
+                  "sentences": [
+                    "Used for display in order of newest saved date, and similar purposes."
+                  ]
+                },
+                {
+                  "label": "Lists",
+                  "sentences": [
+                    "For each list that a user creates to sort saved places: an identifier for the list, the account identifier, the name (up to 15 characters), the icon (optional; one character), and the creation and update date and time."
+                  ]
+                },
+                {
+                  "label": "Places in lists",
+                  "sentences": [
+                    "Which saved place has been added to which list, and the date and time it was added."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(5) Temporary record that limits source title fetching",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "When a URL is entered as a source, the page title is fetched before saving is confirmed. To prevent simultaneous fetches, repeated fetches of the same URL, and excessive fetching in a short time, the following is stored temporarily."
+              ]
+            },
+            {
+              "kind": "note",
+              "sentences": [
+                "This temporary record remains even for URLs that were not saved. It is designed to be deleted automatically at most 20 minutes after the fetch starts (Article 3, paragraph 7). A URL whose saving was confirmed is saved separately, as it is, in the source in (4). A hash does not make a URL impossible to recover (Article 9, paragraph 7)."
+              ]
+            },
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Account that attempted the fetch",
+                  "sentences": [
+                    "The identifier in (1)."
+                  ]
+                },
+                {
+                  "label": "Keyed hash of the URL",
+                  "sentences": [
+                    "A value obtained by converting the URL with a per-user identifier as the key. The URL itself is not kept in this record."
+                  ]
+                },
+                {
+                  "sentences": [
+                    "Start and end time of the fetch."
+                  ]
+                },
+                {
+                  "label": "Title obtained",
+                  "sentences": [
+                    "If the fetch failed, it stays empty, and a record that a fetch was attempted is kept."
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(6) Information received at login and information that remains on the device (not stored in the database)",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Information received from the Apple or Google account",
+                  "sentences": [
+                    "At login, the user authenticates with an Apple or Google account, and the Service receives the ID token issued by Firebase Authentication. In addition to an identifier for each user, the ID token may contain an email address and name, depending on the Firebase settings and the user’s choices. For login checks, the Operator uses the identifier, issuer, audience, expiry, and time of authentication; it does not read the email address or name, and does not store them in the database."
+                  ]
+                },
+                {
+                  "label": "Login session",
+                  "sentences": [
+                    "While the user is logged in, on the web the ID token and the refresh token used to renew it are encrypted and stored in a cookie on the user’s device (Article 8, paragraph 1). In the iOS app, the ID token and the refresh token are stored in the device’s keychain, together with the Firebase Authentication account information (the identifier and, where Firebase holds them, the email address, name, URL of the profile image, and so on) (Article 8, paragraph 6 and Article 9, paragraph 2). The ID token is also attached to requests sent to the database (Supabase). When a user logs in with a Google account in the iOS app, Google Sign-In for iOS also stores Google’s login state in the device’s keychain. This Google login state is not erased by logging out of the Service or by account deletion."
+                  ]
+                },
+                {
+                  "label": "Information held by Firebase",
+                  "sentences": [
+                    "Google, which operates Firebase Authentication, explains that it handles email addresses, IP addresses, and browser information (User-Agent) for login, account management, and prevention of misuse. It explains that IP address records are erased from the production environment and backups after several weeks, and that other authentication information is erased from them within 180 days of the deletion of the user’s account. It explains that Firebase Authentication processing takes place only in data centers in the United States."
+                  ]
+                },
+                {
+                  "label": "Firebase records that remain on the device",
+                  "sentences": [
+                    "On the web, at login, the Firebase SDK leaves a record of the type of SDK used and the date in the device’s browser storage (IndexedDB). This record is sent to Google along with the next communication to Firebase. In the iOS app, this record is not left in the device’s browser storage (IndexedDB) and is sent to Google along with communication to Firebase."
+                  ]
+                },
+                {
+                  "label": "Information passed on from sharing (iOS app)",
+                  "sentences": [
+                    "When a URL or text is sent to the Service from another app’s share screen, the iOS app’s share extension removes from the URL any tracking marks that identify the person who shared it, and splits it into a source candidate and a search term. When the user continues in the main app, the share extension keeps this in the device’s keychain until it is handed over, and it is deleted when the main app reads it. Items older than 10 minutes are not used. Searching and saving within the share extension are done by the same route as in the iOS app (Article 5). When saving is confirmed, the source becomes a record in (4)."
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 2,
+      "heading": "Purposes of Use",
+      "paragraphs": [
+        {
+          "sentences": [
+            "Information is used to the extent necessary for the following purposes."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "Creating and maintaining accounts, verifying identity, and login (including authentication with an Apple or Google account, and making logins that have been logged out or whose account has been deleted unusable)"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "Displaying the user’s own record of saved places"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "Reflecting settings such as the display language"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "Creating and storing a record of agreement to the Terms of Use and this Policy, and the third-party provision records that laws and regulations require for provision to third parties in foreign countries. The Operator will put in place the system for this record (including where it uses an alternative record that meets the requirements) before starting the provision concerned"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "Responding to violations of the Terms of Use, and preventing unauthorized access and misuse"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "Fetching source titles and preventing excessive access to external sites"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "Responding to inquiries and to requests concerning personal information"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "Important notices such as changes to the Terms of Use or this Policy and termination of the Service"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "Maintenance of the Service and handling of failures"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "sentences": [
+            "The Service does not use personal information for ad delivery or behavioral targeting, and does not include tools for that. For access analytics, a component for learning how pages are viewed (Google Analytics) is included only on the web’s public pages (pages that can be viewed without logging in, such as the top page, the Terms of Use, and this Policy) (Article 5, paragraph 8). It is not included on screens after login or in the iOS app, and operations are not analyzed in connection with users’ accounts or saved places. Information that the Google map and login components built into the iOS app (Google Maps SDK for iOS and Google Sign-In for iOS) collect for purposes set by Google is described in Article 5, paragraphs 1 and 3. Except for exceptions under laws and regulations, information is not used beyond the above purposes without the necessary consent."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "heading": "Storage and Deletion",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "As a rule, the information in Article 1 is stored while the account exists. This excludes information that the individual has changed or deleted, the temporary record in paragraph 7, and the records in paragraph 9. No automatic deletion is carried out on the grounds of a long period without logging in."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "An account whose registration procedure has not been completed more than 24 hours after its creation is deleted automatically, together with its database records and its Firebase account, by an hourly process. At this time, the account invalidation record in paragraph 9, item 1 is kept."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "When a user deletes their account, the Operator promptly deletes from the database the account and the profile, consent record, saved places, lists, places in lists, temporary record in Article 1 (5), and logout record linked to it, and also deletes the Firebase account. Account deletion is carried out after re-authentication with the Apple or Google account used to log in, and for an Apple account, the Service also revokes the Apple token. Deletion cannot be undone and cannot be restored at a user’s request. The third-party provision records that laws and regulations require for provision to third parties in foreign countries are kept separately from these, for the period set by law. The Operator will put in place the system for this record (including where it uses an alternative record that meets the requirements) before starting the provision concerned."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "If registration is canceled partway, the account is deleted at that point as well."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "Users can delete saved places one at a time. Users can create, change, and delete lists, and add saved places to lists or remove them. Deleting a list does not delete the saved places in it. Deleting a saved place also removes it from its lists."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "While the account exists, the individual cannot change or delete the consent record on its own. It is deleted upon account deletion."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "The temporary record of source fetching becomes eligible for deletion once 10 minutes have passed since the fetch started, and is deleted automatically at most 20 minutes after the start by a process that runs every 10 minutes. It does not wait for account deletion or for the next use. If processing is delayed by a failure, it is deleted after recovery."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "The above describes deletion from the live data used by the Service. Supabase has stated that it makes encrypted daily backups, and information from before deletion may remain during the backup retention period set by Supabase. Firebase Authentication (Google) has stated that it deletes other authentication information from the production environment and backups within 180 days of the deletion of the user’s account, and keeps IP address records for several weeks. The retention period for Vercel’s communication logs is as set out in Article 5, paragraph 6."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "Separately from the rule in paragraph 1, the following records are kept as follows."
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "The account invalidation record is kept with no set period, in order to make unusable all logins of users who deleted their account or canceled registration and of accounts deleted automatically under paragraph 2. This record consists only of the identifier in (1) and a time, and does not include the contents of the profile or saved places."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "The account deletion marker is kept until the hourly process confirms the deletion of the Firebase account, and is deleted after that is confirmed. Even if the deletion process stops partway, the hourly process completes the deletion of the Firebase account and the database records."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "The logout record is kept until the account is deleted, and is deleted at that time."
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 4,
+      "heading": "Information Not Obtained and Not Stored",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "Passwords are not obtained or stored. Authentication is only by login with an Apple or Google account."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "Information related to password reset is not used."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "Information related to invitations is not used."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "There is no screen that accepts a user’s phone number."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "There is no mechanism to register information for re-authentication."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "note",
+              "sentences": [
+                "Paragraphs 1 to 5 are not obtained or stored by the Service because login is limited to Apple or Google accounts only."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "The current location is obtained from the device with permission and is used temporarily for display on the map. Coordinates are not stored in or sent to the Service’s database or servers, and obtaining stops when the user leaves the screen. Permission can be revoked in the device’s settings. The sending of the map’s display area to Google is as set out in paragraph 1 of the next Article. In the iOS app, the map’s display area, used to bias search suggestions toward nearby places, is sent to Google through the Service’s server. Right after the map is moved to the current location, the center of this area is the current location. The Service’s server does not store it."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "There is no camera or image upload feature."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "Strings entered in a search are not stored in the Service’s database. They are sent to Google for the search. In the iOS app, they are sent through the Service’s server (Article 5, paragraph 2). A place that the user selects and saves becomes a record in Article 1 (4)."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 5,
+      "heading": "Transmission to External Services",
+      "paragraphs": [
+        {
+          "sentences": [
+            "The routes and purposes of transmission from the Service are as follows. hareMa does not send information for advertising. The only transmission the Operator makes for access analytics is the transmission from the web’s public pages in paragraph 8. Information that Google components built into the iOS app send for Google’s analytics is described in paragraphs 1 and 3. Handling by a recipient for providing, protecting, and improving its own services follows each company’s policy. This Article is also intended to inform users of the content, recipients, and purposes of information sent from their devices, and is published regardless of whether the external transmission rules of the Telecommunications Business Act apply."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "Map, search, and place display (Google) —— The Service uses the Google Maps API (Google Maps Platform). On the web, map display requests, search strings, the map’s display area, and the identifiers of places that are selected or displayed are sent from the browser to Google. Google has stated that it logs requests to Google Maps Platform, and that these logs normally include the device’s IP address, the request URL and parameters, the date and time, and information about the browser and OS. What is sent to bias search suggestions toward nearby places is not the current location itself but the map’s display area. After the map is moved to the current location, that area includes the surroundings of the current location. On the web’s map screen, permission for location is requested through the device browser’s permission screen, and when permission is given, the current location (latitude and longitude) is obtained from the device and shown on the map and place information provided by Google. The obtained current location is not sent to the Service’s server and is used only, through the map’s display area, to prioritize search suggestions, and permission can be revoked at any time in the device’s settings. Google may use and retain the data it receives, such as search terms, IP addresses, and latitude and longitude, to provide and improve its own products and services. Google’s Privacy Policy (https://policies.google.com/privacy) is incorporated into this Policy by reference."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "In the iOS app, the Google Maps SDK for iOS is used to display the map, and map display requests are sent from the device to Google. Search strings, the map’s display area, and the identifiers of places that are selected or displayed are sent through the Service’s server, not directly from the device to Google (next paragraph). In its declaration to Apple that accompanies this SDK (the privacy manifest), Google states that the SDK collects device identifiers, crash, performance, and interaction records, and other information for providing features and for analytics. Google receives these, and the Operator does not. On the map screen, permission for location is requested through iOS’s permission screen. The current location (latitude and longitude) obtained with permission is not sent as it is to the Service’s server. However, in the iOS app, the map’s display area is sent to the Service’s server to bias search suggestions toward nearby places (right after the map is moved to the current location, the center of this area is the current location). The Service’s server only passes this to Google and does not store it."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "Place identification (Google) —— For confirming that a place exists when saving it, and for obtaining and updating its latitude and longitude, the Service’s server sends the place identifier to the Google Places API. In this request, the IP address of the Service’s server, the parameters including the place identifier, and the date and time may be logged. On the web, the place names, addresses, and similar information for display are obtained on the device and held temporarily in the device’s memory. Google’s policy in the preceding paragraph also applies to this handling."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "In the iOS app, search suggestions and the place names, addresses, and similar information for display are also obtained from the Google Places API from the device through the Service’s server, and held temporarily in the device’s memory. Because suggestions are shown as the user types, text that is only partly entered is also sent each time. What the Service’s server sends to Google at this time is the search string, the map’s display area, and the place identifier; it does not send the user’s identifier. The Service’s server does not store these. For this request as well, the IP address of the Service’s server, the parameters including the search string, the map’s display area, and the place identifier, and the date and time may be logged."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "Login (Apple, Google, and Firebase Authentication) —— For login on the web, after the two consents are given, the browser on the user’s device connects to Google’s (Firebase’s) API using the Firebase Authentication SDK, opens the Apple or Google login screen, and authenticates. From the device to Google, the information needed for login, the IP address, browser information, and the record of the SDK type and date are sent, and on the Apple or Google login screen, each company handles the user’s account information. The Service’s server obtains Google’s public keys used to verify the signature of the ID token (no user information is sent). On the web, when the ID token is close to expiry, it sends the refresh token to Google to renew the ID token, and at account deletion and cancellation of registration, it sends the ID token to Google to delete the Firebase account. In account deletion, only for an Apple account, the Apple token obtained through re-authentication is sent to Apple through Firebase, with a request for revocation. The Operator carries out the acceptance of registration (creating the pre-consent registration record in Article 1 (1)) and the hourly processes in Article 3, paragraph 2 and Article 3, paragraph 9, using the Service’s Firebase functions, and those functions send the identifier in Article 1 (1) to the database (Supabase) and receive the identifier of the account to be deleted. These are for login authentication, account management, and prevention of misuse. Please see Google’s Privacy Policy (https://policies.google.com/privacy) and Apple’s Privacy Policy (https://www.apple.com/jp/legal/privacy/jp/)."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "For login in the iOS app, after the two consents are given, the user authenticates on the iOS Apple login screen or with the login component provided by Google (Google Sign-In for iOS), and the result is sent from the device to Google’s (Firebase’s) API using the Firebase Authentication SDK. From the device to Google, the information needed for login, the IP address, app and device information, and the record of the SDK type and date are sent. The scope the Service requests for login with a Google account is the Google account identifier, name, email address, and profile image. In addition, in its declaration to Apple that accompanies Google Sign-In for iOS (the privacy manifest), Google states the types of information this component sends to Google (such as device identifiers and usage) and the purposes (providing features and analytics). Google receives these, and the Operator does not receive them beyond the scope contained in the ID token described in Article 1 (6). In the iOS app, renewal of the ID token, and deletion of the Firebase account at account deletion and cancellation of registration, are requested from the device to Google without going through the Service’s server, and revocation for an Apple account is also requested from the device to Apple through Firebase. When saving from another app’s share screen, the share extension sends the refresh token in the device’s keychain from the device to Google to obtain the ID token again."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "Data storage and authentication checks (Supabase) —— On the web, the Service’s server sends requests to Supabase, which operates the database, to store, read, and delete the information in Article 1. The login ID token is attached to the requests to confirm whose request it is. The information contained in the ID token is as set out in Article 1 (6)."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "In the iOS app, displaying, editing, and deleting the list of saved places, registering and changing the username, checking the validity of the login and recording logout, and the processing of account deletion and cancellation of registration are requested from the device directly to Supabase. The ID token is attached to the requests, and only the individual’s own records are handled, through the database’s row-level access control (Article 9, paragraph 3). In these requests, communication information such as the device’s IP address reaches Supabase. Saving a new place and fetching a source title go through the Service’s server."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "Fetching the title of a source URL (the site of the URL entered) —— Before saving, the Service’s server connects to the URL and obtains the page title. The URL and the communication information of the Service’s server reach the destination, and may be logged. This is not processing in which the user’s device connects directly. The communication has already taken place even if the user decides not to save, so users should not include personal information or secrets in a URL."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "Hosting (Vercel) —— Communication with the Service passes through Vercel. Vercel has stated that it obtains the user’s IP address, the city and country estimated from the IP address, browser and device information, requests, date and time, diagnostic information, and so on. These are used for delivery and processing and for measures against misuse. The retention period is stated to be the minimum period necessary to meet legal and contractual obligations. The Service’s database does not store IP addresses."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "Links to external sites (when opened by the user’s action) —— When a link to Google Maps, a place’s website, or a source URL is opened from a place’s details screen or elsewhere, the information contained in the link (for Google Maps, the search term and place identifier) is sent from the user’s device to the destination. The Service does not send this automatically, and handling at the destination follows each site’s policy. In the iOS app, links are opened in Safari (links to Google Maps are opened in the Google Maps app if it is installed)."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "Access analytics for public pages (Google Analytics) —— The web’s public pages include a component (tag) of Google Analytics, Google’s access analytics service. The component sends from the user’s browser to Google the URL of the page being displayed and of the page viewed before it, the page title, browser, OS, and screen information, the language, the approximate region, the date and time, information about operations such as time spent on the page and scrolling, and an identifier placed in a cookie. The Operator’s purpose is to learn, as aggregates that are not separated by user, how many people viewed the public pages, how they arrived, and how long they viewed, in order to improve the Service’s guidance. The Operator sees only the aggregates that Google produces. This component is not run on screens after login, and URLs that contain a place identifier are not sent. Handling at Google follows Google’s Privacy Policy (https://policies.google.com/privacy) and Google’s explanation of how it uses information from sites or apps that use its services (https://policies.google.com/technologies/partner-sites). To stop this transmission, users can use the Google Analytics Opt-out Browser Add-on provided by Google, or refuse cookies in the browser settings."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 6,
+      "heading": "Provision to Third Parties",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "The Operator does not provide personal data to third parties except where the individual has consented and in the following cases."
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "Where required by laws and regulations"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "Where necessary for the protection of a person’s life, body, or property, and it is difficult to obtain the individual’s consent"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "Where especially necessary for improving public health or promoting the sound upbringing of children, and it is difficult to obtain the individual’s consent"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "Where necessary to cooperate with a national or local government body or other party in carrying out affairs prescribed by laws and regulations, and obtaining consent would be likely to impede the performance of those affairs"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "The Operator does not sell personal data, provide it for advertising, or jointly use it with other businesses."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "Provision that is necessary for outsourcing within Japan may not constitute third-party provision under the law. Entrustment to a business located in a foreign country is not handled under this exception alone, but under paragraph 4 of the next Article."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 7,
+      "heading": "Contractors and Handling in Foreign Countries",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "For login authentication, data storage, and hosting, the handling of information is entrusted to the following businesses."
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "table",
+              "header": [
+                "Contractor",
+                "Services",
+                "Information handled"
+              ],
+              "rows": [
+                [
+                  "Google (Firebase Authentication)",
+                  "Login authentication and account management",
+                  "The login ID token and refresh token, email address, name, IP address, browser or iOS app and device information (Article 1 (6))"
+                ],
+                [
+                  "Supabase",
+                  "Database",
+                  "The information in Article 1, and requests with the login ID token attached (in the iOS app, requests from the device and communication information such as its IP address)"
+                ],
+                [
+                  "Vercel",
+                  "Hosting",
+                  "Communication with the Service and what is entered"
+                ]
+              ]
+            },
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "Apple, and Google when users log in with a Google account (as the account provider), are the user’s own account providers and are not contractors. Direct transmission from the device to Google Maps Platform, and transmission of place identifiers from the server, are not treated as entrustment, because Google also uses the information it receives for its own purposes. In every case, the route and use are described in Article 5. The information that the Google Maps SDK for iOS and Google Sign-In for iOS built into the iOS app send from the device to Google, and the information that the Service’s server sends to Google for searches in the iOS app, are likewise not treated as entrustment."
+              ]
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "The Operator selects contractors, keeps track of the state of their security management, and supervises them as necessary and appropriate. Matters confirmed in published documents, and the scope in which the state of implementation could not be confirmed, are stated in paragraph 4, item 5."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "The Operator does not give the registration information of users of the Service to the domain registrar Porkbun for domain and DNS settings."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "The following explains entrustment to businesses located in foreign countries."
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "Processing locations —— Processing, including each company’s delivery network, operations, and support, is not limited to Japan. Firebase Authentication is stated to process only in data centers in the United States. Vercel is stated to process information in the United States and other countries where it does business. Supabase is stated to process in countries where it or its subcontractors have facilities (including the United States and Singapore), in some cases."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "Countries where recipients are located —— The providers under the published terms are Supabase Pte. Ltd. (Republic of Singapore), Vercel Inc. (United States of America), and Google (Firebase Authentication). “Google” in the contract with Google means, for billing in Japan, Google Asia Pacific Pte. Ltd. (Republic of Singapore) and its affiliates, and because Firebase Authentication processing takes place in the United States, both the Republic of Singapore and the United States of America are treated as countries of Google’s recipients."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "Consent to provision —— Even if the servers are in Japan, businesses in foreign countries may handle personal data. The Service treats these as provision to third parties in foreign countries. Before making this provision, the Operator will present the information in the following items (the name of the foreign country, that country’s system, and the measures the recipient takes) and obtain the individual’s consent. This consent is obtained separately from agreement to the Terms of Use. Until the consent is given, the Operator does not carry out any processing that involves these provisions, including login processing."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "Systems of the recipients’ countries."
+              ],
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Country",
+                    "Contractor",
+                    "Protection system",
+                    "Indicators of the system",
+                    "Systems that may affect rights and interests"
+                  ],
+                  "rows": [
+                    [
+                      "Republic of Singapore",
+                      "Supabase and Google",
+                      "There is a Personal Data Protection Act (PDPA 2012) that covers the private sector and sets obligations such as notification, consent, purpose limitation, security, retention limitation, and access and correction",
+                      "Materials published by the Personal Information Protection Commission (Japan) (the “Commission”) state participation in APEC CBPR. It is not included in the list of countries covered by EU adequacy decisions",
+                      "The Commission’s survey as of October 2021 points to a lack of provisions, for information production and access orders under the Criminal Procedure Code, on approval by an independent body, restrictions on the handling and security management of the information obtained, transparency, and supervision and review"
+                    ],
+                    [
+                      "United States of America",
+                      "Vercel and Google",
+                      "According to the Commission’s survey as of October 2021, there is no comprehensive federal law that uniformly covers all private-sector fields, and there are sector-specific and state-specific systems",
+                      "The Commission’s published materials state participation in APEC CBPR. The EU adequacy decision covers commercial organizations that participate in the EU-US Data Privacy Framework, and does not extend to every business in the United States",
+                      "Through legal process such as the CLOUD Act, data controlled by a business under US jurisdiction may be required to be produced even if it is stored outside the country"
+                    ]
+                  ]
+                },
+                {
+                  "kind": "paragraph",
+                  "sentences": [
+                    "This is based on information published by the Commission’s country surveys (https://www.ppc.go.jp/enforcement/infoprovision/laws/offshore_report_singapore/ and https://www.ppc.go.jp/enforcement/infoprovision/laws/offshore_report_america/), the Personal Data Protection Commission of Singapore (https://www.pdpc.gov.sg/overview-of-pdpa/the-legislation/personal-data-protection-act/data-protection-obligations), the European Commission (https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/adequacy-decisions_en), and the US Department of Justice (https://www.justice.gov/criminal/cloud-act-resources). The country surveys reflect information as of the survey date (October 2021) and may differ from current systems. The Operator will update this paragraph after checking the differences from current systems. A country’s participation in a framework and each contractor’s being certified are separate matters."
+                  ]
+                }
+              ]
+            },
+            {
+              "no": 5,
+              "sentences": [
+                "Each company’s measures and the scope of confirmation."
+              ],
+              "blocks": [
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "label": "Supabase",
+                      "sentences": [
+                        "The published data processing agreement forms part of its terms of service, and sets out processing in line with instructions, access control, encryption in transit and at rest, audit logs, encrypted daily backups, penetration testing, incident notification, and so on. https://supabase.com/legal/dpa"
+                      ]
+                    },
+                    {
+                      "label": "Google (Firebase Authentication)",
+                      "sentences": [
+                        "The Google Cloud data processing agreement (Cloud Data Processing Addendum) treats Google as the processor, and sets out processing in line with the customer’s instructions, technical, organizational, and physical security measures, written contracts with sub-processors and the retention of responsibility, advance notice of new sub-processors, and so on (https://cloud.google.com/terms/data-processing-addendum). The table of Firebase terms places Authentication in the group of Google Cloud Platform terms. No published document that names Authentication as covered by this agreement could be confirmed. This is because the Service is a small service run by an individual and has no means of making individual inquiries or audits beyond the published documents (this states that fact and the reason, as a case where information about the measures the recipient takes cannot be provided)."
+                      ]
+                    },
+                    {
+                      "label": "Vercel",
+                      "sentences": [
+                        "The published data processing agreement covers the Enterprise and Pro plans, and does not apply to the Hobby plan that the Service uses. No equivalent contractual measures applying to the Hobby plan could be confirmed. This is because the Service is a small service run by an individual and has no means of making individual inquiries or audits beyond the published documents (this states that fact and the reason, as a case where information about the measures the recipient takes cannot be provided). Vercel’s terms state that content on the Hobby plan may be used to train AI and machine learning models of Vercel and third parties, but the Operator has turned off this use in the Team settings. https://vercel.com/legal/dpa"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "paragraph",
+                  "sentences": [
+                    "The above is a confirmation of the published contract terms. Measured against the 8 principles of the OECD Privacy Guidelines (collection limitation, data quality, purpose specification, use limitation, security safeguards, openness, individual participation, and accountability), the contract terms of Supabase and Google above are provisions corresponding to use limitation (processing in line with the Operator’s instructions) and security safeguards. As stated above, the data processing agreement does not apply to Vercel’s Hobby plan. Whether each company takes measures corresponding to the other principles, and the state of implementation of measures inside each company, cannot be provided, because the Operator has not obtained information from the companies beyond the published documents. The information will be updated as confirmation proceeds. Announcing the purposes of use to the individual and responding to requests for disclosure and the like are carried out by the Operator in accordance with Article 2 and Article 10 of this Policy. This explanation and consent do not remove the Operator’s duty to supervise contractors."
+                  ]
+                }
+              ]
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 8,
+      "heading": "Cookies and Similar Technologies",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "The cookie that the Service sets (harema_session) is used to keep the login session. The cookie contains the ID token used for login and the refresh token used to renew it, in encrypted form. The cookie is valid for 30 days from login. The ID token expires after 1 hour, but it is renewed automatically when close to expiry, so users are not logged out every hour. After 30 days from login, users need to log in again. When you choose a display language in the menu after login, or log in after choosing a language on the login screen, the chosen language (Japanese or English) is stored in a cookie (harema_locale), only if your agreement to the Terms of Use and this Policy has been recorded. The cookie is kept for 1 year from when it is stored. When you log in after that, the period is extended to 1 year from that time. This cookie is set so that programs running in the browser cannot read it, and it contains no login information."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "The authentication cookie is set so that it cannot be read by scripts in the browser."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "hareMa does not use cookies for advertising or behavioral targeting. As a cookie for access analytics, it uses the Google Analytics cookie in Article 5, paragraph 8, only on the web’s public pages. It is not used on screens after login or in the iOS app."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "The External Services in Article 5 may use cookies and similar technologies for providing their features and other purposes."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "If cookies are disabled, features that require login cannot be used."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "The iOS app does not use cookies to keep the login session. The login session is stored in the device’s keychain (Article 1 (6) and Article 9, paragraph 2). As in paragraph 1, after 30 days from login, users need to log in again."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 9,
+      "heading": "Security Management",
+      "paragraphs": [
+        {
+          "sentences": [
+            "The Operator takes the following measures. Details whose publication could impair security management are not stated."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "Authentication with an Apple or Google account is used, and passwords are not held."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "The authentication cookie is set so that it cannot be read by scripts in the browser. In the iOS app, the login session is stored in the device’s keychain with settings under which it can be read only while the device is unlocked and does not move to other devices, and reading is limited to the Service’s app and its share extension."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "Row-level access control is set up in the database so that other users cannot read or write each user’s data."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "The administrative key is used only on the server side, and its use in the app is limited to storing the location information of places verified with Google’s Place Details. In account deletion and cancellation of registration, this key is not used; the account concerned is identified from the ID token of the individual’s login, verified on the server, and processed."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "Keys for External Services are restricted, key by key, in the features they can call, and for keys that allow it, the referrer is also restricted."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "When fetching the title of a source URL, checks are made to prevent connection to internal networks and the like."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "The temporary record of source fetching does not keep the URL itself. However, because the per-user identifier used for the hash is in the same record, this does not prevent inference or matching if the whole record were leaked. It is a measure that makes matching by a correspondence table common to all users difficult, and is combined with deletion in a short period."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "Contractors are selected and supervised as set out in Article 7."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "When entrusting the handling of personal data to a business in a foreign country, the Operator identifies the contractor and the names of the foreign countries where the subcontractors each company publishes are located, investigates those countries’ systems for the protection of personal information, and then takes the necessary measures. The countries currently identified are the United States of America, the Republic of Singapore, and Hungary, according to the list of subcontractors published by Supabase. The countries where the subcontractors of Google (Firebase Authentication) and Vercel are located will be added to this paragraph after the lists each company publishes are confirmed. The systems of the United States of America and the Republic of Singapore are set out in Article 7, paragraph 4, item 4. The measures taken are confirming the published data processing agreements (Article 7, paragraph 4, item 5), selecting contractors, and limiting the information sent to contractors."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 10,
+      "heading": "Requests for Disclosure and the Like",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "In accordance with laws and regulations, users may request notification of the purpose of use of retained personal data, disclosure, correction, addition, or deletion, cessation of use or erasure, and cessation of third-party provision. Users may also request disclosure of the third-party provision records concerning themselves. For provision to third parties in foreign countries, the Operator will put in place a record system that meets the items to be recorded, the time of creation, the retention period, and the disclosure procedure set by laws and regulations (including where it uses an alternative record that meets the requirements) before starting the provision concerned."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "Receipt, identity verification, and response."
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "Receipt —— Requests are accepted by email at the address in Article 13, paragraph 1."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "Identity verification —— As a rule, the Operator verifies that the requester is the holder of the account used to log in, by having the requester temporarily change their username to a string the Operator specifies. After account deletion, or where the requester cannot log in, or for a request from an agent, the Operator will explain another method of verification, to the extent necessary for the request."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "Response —— After identity verification, the Operator responds without delay in accordance with laws and regulations. Disclosure is made by the method the requester specifies from among provision of electronic records (including sending by email to the address from which the request was received), delivery of documents, and other methods the Operator sets, and if disclosure by the specified method is difficult, the Operator will say so and make disclosure by delivery of documents. Responses to requests other than disclosure are, as a rule, made by email to the address from which the request was received. If the Operator cannot comply, it will explain that and the reason."
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "Fee —— Free of charge."
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "The following operations can be carried out without a request to the contact point."
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "Changing the username"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "Deleting saved places"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "Account deletion (deletion of the account and registered information described in Article 3)"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 11,
+      "heading": "Minors",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "The Service may be used only by people aged 13 or older. People under 13 should not register or use the Service. Because there is no mechanism to verify age, the possibility of receiving information from people under 13 cannot be ruled out."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "People under 18 should obtain in advance the consent of a person with parental authority or another legal representative to the use of the Service and to the handling of information described in this Policy (including provision to third parties in foreign countries under Article 7, paragraph 4). The Service has no mechanism to verify that consent."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "If use by a person under 13 comes to light, or if a legal representative makes an inquiry, the Operator will confirm the matter through the contact point in Article 13 and take measures such as suspending use or deleting information."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 12,
+      "heading": "Changes to This Policy",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "When this Policy is changed, it follows Article 14 of the Terms of Use and laws and regulations. A change of purpose of use is limited to a range that has a reasonable relationship with the purpose before the change."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "When making a change, the Operator posts a notice of the change and the content after the change on the Service. For a change that alters the handling of information about users who already use the Service (such as adding information obtained, adding recipients or contractors, or changing purposes of use), the effective date is also stated, and the notice is posted at least 3 days before the effective date. A change that does not alter the handling of information about users who already use the Service, such as correcting typographical errors, clarifying explanations, or adding a description of handling in a new app, takes effect when the notice is posted, and the notice shows the date of the change."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "For an important change, such as adding information obtained or changing purposes of use or contractors, the notice in the preceding paragraph is posted on the Service’s top page and at the top of the page of this Policy, in a form that shows a change has been made."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "For handling that laws and regulations require consent to anew, such as use beyond the range of reasonable relationship, or provision to third parties in foreign countries that adds a country, recipient, data item, or purpose not shown in Article 7, paragraph 4, the Operator presents the necessary information and obtains consent before starting that handling. Notice or continued use alone does not take the place of this consent."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "If the system of a recipient’s country is amended, consent already obtained does not by itself lose its effect, but a change that materially affects the decision is notified by the methods in paragraphs 2 and 3."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 13,
+      "heading": "Contact Point and Operator",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "Inquiries, complaints, and requests for disclosure and the like are accepted by email (harema.app.support@gmail.com). This email address also serves as the contact for the person in charge of handling personal information. There is no inquiry form. Personal information should not be written in public posts."
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "The Operator is shown as “hareMa Operator”. The Operator’s name and address are not posted, but the Operator will answer without delay if they are requested through the contact point in the preceding paragraph."
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    }
+  ]
+}
+// Bodies shown while the notice of revision is posted (docs/legal/posting). Switched to the bodies above at the effective time by legal-switch.ts.
+export const privacyPosting: LegalDocument = {
+  "title": "プライバシーポリシー",
+  "revisedOn": "2026.11.22",
+  "preamble": [
+    "改定のお知らせ(2026.11.25 掲示)",
+    "2026.11.29 午前 0 時(日本標準時)から、本ポリシーの​第 1 条と第 3 条を​次のとおり改定します。保存した店を​リストに分けられるようにするため、リストと、リストに入れた店を、保存する情報に加えます。",
+    "第 1 条(4)に、次の 2 つの項目を加えます。",
+    "リスト —— 保存した店を​分けるために​本人が作るリストの、リストごとの識別子、アカウントの識別子、名前(15 文字まで)、アイコン(任意で 1 字)、作成・更新日時です。",
+    "リストに入れた店 —— ​どのリストに​どの保存した店を​入れたかの対応と、入れた日時です。",
+    "第 3 条 3 項の、退会のときに削除する情報に、リストと、リストに入れた店を加えます。",
+    "第 3 条 5 項の最後に、次の文を加えます。",
+    "リストは、本人が作成・変更・削除でき、保存した店を​リストに入れたり外したりできます。リストを削除しても、保存した店は削除しません。保存した店を削除すると、その店をリストからも外します。",
+    "hareMa(以下「本サービス」)の運営者は、利用者の情報を次のとおり取り扱います。本ポリシーは利用規約の一部です。利用規約は https://harema.app/terms です。ログインでは、Apple・Google・Firebase と通信します。本ポリシーは、この通信や、公開ページの閲覧に伴う情報にも適用します。本ポリシーは、harema.app の web と、スマートフォンのアプリの両方に適用します。web とアプリで取り扱いが異なるところは、「web では」「iOS アプリでは」と書きます。"
+  ],
+  "articles": [
+    {
+      "no": 1,
+      "heading": "取得・保存する情報",
+      "paragraphs": [
+        {
+          "sentences": [
+            "本サービスのデータベースには、次の情報を保存します。なお、店そのものの共通データには、Google の場所の識別子・緯度経度・取得日時を保存します。この記録は利用者の識別子を持たず、利用者と店の結び付きは(4)に保存します。店名・住所・種別・営業時間・電話番号・ウェブサイトは、このデータベースには保存しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "heading": "(1) アカウントの情報",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "アカウントの識別子",
+                  "sentences": [
+                    "ログインに使う Firebase Authentication が、利用者ごとに発行する符号(Firebase の uid)です。"
+                  ]
+                },
+                {
+                  "label": "同意前の登録の記録",
+                  "sentences": [
+                    "(1)の識別子、作成日時、削除中の印と、登録の手続が完了する前のログインで同意した利用規約と本ポリシーのバージョンとその同意の日時です。ログインしてから、ユーザー名の登録と規約への同意が完了するまでの記録で、作成日時は、登録の手続が完了しないアカウントの削除判定にも使います。"
+                  ]
+                },
+                {
+                  "label": "ログアウトの記録",
+                  "sentences": [
+                    "ログアウトしたそのログインを再び使えなくするため、(1)の識別子、そのログインの時刻、ログアウトの日時を記録します。同じ利用者の別の端末のログインには影響しません。"
+                  ]
+                },
+                {
+                  "label": "アカウントの失効の記録",
+                  "sentences": [
+                    "退会・登録の中止をしたアカウントと、第 3 条 2 項で自動削除したアカウントの全てのログインを使えなくするため、(1)の識別子と時刻を記録します。"
+                  ]
+                },
+                {
+                  "label": "退会の印",
+                  "sentences": [
+                    "退会または登録の中止の処理中であることを示す、(1)の識別子と時刻です。"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(2) プロフィール",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "アカウントとの紐付け",
+                  "sentences": [
+                    "(1)の識別子を使います。"
+                  ]
+                },
+                {
+                  "label": "ユーザー名",
+                  "sentences": [
+                    "1〜15 文字。重複を許容し、他の利用者には表示しません。"
+                  ]
+                },
+                {
+                  "label": "表示言語",
+                  "sentences": [
+                    "日本語と英語に対応しています。端末やブラウザの言語に合わせて表示します。画面で選ぶこともできます。"
+                  ]
+                },
+                {
+                  "sentences": [
+                    "作成・更新日時。"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(3) 規約への同意の記録",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "同意したアカウント",
+                  "sentences": [
+                    "(1)の識別子です。"
+                  ]
+                },
+                {
+                  "label": "同意した日時",
+                  "sentences": [
+                    "データベース側の時刻を記録し、利用者の端末時刻や入力値は使いません。"
+                  ]
+                },
+                {
+                  "sentences": [
+                    "記録の作成日時。"
+                  ]
+                },
+                {
+                  "label": "同意したバージョン",
+                  "sentences": [
+                    "同意した時点の利用規約と本ポリシーのバージョンと、その同意の日時です。バージョンは文書ごとの通し番号で、改定のたびに次の番号になり、最終改定日と 1 対 1 で対応します。新しい改定に同意したときは、バージョンと日時を書き換えます。登録の手続が完了する前のログインでは、同意前の登録の記録に記録し、登録の完了のときにここへ写します。同意前の登録の記録にバージョンが無いときは、登録の完了のときに、そのログインの時点のバージョンとログインの日時を記録します。"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(4) 保存した店の情報",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "利用者と店の対応",
+                  "sentences": [
+                    "保存 1 件ごとの識別子、アカウントの識別子、店の識別子です。"
+                  ]
+                },
+                {
+                  "label": "保存状態",
+                  "sentences": [
+                    "「行きたい」「また行きたい」「もういい」のいずれかです。"
+                  ]
+                },
+                {
+                  "label": "メモ",
+                  "sentences": [
+                    "任意入力で 500 文字まで。記入した内容を保存します。"
+                  ]
+                },
+                {
+                  "label": "出典",
+                  "sentences": [
+                    "任意の文章または URL で 1000 文字まで。URL から取得できたページの題名も、200 文字まで保存します。"
+                  ]
+                },
+                {
+                  "label": "作成・更新日時",
+                  "sentences": [
+                    "保存日の新しい順の表示などに使います。"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(5) 出典の題名取得を抑制する一時記録",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "出典に URL を入力すると、保存を確定する前に、そのページの題名を取得します。同時取得・同じ URL の再取得・短時間の過剰な取得を防ぐため、次を一時保存します。"
+              ]
+            },
+            {
+              "kind": "note",
+              "sentences": [
+                "保存をやめた URL についても、この一時記録は残ります。取得開始から最長 20 分で自動削除する設計です(第 3 条 7 項)。保存を確定した URL は、別に(4)の出典へそのまま保存します。ハッシュは URL を復元不能にするものではありません(第 9 条 7 項)。"
+              ]
+            },
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "取得を試みたアカウント",
+                  "sentences": [
+                    "(1)の識別子です。"
+                  ]
+                },
+                {
+                  "label": "URL の鍵付きハッシュ",
+                  "sentences": [
+                    "利用者ごとの識別子を鍵に変換した値です。この記録には URL 本体を残しません。"
+                  ]
+                },
+                {
+                  "sentences": [
+                    "取得の開始・終了時刻。"
+                  ]
+                },
+                {
+                  "label": "取得できた題名",
+                  "sentences": [
+                    "失敗したときは空のまま、取得を試みた記録を残します。"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "(6) ログインで受け取る情報と端末に残る情報(データベースには保存しません)",
+          "sentences": [],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "label": "Apple・Google のアカウントから受け取る情報",
+                  "sentences": [
+                    "ログインでは、利用者が Apple または Google のアカウントで認証し、Firebase Authentication が発行する ID トークンを受け取ります。ID トークンには、利用者ごとの識別子のほか、Firebase の設定と利用者の選択によって、メールアドレスや氏名が含まれることがあります。運営者は、ログインの確認に、識別子・発行元・宛先・有効期限・認証の時刻を使い、メールアドレスや氏名を読み取らず、データベースにも保存しません。"
+                  ]
+                },
+                {
+                  "label": "ログインのセッション",
+                  "sentences": [
+                    "ログインの間、web では、ID トークンと、その更新に使う更新用の鍵を、暗号化して利用者の端末の Cookie に保存します(第 8 条 1 項)。iOS アプリでは、ID トークンと更新用の鍵を、Firebase Authentication のアカウントの情報(識別子と、Firebase が持つ場合のメールアドレス・氏名・プロフィール画像の URL など)とともに、端末のキーチェーンに保存します(第 8 条 6 項・第 9 条 2 項)。ID トークンは、データベース(Supabase)への要求にも添えて送ります。iOS アプリで Google のアカウントでログインした場合は、Google Sign-In for iOS も、Google のログインの状態を端末のキーチェーンに保存します。この Google のログインの状態は、本サービスのログアウトや退会では消えません。"
+                  ]
+                },
+                {
+                  "label": "Firebase が保持する情報",
+                  "sentences": [
+                    "Firebase Authentication を運営する Google は、メールアドレス、IP アドレス、ブラウザの情報(User-Agent)を、ログインとアカウントの管理、不正利用の防止のために取り扱うと説明しています。IP アドレスの記録は数週間、その他の認証の情報は利用者のアカウントの削除から 180 日以内に、本番環境とバックアップから消えると説明しています。Firebase Authentication の処理は、米国のデータセンターだけで行われると説明しています。"
+                  ]
+                },
+                {
+                  "label": "端末に残る Firebase の記録",
+                  "sentences": [
+                    "web では、Firebase の SDK は、ログインのとき、利用した SDK の種類と日付の記録を、端末のブラウザの保存領域(IndexedDB)に残します。この記録は、次の Firebase への通信に添えて Google へ送られます。iOS アプリでは、この記録を端末のブラウザの保存領域(IndexedDB)には残さず、Firebase への通信に添えて Google へ送ります。"
+                  ]
+                },
+                {
+                  "label": "共有から渡す情報(iOS アプリ)",
+                  "sentences": [
+                    "他のアプリの共有の画面から本サービスへ URL や文字を送ると、iOS アプリの共有の拡張は、URL から共有した人を示す追跡の印を除いて、出典の候補と検索語に分けます。本体のアプリで続けるときは、渡すまでの間、これを端末のキーチェーンに置き、本体のアプリが読んだときに消します。10 分より古いものは使いません。共有の拡張の中での検索と保存は、iOS アプリと同じ経路で行います(第 5 条)。保存を確定すると、出典は(4)の記録になります。"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "no": 2,
+      "heading": "利用目的",
+      "paragraphs": [
+        {
+          "sentences": [
+            "情報は、次の目的に必要な範囲で利用します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "アカウントの作成・維持・本人確認・ログイン(Apple・Google のアカウントでの認証と、ログアウトした・退会したログインを使えなくすることを含みます)"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "本人に保存した店の記録を表示すること"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "表示言語などの設定を反映すること"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "規約・本ポリシーへの同意の記録と、外国にある第三者への提供についての法令が求める第三者提供記録を作成・保存すること。運営者は、この記録の体制(要件を満たす代替の記録による場合を含みます)を整えてから、対象となる提供を開始します"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "規約違反への対応、不正アクセス・不正利用の防止"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "出典の題名を取得し、外部サイトへの過剰なアクセスを防ぐこと"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "問い合わせ・個人情報に関する請求への対応"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "規約・本ポリシーの変更、サービス終了などの重要な通知"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "サービスの保守・障害対応"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "sentences": [
+            "本サービスは、広告配信・行動ターゲティングのために個人情報を利用せず、そのためのツールも組み込んでいません。アクセス解析は、web の公開ページ(トップ・利用規約・本ポリシーなど、ログインせずに見られるページ)に限り、閲覧の状況を知るための部品(Google アナリティクス)を組み込みます(第 5 条 8 項)。ログインの後の画面と iOS アプリには組み込まず、利用者のアカウントや保存した店に結びつけて操作を解析しません。iOS アプリに組み込む Google の地図とログインの部品(Google Maps SDK for iOS・Google Sign-In for iOS)が、Google の定める目的で集める情報は、第 5 条 1 項と 3 項に記載します。法令上の例外を除き、必要な同意なく上記の目的を超えて利用しません。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 3,
+      "heading": "保存と削除",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "第 1 条の情報は、原則としてアカウントが存在する間保存します。本人が変更・削除した情報と、7 項の一時記録、9 項の記録は除きます。長期間ログインしないことを理由とする自動削除は行っていません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "登録の手続が完了しないまま、作成から 24 時間を過ぎたアカウントは、毎時の処理で、データベースの記録と Firebase のアカウントを自動削除します。このとき、9 項 1 号の失効の記録を残します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "退会すると、運営者は、アカウントと、それに紐づくプロフィール・同意記録・保存した店・第 1 条(5)の一時記録・ログアウトの記録をデータベースから速やかに削除し、Firebase のアカウントも削除します。退会の手続は、ログインに使った Apple または Google のアカウントでの再認証を経て行い、Apple のアカウントの場合は、本サービスが Apple のトークンの取り消しも行います。削除は取り消せず、利用者の求めに応じて復元できません。外国にある第三者への提供についての法令が求める第三者提供記録は、これらとは別に、法令に定める期間保存します。運営者は、この記録の体制(要件を満たす代替の記録による場合を含みます)を整えてから、対象となる提供を開始します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "登録の途中で中止した場合も、その時点でアカウントを削除します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "保存した店は、本人が 1 件ずつ削除できます。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "同意の記録は、アカウントが存在する間、本人がその記録だけを変更・削除することはできません。退会時には削除します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "出典取得の一時記録は、取得開始から 10 分を過ぎると削除対象となり、10 分ごとの処理によって最長 20 分で自動削除します。退会や次の利用を待ちません。障害で処理が遅れた場合は、復旧後に削除します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "以上は、本サービスが使用する稼働中のデータからの削除についての説明です。Supabase は暗号化した日次バックアップを作成すると公表しており、削除前の情報が、Supabase が定めるバックアップの保持期間中に残る場合があります。Firebase Authentication(Google)は、利用者のアカウントの削除から 180 日以内に、その他の認証の情報を本番環境とバックアップから削除し、IP アドレスの記録は数週間保持すると公表しています。Vercel の通信の記録の保持期間は、第 5 条 6 項のとおりです。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "次の記録は、1 項の原則とは別に、次のとおり保存します。"
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "アカウントの失効の記録は、退会・登録の中止をした利用者と 2 項で自動削除したアカウントの全てのログインを使えなくするため、期間を定めず残します。この記録は、(1)の識別子と時刻だけで、プロフィールや保存した店の内容を含みません。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "退会の印は、毎時の処理が Firebase のアカウントの削除を確かめるまで残し、確かめた後に削除します。削除の処理が途中で止まった場合も、毎時の処理が Firebase のアカウントとデータベースの削除を完了させます。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "ログアウトの記録は、退会するまで残し、退会のときに削除します。"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 4,
+      "heading": "取得しない情報・保存しない情報",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "パスワードは取得・保存しません。認証は Apple または Google のアカウントでのログインのみです。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "パスワードの再設定に関する情報は利用しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "招待に関する情報は利用しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "利用者の電話番号を受け付ける画面はありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "再認証用の情報を登録するしくみはありません。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "note",
+              "sentences": [
+                "1〜5 は、ログインを Apple または Google のアカウントだけに限っているため、本サービスは取得せず、保存もしません。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "現在地は、許可を得て端末から取得し、地図上の表示に一時利用します。本サービスのデータベースやサーバーへ座標を保存・送信せず、画面を離れると取得を止めます。端末の設定から許可を取り消せます。Google への地図の表示範囲の送信は、次条 1 項のとおりです。iOS アプリでは、検索の候補を寄せるための地図の表示範囲を、本サービスのサーバーを通して Google へ送ります。現在地へ地図を移した直後は、この範囲の中心が現在地になります。本サービスのサーバーは、これを保存しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "カメラや画像アップロードの機能はありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "検索に入力した文字列は、本サービスのデータベースに保存しません。検索のため Google へ送信します。iOS アプリでは、本サービスのサーバーを通して送信します(第 5 条 2 項)。選んで保存した店は、第 1 条(4)の記録になります。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 5,
+      "heading": "外部サービスへの送信",
+      "paragraphs": [
+        {
+          "sentences": [
+            "本サービスからの送信経路と目的は、次のとおりです。hareMa は広告のための送信を行いません。運営者が行うアクセス解析のための送信は、web の公開ページからの 8 項だけです。iOS アプリに組み込む Google の部品が、Google の分析のために送る情報は、1 項と 3 項に記載します。送信先が自社のサービスの提供・保護・改善のために行う取扱いは、各社のポリシーに従います。本条は、端末から送信される情報の内容・送信先・利用目的を知らせるためのものでもあり、電気通信事業法の外部送信規律の適用の有無にかかわらず公表します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "地図・検索・店情報の表示(Google) —— 本サービスは Google Maps API(Google Maps Platform)を使用します。web では、ブラウザから Google へ、地図表示のリクエスト、検索文字列、地図の表示範囲、選択・表示する店の識別子が送られます。Google は、Google Maps Platform へのリクエストを記録し、通常その記録には端末の IP アドレス、リクエストの URL とパラメーター、日時、ブラウザと OS に関する情報が含まれると公表しています。検索の候補を近くの場所に寄せるために送るのは、現在地そのものではなく地図の表示範囲です。現在地へ地図を移動した後は、その範囲に現在地の周辺が含まれます。web の地図の画面では、位置情報の許可を端末のブラウザの許可の画面で求め、許可を得たときに、端末から現在地(緯度経度)を取得して、Google が提供する地図と場所の情報の上に現在地を表示します。取得した現在地は、本サービスのサーバーへ送らず、地図の表示範囲を通じて検索の候補の優先付けにだけ使い、許可は端末の設定でいつでも取り消せます。Google は、受け取る検索語・IP アドレス・緯度経度などのデータを、自社の製品とサービスの提供と改善のために利用し、保持することがあります。Google のプライバシーポリシー(https://policies.google.com/privacy)を参照により本ポリシーに組み込みます。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "iOS アプリでは、地図の表示に Google Maps SDK for iOS を使い、端末から Google へ、地図表示のリクエストが送られます。検索文字列、地図の表示範囲、選択・表示する店の識別子は、端末から Google へ直接ではなく、本サービスのサーバーを通して送ります(次項)。Google は、この SDK に添えた Apple への申告(プライバシーマニフェスト)で、この SDK が、端末の識別子、クラッシュ・性能・操作の記録、その他の情報を、機能の提供と分析のために収集すると示しています。これらは Google が受け取るもので、運営者は受け取りません。地図の画面では、位置情報の許可を iOS の許可の画面で求めます。許可を得て取得した現在地(緯度経度)を、そのまま本サービスのサーバーへ送ることはありません。ただし iOS アプリでは、検索の候補を近くの場所に寄せるために、地図の表示範囲を本サービスのサーバーに送ります(現在地へ地図を移した直後は、この範囲の中心が現在地になります)。本サービスのサーバーは、これを Google へ渡すだけで、保存しません。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "店の同定(Google) —— 保存時の実在確認と緯度経度の取得・更新では、本サービスのサーバーから Google Places API へ店の識別子を送ります。このリクエストでは、本サービスのサーバーの IP アドレス、店の識別子を含むパラメーター、日時が記録されることがあります。web では、表示用の店名・住所などは端末から取得し、端末のメモリに一時保持します。これらの取扱いにも前項の Google のポリシーが適用されます。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "iOS アプリでは、検索の候補と、表示用の店名・住所なども、端末から本サービスのサーバーを通して Google Places API から取得し、端末のメモリに一時保持します。検索の候補は、入力に合わせて出すため、入力の途中の文字も、その都度送ります。このとき本サービスのサーバーから Google へ送るのは、検索文字列、地図の表示範囲、店の識別子で、利用者の識別子は送りません。本サービスのサーバーは、これらを保存しません。このリクエストでも、本サービスのサーバーの IP アドレス、検索文字列・地図の表示範囲・店の識別子を含むパラメーター、日時が記録されることがあります。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "ログイン(Apple・Google・Firebase Authentication) —— web のログインでは、2 つの同意が付いた後に、利用者の端末のブラウザが、Firebase Authentication の SDK を使って Google(Firebase)の API へ接続し、Apple または Google のログイン画面を開いて認証します。端末から Google へは、ログインに必要な情報、IP アドレス、ブラウザの情報、SDK の種類と日付の記録が送られ、Apple または Google のログイン画面では、各社が利用者のアカウントの情報を取り扱います。本サービスのサーバーは、ID トークンの署名の検証に使う Google の公開鍵を取得し(利用者の情報は送りません)、web では、ID トークンの有効期限が近いときは、更新用の鍵を Google へ送って ID トークンを更新し、退会と登録の中止のときは、ID トークンを Google へ送って Firebase のアカウントを削除します。退会では、Apple のアカウントの場合に限り、再認証で得た Apple のトークンを、Firebase を通じて Apple へ送り、取り消しを求めます。運営者は、登録の受付(第 1 条(1)の同意前の登録の記録の作成)と、第 3 条 2 項と第 3 条 9 項の毎時の処理を、本サービスの Firebase の関数で行い、その関数からデータベース(Supabase)へ、第 1 条(1)の識別子を送り、削除の対象の識別子を受け取ります。これらは、ログインの認証、アカウントの管理、不正利用の防止のためです。Google のプライバシーポリシー(https://policies.google.com/privacy)と Apple のプライバシーポリシー(https://www.apple.com/jp/legal/privacy/jp/)をご覧ください。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "iOS アプリのログインでは、2 つの同意が付いた後に、iOS の Apple のログインの画面、または Google が提供するログインの部品(Google Sign-In for iOS)で認証し、その結果を、Firebase Authentication の SDK を使って端末から Google(Firebase)の API へ送ります。端末から Google へは、ログインに必要な情報、IP アドレス、アプリと端末の情報、SDK の種類と日付の記録が送られます。Google のアカウントでのログインで本サービスが求める範囲は、Google のアカウントの識別子・氏名・メールアドレス・プロフィール画像です。このほか、Google は、Google Sign-In for iOS に添えた Apple への申告(プライバシーマニフェスト)で、この部品が Google へ送る情報の種類(端末の識別子、利用の状況など)と、その目的(機能の提供と分析)を示しています。これらは Google が受け取るもので、運営者は、第 1 条(6)に書いた ID トークンに含まれる範囲を超えて、これらを受け取りません。iOS アプリでは、ID トークンの更新と、退会と登録の中止のときの Firebase のアカウントの削除を、本サービスのサーバーを通さずに端末から Google へ求め、Apple のアカウントの場合の取り消しも、端末から Firebase を通じて Apple へ求めます。他のアプリの共有の画面から保存するときは、共有の拡張が、端末のキーチェーンにある更新用の鍵を端末から Google へ送って、ID トークンを取り直します。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "データの保存と認証の確認(Supabase) —— web では、本サービスのサーバーは、第 1 条の情報の保存・読み出し・削除のため、データベースを運営する Supabase へ要求を送ります。要求には、誰の要求かを確認するため、ログインの ID トークンを添えます。ID トークンに含まれる情報は、第 1 条(6)のとおりです。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "iOS アプリでは、保存した店の一覧の表示・編集・削除、ユーザー名の登録と変更、ログインの有効性の確認とログアウトの記録、退会と登録の中止の処理を、端末から Supabase へ直接求めます。要求には ID トークンを添え、データベースの行単位のアクセス制御(第 9 条 3 項)で、本人の記録だけを扱います。この要求では、端末の IP アドレスなどの通信の情報が Supabase に伝わります。新しい店の保存と出典の題名取得は、本サービスのサーバーを通します。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "出典 URL の題名取得(入力された URL のサイト) —— 保存前に、本サービスのサーバーから URL へ接続し、ページの題名を取得します。アクセス先には URL と本サービスのサーバーの通信情報が伝わり、記録される場合があります。利用者の端末から直接接続する処理ではありません。保存をやめても通信は既に行われますので、URL に個人情報や秘密を含めないでください。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "ホスティング(Vercel) —— 本サービスへの通信は Vercel を経由します。Vercel は、利用者の IP アドレス、IP アドレスから推定した市・国、ブラウザや端末、リクエスト、日時、診断情報などを取得すると公表しています。これらは配信・処理や不正利用対策に用いられます。保持期間は、法令上・契約上の義務を果たすために必要な最小限の期間とされています。本サービスのデータベースには IP アドレスを保存しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "外部のサイトへのリンク(利用者の操作で開く場合) —— 店の詳細画面などから、Google マップ・店のウェブサイト・出典の URL へのリンクを開くと、利用者の端末から開いた先へ、リンクに含まれる情報(Google マップでは検索語と店の識別子)が送られます。本サービスが自動で送るものではなく、開いた先での取扱いは、各サイトのポリシーに従います。iOS アプリでは、リンクを Safari(Google マップへのリンクは、Google マップのアプリが入っていればそのアプリ)で開きます。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "公開ページのアクセス解析(Google アナリティクス) —— web の公開ページには、Google のアクセス解析のサービス Google アナリティクスの部品(タグ)を組み込みます。部品は、利用者のブラウザから Google へ、表示しているページの URL とその前に見ていたページの URL、ページの題名、ブラウザ・OS・画面の情報、言語、おおよその地域、日時、ページを見ていた時間やスクロールなどの操作の情報と、Cookie に置く識別子を送ります。運営者の目的は、公開ページを見た人の数・来た経路・見ていた時間を、利用者ごとに分けない集計として知り、本サービスの案内を改善することです。運営者が見るのは Google が作る集計だけです。ログインの後の画面では、この部品を動かさず、店の識別子を含む URL を送りません。Google での取り扱いは、Google のプライバシーポリシー(https://policies.google.com/privacy)と、Google のサービスを使うサイトやアプリから得た情報の使い方の説明(https://policies.google.com/technologies/partner-sites)に従います。送信を止めたい場合は、Google が提供する Google アナリティクス オプトアウト アドオンを使うか、ブラウザの設定で Cookie を拒むことができます。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 6,
+      "heading": "第三者提供",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "運営者は、本人の同意がある場合と次の場合を除き、個人データを第三者に提供しません。"
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "法令に基づく場合"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "人の生命・身体・財産の保護に必要で、本人の同意を得ることが難しい場合"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "公衆衛生の向上や児童の健全な育成に特に必要で、本人の同意を得ることが難しい場合"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "国や地方公共団体等の法令上の事務への協力に必要で、同意を得るとその遂行を妨げるおそれがある場合"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "個人データの販売、広告のための提供、他の事業者との共同利用は行いません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "国内での業務委託に必要な提供は、法律上の第三者提供に当たらない場合があります。外国にある事業者への委託は、この例外だけでは扱わず、次条 4 項に基づいて扱います。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 7,
+      "heading": "委託先と外国での取り扱い",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "ログインの認証・データ保存・ホスティングのため、次の事業者に情報の取り扱いを委託します。"
+          ],
+          "items": [],
+          "blocks": [
+            {
+              "kind": "table",
+              "header": [
+                "委託先",
+                "業務",
+                "取り扱う情報"
+              ],
+              "rows": [
+                [
+                  "Google(Firebase Authentication)",
+                  "ログインの認証・アカウントの管理",
+                  "ログインの ID トークンと更新用の鍵、メールアドレス・氏名・IP アドレス・ブラウザまたは iOS アプリと端末の情報(第 1 条(6))"
+                ],
+                [
+                  "Supabase",
+                  "データベース",
+                  "第 1 条の情報、ログインの ID トークンを添えた要求(iOS アプリでは、端末からの要求と、その IP アドレスなどの通信の情報)"
+                ],
+                [
+                  "Vercel",
+                  "ホスティング",
+                  "本サービスとの通信・入力内容"
+                ]
+              ]
+            },
+            {
+              "kind": "paragraph",
+              "sentences": [
+                "Apple と、Google のアカウントでログインするときの Google(アカウントの提供者)は、利用者自身のアカウントの事業者であり、委託先ではありません。Google Maps Platform への端末からの直接送信と、サーバーからの店の識別子の送信は、Google が受け取った情報を自社の目的にも使うため、委託として扱いません。いずれも経路と用途は第 5 条に記載しています。iOS アプリに組み込む Google Maps SDK for iOS と Google Sign-In for iOS が端末から Google へ送る情報と、iOS アプリの検索のために本サービスのサーバーから Google へ送る情報も、同じく委託として扱いません。"
+              ]
+            }
+          ]
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "運営者は、委託先の選定と安全管理の状況の把握を行い、必要かつ適切に監督します。公表文書で確認した事項と、実施状況を確認できていない範囲は、4 項 5 号に記載します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "ドメイン登録事業者 Porkbun には、ドメイン・DNS 設定のために、本サービスの利用者の登録情報を渡すことはありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "外国にある事業者への委託について、次のとおり説明します。"
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "処理場所 —— 各社の配信網・運用・サポートを含む処理は、日本国内に限られません。Firebase Authentication は、米国のデータセンターだけで処理を行うと公表されています。Vercel は、情報を米国とその他の同社が事業を行う国で処理すると公表しています。Supabase は、同社または再委託先が設備を持つ国(米国とシンガポールを含みます)で処理を行う場合があると公表しています。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "所在国 —— 公表規約上の提供事業者は、Supabase Pte. Ltd.(シンガポール共和国)、Vercel Inc.(アメリカ合衆国)、Google(Firebase Authentication)です。Google との契約でいう「Google」は、日本の請求先では Google Asia Pacific Pte. Ltd.(シンガポール共和国)とその関係会社を指し、Firebase Authentication の処理は米国で行われるため、シンガポール共和国とアメリカ合衆国の両方を Google の提供先の国として扱います。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "提供への同意 —— サーバーが日本にあっても、外国の事業者が個人データを扱う場合があります。本サービスは、これらを外国にある第三者への提供として扱います。運営者は、この提供を行う前に、次号以下の情報(外国の名称、当該外国の制度、提供先が講ずる措置)を示したうえで、本人の同意を得ます。この同意は、利用規約への同意とは別に取得します。同意が成立する前は、ログインの処理を含め、これらの提供を伴う処理を行いません。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "提供先の国の制度。"
+              ],
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "国",
+                    "委託先",
+                    "保護制度",
+                    "制度の指標",
+                    "権利利益に影響しうる制度"
+                  ],
+                  "rows": [
+                    [
+                      "シンガポール共和国",
+                      "Supabase・Google",
+                      "民間部門を対象とする個人情報保護法(PDPA 2012)があり、通知・同意・目的制限・安全管理・保存制限・開示訂正等の義務を定める",
+                      "個人情報保護委員会の公表資料は APEC CBPR への参加を記載。EU の十分性認定の対象国一覧には含まれない",
+                      "同委員会の 2021 年 10 月時点の調査は、刑事訴訟法による情報提出・アクセス命令について、独立機関の承認、取得情報の取扱制限・安全管理、透明性、監督・審査に関する規定の不足を挙げる"
+                    ],
+                    [
+                      "アメリカ合衆国",
+                      "Vercel・Google",
+                      "同委員会の 2021 年 10 月時点の調査によれば、連邦には民間の全分野を一律に覆う包括法はなく、分野別・州別の制度がある",
+                      "同委員会の公表資料は APEC CBPR への参加を記載。EU の十分性認定は EU-US Data Privacy Framework に参加する商業組織が対象で、米国の全事業者に及ぶものではない",
+                      "CLOUD Act 等の法的手続により、米国の管轄下の事業者が管理するデータは、国外での保存であっても提出を求められる場合がある"
+                    ]
+                  ]
+                },
+                {
+                  "kind": "paragraph",
+                  "sentences": [
+                    "個人情報保護委員会の国別調査(https://www.ppc.go.jp/enforcement/infoprovision/laws/offshore_report_singapore/ ・ https://www.ppc.go.jp/enforcement/infoprovision/laws/offshore_report_america/)、シンガポール個人情報保護委員会(https://www.pdpc.gov.sg/overview-of-pdpa/the-legislation/personal-data-protection-act/data-protection-obligations)、欧州委員会(https://commission.europa.eu/law/law-topic/data-protection/international-dimension-data-protection/adequacy-decisions_en)、米国司法省(https://www.justice.gov/criminal/cloud-act-resources)の公表情報に基づきます。国別調査は調査時点(2021 年 10 月)の情報で、現行の制度と異なる場合があります。運営者は、現行制度との差分を確認したうえで本項を更新します。国が枠組みに参加していることと、各委託先が認証を受けていることは別です。"
+                  ]
+                }
+              ]
+            },
+            {
+              "no": 5,
+              "sentences": [
+                "各社の措置と確認範囲。"
+              ],
+              "blocks": [
+                {
+                  "kind": "list",
+                  "items": [
+                    {
+                      "label": "Supabase",
+                      "sentences": [
+                        "公表されたデータ処理契約は利用規約の一部を構成し、指示に沿った処理、アクセス制御、通信時・保存時の暗号化、監査ログ、暗号化した日次バックアップ、侵入テスト、事故通知等を定めています。https://supabase.com/legal/dpa"
+                      ]
+                    },
+                    {
+                      "label": "Google(Firebase Authentication)",
+                      "sentences": [
+                        "Google Cloud のデータ処理契約(Cloud Data Processing Addendum)は、Google を処理者とし、顧客の指示に沿った処理、技術的・組織的・物理的な安全管理措置、再処理者との書面契約と責任の維持、新しい再処理者の事前の通知等を定めています。https://cloud.google.com/terms/data-processing-addendum。Firebase の規約の表は、Authentication を Google Cloud Platform の規約の群に入れています。Authentication にこの契約が適用されると名指しした公表文書は確認できていません。個人が運営する小規模なサービスであり、公表文書を超える個別の照会・監査を行う手段が無いためです(提供先が講ずる措置に関する情報を提供できない場合として、その旨と理由をここに示します)。"
+                      ]
+                    },
+                    {
+                      "label": "Vercel",
+                      "sentences": [
+                        "公表されたデータ処理契約の対象は Enterprise・Pro プランで、本サービスの Hobby プランには適用されません。Hobby プランに適用される同等の契約上の措置は確認できていません。個人が運営する小規模なサービスであり、公表文書を超える個別の照会・監査を行う手段が無いためです(提供先が講ずる措置に関する情報を提供できない場合として、その旨と理由をここに示します)。Vercel の規約は、Hobby プランのコンテンツを同社と第三者の AI・機械学習のモデルの学習に使えると定めていますが、運営者は、Team の設定でこの利用を止めています。https://vercel.com/legal/dpa"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "paragraph",
+                  "sentences": [
+                    "以上は公表された契約条件の確認です。OECD プライバシーガイドラインの 8 原則(収集制限・データ内容・目的明確化・利用制限・安全保護・公開・個人参加・責任)に照らすと、Supabase と Google の上記の契約条件は、利用制限(運営者の指示に沿った処理)と安全保護に対応する定めです。Vercel の Hobby プランには、上記のとおりデータ処理契約が適用されません。各社がその他の原則に対応する措置を講じているかと、各社内部での措置の実施状況は、運営者が公表文書のほかに各社から情報を得ていないため、その情報を提供できません。確認に応じて情報を更新します。本人への利用目的の公表と開示等の請求への対応は、運営者が本ポリシーの第 2 条と第 10 条に従って行います。この説明や同意によって、運営者の委託先監督義務がなくなるものではありません。"
+                  ]
+                }
+              ]
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 8,
+      "heading": "Cookie 等",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "本サービスが設定する Cookie(harema_session)は、ログインのセッションの保持に使います。Cookie には、ログインに使う ID トークンと、その更新に使う更新用の鍵を、暗号化して入れています。Cookie の有効期間は、ログインから 30 日です。ID トークンの有効期限は 1 時間ですが、期限が近いときに自動で更新するため、1 時間ごとにログアウトするしくみではありません。ログインから 30 日を過ぎると、あらためてログインが必要です。ログインの後のメニューで表示する言語を選んだときと、ログインの画面で言語を選んでログインしたときは、利用規約と本ポリシーへの同意が記録されている場合に限り、選んだ言語(日本語か英語)を Cookie(harema_locale)に保存します。保存の期間は、保存したときから 1 年間です。その後にログインしたときは、そのときから 1 年間に延ばします。この Cookie はブラウザで動くプログラムからは読み取れない設定で、ログインの情報は入りません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "認証 Cookie は、ブラウザ上のスクリプトから読み取れない設定にしています。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "hareMa は広告・行動ターゲティング用の Cookie を使いません。アクセス解析用の Cookie は、web の公開ページに限り、第 5 条 8 項の Google アナリティクスの Cookie を使います。ログインの後の画面と iOS アプリでは使いません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "第 5 条の外部サービスが、機能の提供等に Cookie などを用いる場合があります。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "Cookie を無効にすると、ログインが必要な機能を利用できません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "iOS アプリは、ログインのセッションの保持に Cookie を使いません。ログインのセッションは、端末のキーチェーンに保存します(第 1 条(6)・第 9 条 2 項)。1 項と同じく、ログインから 30 日を過ぎると、あらためてログインが必要です。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 9,
+      "heading": "安全管理",
+      "paragraphs": [
+        {
+          "sentences": [
+            "運営者は、次の措置を講じています。公表によって安全管理に支障を生じるおそれのある詳細は記載していません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 1,
+          "sentences": [
+            "Apple または Google のアカウントによる認証を用い、パスワードを保持しません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "認証 Cookie を、ブラウザのスクリプトから読み取れない設定にしています。iOS アプリでは、ログインのセッションを、端末のロックを解除している間だけ読め、ほかの端末へ移らない設定で、端末のキーチェーンに保存し、読めるのを本サービスのアプリとその共有の拡張に限っています。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "データベースに行単位のアクセス制御を設け、利用者ごとのデータを他の利用者が読み書きできないようにします。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "管理権限の鍵はサーバー側だけで使い、アプリでの用途を、Google の Place Details で検証した店の位置情報の保存に限定します。退会と登録の中止では、この鍵を使わず、サーバーで検証した本人のログインの ID トークンから対象のアカウントを特定して処理します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "外部サービスの鍵は、鍵ごとに呼び出せる機能を制限し、参照元を制限できる鍵にはその制限も設けています。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 6,
+          "sentences": [
+            "出典 URL の題名取得では、内部ネットワーク等への接続を防ぐ検査を行います。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 7,
+          "sentences": [
+            "出典取得の一時記録には URL 本体を残しません。ただし、ハッシュに使う利用者ごとの識別子は同じ記録にあるため、記録全体が漏れた場合の推測・照合を防ぐものではありません。全利用者に共通の対応表による照合を難しくする措置であり、短期間での削除と組み合わせています。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 8,
+          "sentences": [
+            "委託先の選定・監督は第 7 条のとおり行います。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 9,
+          "sentences": [
+            "外国にある事業者へ個人データの取り扱いを委託するときは、委託先と、各社が公表する再委託先の所在する外国の名称を把握し、その外国の個人情報の保護に関する制度を調べたうえで、必要な措置を講じます。現在把握している所在国は、Supabase が公表する再委託先の一覧によるアメリカ合衆国、シンガポール共和国、ハンガリーです。Google(Firebase Authentication)と Vercel の再委託先の所在国は、各社が公表する一覧を確認したうえで本項に足します。アメリカ合衆国とシンガポール共和国の制度は第 7 条 4 項 4 号に示しました。講じる措置は、公表されたデータ処理契約の確認(第 7 条 4 項 5 号)、委託先の選定、委託先へ送る情報の限定です。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 10,
+      "heading": "開示等の請求",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "法令に従い、保有個人データの利用目的の通知、開示、訂正・追加・削除、利用停止・消去、第三者提供の停止を請求できます。本人に関する第三者提供記録の開示も請求できます。運営者は、外国にある第三者への提供について、法令が定める記録事項・作成時点・保存期間・開示手順を満たす記録の体制(要件を満たす代替の記録による場合を含みます)を整えてから、対象となる提供を開始します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "受付・本人確認・回答。"
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "受付 —— 第 13 条 1 項のメールで受け付けます。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "本人確認 —— 原則として、請求者がログインに使っているアカウントの本人であることを、運営者が指定する文字列へユーザー名を一時的に変更していただく方法で確認します。退会後やログインできない場合、代理人からの請求の場合は、請求に必要な範囲の別の確認方法を案内します。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "回答 —— 本人確認後、法令に従い遅滞なく対応します。開示は、電磁的記録の提供(請求を受け付けたメールでの送付を含みます)、書面の交付その他運営者の定める方法のうち、請求者が指定した方法で行い、指定の方法による開示が困難な場合は、その旨をお知らせしたうえで書面の交付により行います。開示以外の請求への回答は、原則として、請求を受け付けたメールで行います。応じられない場合は、その旨と理由を説明します。"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 4,
+              "sentences": [
+                "手数料 —— 無料です。"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "次の操作は、窓口への請求なしで行えます。"
+          ],
+          "items": [
+            {
+              "no": 1,
+              "sentences": [
+                "ユーザー名の変更"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 2,
+              "sentences": [
+                "保存した店の削除"
+              ],
+              "blocks": []
+            },
+            {
+              "no": 3,
+              "sentences": [
+                "退会(第 3 条に記載したアカウント・登録情報の削除)"
+              ],
+              "blocks": []
+            }
+          ],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 11,
+      "heading": "未成年者",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "利用できるのは 13 歳以上の方です。13 歳未満の方は登録や利用をしないでください。年齢を確認するしくみがないため、13 歳未満の方から情報を受け取る可能性を排除できるわけではありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "18 歳未満の方は、サービスの利用と本ポリシーに記載した情報の取り扱い(第 7 条 4 項の外国にある第三者への提供を含みます)について、親権者その他の法定代理人の同意をあらかじめ得てください。本サービスには、その同意を確認するしくみはありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "13 歳未満の方による利用が分かった場合や、法定代理人から相談があった場合は、第 13 条の窓口で確認のうえ、利用停止・削除などの対応を行います。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 12,
+      "heading": "本ポリシーの変更",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "本ポリシーを変更する場合は、利用規約第 14 条と法令に従います。利用目的の変更は、変更前の目的と合理的な関連性がある範囲に限ります。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "変更するときは、変更の旨と変更後の内容を本サービス上へ掲示します。既に本サービスを利用している利用者の情報の取り扱いを変える変更(取得する情報の追加、送信先や委託先の追加、利用目的の変更など)は、効力発生日も示し、効力発生の 3 日以上前に掲示します。誤記の訂正、説明の明確化、新しいアプリでの取り扱いの書き足しなど、既に本サービスを利用している利用者の情報の取り扱いを変えない変更は、掲示した時点で効力を生じ、掲示に変更した日を示します。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 3,
+          "sentences": [
+            "取得情報の追加、利用目的や委託先の変更など、重要な変更は、前項の掲示を、本サービスのトップページと本ポリシーのページの冒頭に、変更の旨が分かる形で行います。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 4,
+          "sentences": [
+            "合理的な関連性の範囲を超える利用や、第 7 条 4 項に示していない国・提供先・データ項目・目的を加える外国にある第三者への提供など、法令上あらためて同意が必要な取り扱いは、その取り扱いを始める前に必要な情報を示して同意を得ます。通知や継続利用だけで、この同意に代えることはありません。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 5,
+          "sentences": [
+            "提供先の国の制度が改正された場合、既に得た同意はそれだけでは効力を失いませんが、判断に重要な影響を及ぼす変更は第 2 項および第 3 項の方法により知らせます。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "no": 13,
+      "heading": "窓口・運営者",
+      "paragraphs": [
+        {
+          "no": 1,
+          "sentences": [
+            "問い合わせ、苦情、開示等の請求は、メール(harema.app.support@gmail.com)で受け付けます。このメールは、個人情報の取り扱いの担当者の連絡先を兼ねます。問い合わせフォームはありません。個人情報は公開投稿に書かないでください。"
+          ],
+          "items": [],
+          "blocks": []
+        },
+        {
+          "no": 2,
+          "sentences": [
+            "運営者は「hareMa 運営者」と表示します。氏名と住所は掲示していませんが、前項の窓口へお求めいただければ、遅滞なく回答します。"
+          ],
+          "items": [],
+          "blocks": []
+        }
+      ]
+    }
+  ]
+}
+export const privacyPostingEn: LegalDocument = {
+  "title": "Privacy Policy",
   "revisedOn": "2026.11.22",
   "preamble": [
     "This is an English translation for reference. The Japanese version is the official version, and if there is any inconsistency between the two, the Japanese version prevails.",
     "Notice of revision (posted 2026.11.25)",
     "From 0:00 a.m. on 2026.11.29 (Japan Standard Time), Articles 1 and 3 of this Policy will be revised as follows. To let users sort saved places into lists, lists and the places in them will be added to the information stored.",
     "The following two items will be added to Article 1 (4).",
-    "Lists —— For each list that a user creates to sort saved places: an identifier for the list, the account identifier, the name (up to 30 characters), the icon (optional; one character), and the creation and update date and time.",
+    "Lists —— For each list that a user creates to sort saved places: an identifier for the list, the account identifier, the name (up to 15 characters), the icon (optional; one character), and the creation and update date and time.",
     "Places in lists —— Which saved place has been added to which list, and the date and time it was added.",
     "Lists and the places in them will be added to the information deleted when a user deletes their account, in Article 3, paragraph 3.",
     "The following sentences will be added at the end of Article 3, paragraph 5.",

@@ -24,10 +24,17 @@ export const SHARE_QUERY_MAX_LENGTH = 60
 
 /**
  * リスト(`public.lists` / `public.list_places`・段 2a)の上限。
- * 名前とアイコンの長さは DB CHECK(`char_length(name) between 1 and 30`・`char_length(icon) between 1 and 32`)の鏡像。
- * リストの数の上限(`LIST_MAX_PER_USER`)は**仮の上限(所有者の決定ではない・料金の段で見直す)**。DB のトリガー
+ * 名前とアイコンの長さは DB CHECK(`char_length(name) between 1 and 15`・`char_length(icon) between 1 and 32`)の鏡像。
+ * 名前の上限は**所有者の決定(2026-11-26 00:56 JST・harema#152)**。22 本目は 30 で置き、28 本目(`20261128000001_list_name_15.sql`)が 15 に置き換えた。変えるときは新しい migration で制約を替え、この値と ja/en の説明の文も合わせる。
+ * リストの数の上限(`LIST_MAX_PER_USER`)は**所有者の決定(2026-11-26 00:04 JST・harema#152。11-29 の公開の値。有料の段の数は料金の段と一緒に決める)**。DB のトリガー
  * (`private.enforce_list_limit`・SQLSTATE 54000)が同じ値を持つ。変えるときは新しい migration で関数を置き換え、この値も合わせる。
  */
-export const LIST_NAME_MAX_LENGTH = 30
+export const LIST_NAME_MAX_LENGTH = 15
 export const LIST_ICON_MAX_LENGTH = 32
-export const LIST_MAX_PER_USER = 100
+export const LIST_MAX_PER_USER = 3
+
+/**
+ * 一覧の「選ぶ」と一括の出し入れで 1 回に扱う店の数の上限。**仮の上限(所有者の決定ではない)**。
+ * 1 回の送信を限り、URL と応答を大きくしすぎないための値。
+ */
+export const LIST_BULK_MAX = 100

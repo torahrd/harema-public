@@ -11,6 +11,8 @@ export type SavedListRow = {
   status: SavedPlaceStatus
   googlePlaceId: string
   position: { lat: number; lng: number } | null
+  /** その店が入っているリストの id(絞りと行の絵に使う)。 */
+  listIds: string[]
 }
 
 /**
